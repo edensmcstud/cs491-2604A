@@ -84,7 +84,6 @@ VS Code will load the entire project.
 🟩 4. Install Dependencies
 Your project will have two folders:
 
-Code
 /backend
 /frontend
 Each has its own dependencies.
@@ -92,22 +91,21 @@ Each has its own dependencies.
 Backend:
 Open a terminal in VS Code:
 
-Code
 cd backend
 npm install
 Frontend:
-Code
+
 cd frontend
 npm install
 This installs everything your teammates need.
 
 🟦 5. Run the Project
 Backend (Node/Express):
-Code
+
 cd backend
 npm start
 Frontend (React):
-Code
+
 cd frontend
 npm start
 React will open automatically in the browser.
@@ -115,7 +113,7 @@ React will open automatically in the browser.
 🟪 6. Project Structure Overview
 This helps beginners understand where things live.
 
-Code
+
 project-root/
 │
 ├── backend/               ← Node.js + Express API
@@ -196,7 +194,7 @@ This is the workflow your team will follow.
 2. Create a feature branch
 Name it like:
 
-Code
+
 feature/inventory-ui
 feature/login-page
 feature/sales-form
