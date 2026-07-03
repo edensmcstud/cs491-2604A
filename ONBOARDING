@@ -1,0 +1,230 @@
+⭐ Bookstore Management System — Team Onboarding Guide
+This is the guide your teammates will follow on Day 1.
+It assumes zero prior experience and keeps everything as simple as possible.
+
+🟥 1. Install Required Software
+These are the only tools your teammates need.
+
+1. Node.js (LTS version)
+This runs the backend and the React dev server.
+
+Download from: https://nodejs.org  
+Choose LTS (Long Term Support).
+
+2. Git + GitHub Desktop
+GitHub Desktop prevents beginners from breaking Git.
+
+
+
+
+
+GitHub Desktop**
+GitHub Desktop prevents beginners from breaking Git.
+
+Download GitHub Desktop: https://desktop.github.com  
+Git installs automatically with it.
+
+3. Visual Studio Code (VS Code)
+The easiest editor for beginners.
+
+
+
+
+
+automatically with it.
+
+3. Visual Studio Code (VS Code)
+The easiest editor for beginners.
+
+Download: https://code.visualstudio.com
+
+Recommended extensions:
+
+JavaScript/TypeScript support
+
+SQLite Viewer
+
+Prettier
+
+4. (Optional) DB Browser for SQLite
+Only needed if someone wants to look at the database.
+
+
+
+
+
+Download: https://sqlitebrowser.org
+
+🟧 2. Clone the Project Repository
+Your teammates will use GitHub Desktop for this.
+
+Steps:
+Open GitHub Desktop
+
+Click File → Clone Repository
+
+Paste your repo URL
+
+Choose a folder
+
+Click Clone
+
+That’s it.
+
+🟨 3. Open the Project in VS Code
+Steps:
+Open VS Code
+
+Click File → Open Folder
+
+Select the project folder
+
+Click Open
+
+VS Code will load the entire project.
+
+🟩 4. Install Dependencies
+Your project will have two folders:
+
+Code
+/backend
+/frontend
+Each has its own dependencies.
+
+Backend:
+Open a terminal in VS Code:
+
+Code
+cd backend
+npm install
+Frontend:
+Code
+cd frontend
+npm install
+This installs everything your teammates need.
+
+🟦 5. Run the Project
+Backend (Node/Express):
+Code
+cd backend
+npm start
+Frontend (React):
+Code
+cd frontend
+npm start
+React will open automatically in the browser.
+
+🟪 6. Project Structure Overview
+This helps beginners understand where things live.
+
+Code
+project-root/
+│
+├── backend/               ← Node.js + Express API
+│   ├── server.js
+│   ├── routes/
+│   ├── controllers/
+│   ├── services/
+│   ├── database/
+│   └── models/
+│
+├── frontend/              ← React UI
+│   ├── src/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   ├── api/
+│   │   └── App.jsx
+│
+└── docs/                  ← Architecture, diagrams, etc.
+Your teammates will mostly work inside:
+
+frontend/src/pages/
+
+frontend/src/components/
+
+They will not touch backend architecture.
+
+🟫 7. How Your Teammates Will Work
+This section sets expectations clearly.
+
+They will:
+Build UI pages
+
+Build forms
+
+Build tables
+
+Add buttons
+
+Add filters
+
+Add basic validation
+
+Call your API endpoints
+
+Style components
+
+Write simple logic
+
+Commit and push code
+
+Create pull requests
+
+They will NOT:
+Configure Node.js
+
+Configure Express
+
+Configure SQLite
+
+Write SQL
+
+Write backend logic
+
+Write authentication
+
+Write routing
+
+Write middleware
+
+Write database schema
+
+This protects them from complexity and protects your timeline.
+
+🟧 8. Git Workflow (Beginner‑Friendly)
+This is the workflow your team will follow.
+
+1. Switch to the dev branch
+2. Create a feature branch
+Name it like:
+
+Code
+feature/inventory-ui
+feature/login-page
+feature/sales-form
+3. Make changes
+4. Commit in GitHub Desktop
+5. Push the branch
+6. Create a Pull Request
+7. You review and merge into dev
+This keeps the project clean and safe.
+
+🟦 9. Troubleshooting Guide
+Beginners panic easily — this section prevents that.
+
+Problem: “npm is not recognized”
+Fix: Node.js is not installed correctly. Reinstall Node.
+
+Problem: “npm start doesn’t work”
+Fix: Run npm install first.
+
+Problem: “React page is blank”
+Fix: Check the browser console for errors.
+
+Problem: “Backend says port in use”
+Fix: Close the terminal and restart the backend.
+
+Problem: “I broke Git”
+Fix:  
+Use GitHub Desktop → Branch → Discard changes  
+Or ask you for help.
