@@ -1,7 +1,7 @@
 ⭐ Bookstore Management System — Team Onboarding Guide
 
 🟥 1. Install Required Software
-These are the only tools your teammates need.
+These are the only tools you need.
 
 1. Node.js (LTS version)
 This runs the backend and the React dev server.
@@ -12,24 +12,8 @@ Choose LTS (Long Term Support).
 2. Git + GitHub Desktop
 GitHub Desktop prevents beginners from breaking Git.
 
-
-
-
-
-GitHub Desktop**
-GitHub Desktop prevents beginners from breaking Git.
-
 Download GitHub Desktop: https://desktop.github.com  
 Git installs automatically with it.
-
-3. Visual Studio Code (VS Code)
-The easiest editor for beginners.
-
-
-
-
-
-automatically with it.
 
 3. Visual Studio Code (VS Code)
 The easiest editor for beginners.
@@ -46,15 +30,10 @@ Prettier
 
 4. (Optional) DB Browser for SQLite
 Only needed if someone wants to look at the database.
-
-
-
-
-
 Download: https://sqlitebrowser.org
 
 🟧 2. Clone the Project Repository
-Your teammates will use GitHub Desktop for this.
+You will use GitHub Desktop for this.
 
 Steps:
 Open GitHub Desktop
@@ -97,7 +76,7 @@ Frontend:
 
 cd frontend
 npm install
-This installs everything your teammates need.
+This installs everything you need.
 
 🟦 5. Run the Project
 Backend (Node/Express):
@@ -132,7 +111,7 @@ project-root/
 │   │   └── App.jsx
 │
 └── docs/                  ← Architecture, diagrams, etc.
-Your teammates will mostly work inside:
+You will mostly work inside:
 
 frontend/src/pages/
 
@@ -140,7 +119,7 @@ frontend/src/components/
 
 They will not touch backend architecture.
 
-🟫 7. How Your Teammates Will Work
+🟫 7. How You Will Work
 This section sets expectations clearly.
 
 They will:
@@ -185,15 +164,12 @@ Write middleware
 
 Write database schema
 
-This protects them from complexity and protects your timeline.
 
 🟧 8. Git Workflow (Beginner‑Friendly)
-This is the workflow your team will follow.
 
 1. Switch to the dev branch
 2. Create a feature branch
 Name it like:
-
 
 feature/inventory-ui
 feature/login-page
