@@ -1,6 +1,6 @@
-⭐ Bookstore Management System — Team Onboarding Guide
+ Bookstore Management System — Team Onboarding Guide
 
-🟥 1. Install Required Software
+ 1. Install Required Software
 These are the only tools you need.
 
 1. Node.js (LTS version)
@@ -32,7 +32,7 @@ Prettier
 Only needed if someone wants to look at the database.
 Download: https://sqlitebrowser.org
 
-🟧 2. Clone the Project Repository
+ 2. Clone the Project Repository
 You will use GitHub Desktop for this.
 
 Steps:
@@ -48,7 +48,7 @@ Click Clone
 
 That’s it.
 
-🟨 3. Open the Project in VS Code
+ 3. Open the Project in VS Code
 Steps:
 Open VS Code
 
@@ -60,7 +60,7 @@ Click Open
 
 VS Code will load the entire project.
 
-🟩 4. Install Dependencies
+ 4. Install Dependencies
 Your project will have two folders:
 
 /backend
@@ -78,7 +78,7 @@ cd frontend
 npm install
 This installs everything you need.
 
-🟦 5. Run the Project
+ 5. Run the Project
 Backend (Node/Express):
 
 cd backend
@@ -89,7 +89,7 @@ cd frontend
 npm start
 React will open automatically in the browser.
 
-🟪 6. Project Structure Overview
+ 6. Project Structure Overview
 This helps beginners understand where things live.
 
 
@@ -119,7 +119,7 @@ frontend/src/components/
 
 They will not touch backend architecture.
 
-🟫 7. How You Will Work
+ 7. How You Will Work
 This section sets expectations clearly.
 
 They will:
@@ -165,7 +165,7 @@ Write middleware
 Write database schema
 
 
-🟧 8. Git Workflow (Beginner‑Friendly)
+ 8. Git Workflow (Beginner‑Friendly)
 
 1. Switch to the dev branch
 2. Create a feature branch
@@ -181,7 +181,7 @@ feature/sales-form
 7. You review and merge into dev
 This keeps the project clean and safe.
 
-🟦 9. Troubleshooting Guide
+ 9. Troubleshooting Guide
 Beginners panic easily — this section prevents that.
 
 Problem: “npm is not recognized”
