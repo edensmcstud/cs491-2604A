@@ -41,4 +41,10 @@ module.exports = db;
 // TODO Sprint 2:
 // Create 'supplierOrders' table if it does not exist
 
+// TODO Sprint 2:
+// Create 'roles' table if it does not exist
+
+// TODO Sprint 2:
+// Create 'auditLogs' table if it does not exist
+
 
