@@ -1,3 +1,6 @@
+console.log("Server.js loaded");
+
+
 // Load environment variables
 require('dotenv').config();
 
@@ -29,14 +32,30 @@ app.listen(PORT, () => {
 });
 
 
-app.get('/api/users', (req, res) => {
-    db.all('SELECT * FROM users', [], (err, rows) => {
-        if (err) {
-            console.error("SQL Error:", err);
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.json(rows);
-    });
-});
+const usersRoute = require('./routes/users');
+app.use('/api/users', require('./routes/users'));
+console.log("Mounted route:", "/users");
 
+app.use('/api/auth', require('./routes/auth'));
+console.log("Mounted route:", "/auth");
+
+app.use('/api/books', require('./routes/books'));
+console.log("Mounted route:", "/books");
+
+app.use('/api/inventory', require('./routes/inventory'));
+console.log("Mounted route:", "/inventory");
+
+app.use('/api/sales', require('./routes/sales'));
+console.log("Mounted route:", "/sales");
+
+app.use('/api/orders', require('./routes/orders'));
+console.log("Mounted route:", "/orders");
+
+app.use('/api/supplierOrders', require('./routes/supplierOrders'));
+console.log("Mounted route:", "/supplierOrders");
+
+app.use('/api/reports', require('./routes/reports'));
+console.log("Mounted route:", "/reports");
+
+app.use('/api/audit', require('./routes/audit'));
+console.log("Mounted route:", "/audit");
