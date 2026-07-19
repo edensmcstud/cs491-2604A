@@ -69,3 +69,9 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Backend running on port ${PORT}`);
 });
+
+
+app.use((req, res, next) => {
+    console.log("BODY RECEIVED:", req.body);
+    next();
+});

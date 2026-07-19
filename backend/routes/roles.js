@@ -2,20 +2,16 @@ const express = require("express");
 const router = express.Router();
 
 const controller = require("../controllers/rolesController");
-const authEmployee = require("../middleware/authEmployee");
+const auth = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
-const requireFields = require("../middleware/requireFields");
 
-router.post(
-    "/assign",
-    authEmployee,
-    requireRole("admin"),
-    requireFields(["user_id", "role_id"]),
-    controller.assignRole
-);
+// Assign role (admin)
+router.post("/assign", auth, requireRole("admin"), controller.assignRole);
 
-router.get("/", authEmployee, requireRole("admin"), controller.getRoles);
+// Get roles (admin)
+router.get("/", auth, requireRole("admin"), controller.getRoles);
 
+// Test route (no auth)
 router.get("/test", controller.test);
 
 module.exports = router;

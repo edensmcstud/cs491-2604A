@@ -2,20 +2,16 @@ const express = require("express");
 const router = express.Router();
 
 const controller = require("../controllers/supplierOrdersController");
-const authEmployee = require("../middleware/authEmployee");
+const auth = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
-const requireFields = require("../middleware/requireFields");
 
-router.post(
-    "/",
-    authEmployee,
-    requireRole("employee"),
-    requireFields(["book_id", "quantity"]),
-    controller.createSupplierOrder
-);
+// Create supplier order (employee)
+router.post("/", auth, requireRole("employee"), controller.createSupplierOrder);
 
-router.get("/", authEmployee, requireRole("employee"), controller.getSupplierOrders);
+// Get supplier orders (employee)
+router.get("/", auth, requireRole("employee"), controller.getSupplierOrders);
 
+// Test route (no auth)
 router.get("/test", controller.test);
 
 module.exports = router;

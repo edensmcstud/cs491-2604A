@@ -6,12 +6,24 @@ exports.assignRole = async (req, res) => {
     try {
         const { user_id, role_id } = req.body;
 
+        // Prevent duplicate role assignment
+        const existing = await query(
+            `SELECT 1 FROM user_roles WHERE user_id = ? AND role_id = ?`,
+            [user_id, role_id]
+        );
+
+        if (existing.length > 0) {
+            return res.status(400).json({ error: "Role already assigned to user" });
+        }
+
+        // Assign role
         await run(
             `INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)`,
             [user_id, role_id]
         );
 
-        await logAction(req.user.user_id, "ASSIGN_ROLE", "USER", user_id);
+        // Audit log (correct property)
+        await logAction(req.user.id, "ASSIGN_ROLE", "USER", user_id);
 
         res.json({ message: "Role assigned" });
     } catch (err) {

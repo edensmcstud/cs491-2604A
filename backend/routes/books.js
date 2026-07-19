@@ -1,21 +1,22 @@
 ﻿const express = require("express");
 const router = express.Router();
 
+const auth = require("../middleware/auth");
 const controller = require("../controllers/booksController");
-const authEmployee = require("../middleware/authEmployee");
-const requireRole = require("../middleware/requireRole");
-const requireFields = require("../middleware/requireFields");
 
-router.get("/test", controller.test);
+// GET all books
+router.get("/", auth, controller.getBooks);
 
-router.post(
-    "/",
-    authEmployee,
-    requireRole("admin"),
-    requireFields(["isbn", "title", "author", "price"]),
-    controller.createBook
-);
+// GET single book
+router.get("/:id", auth, controller.getBook);
 
-router.get("/", authEmployee, controller.getBooks);
+// CREATE book
+router.post("/", auth, controller.createBook);
+
+// UPDATE book
+router.put("/:id", auth, controller.updateBook);
+
+// DELETE book (soft delete)
+router.delete("/:id", auth, controller.deleteBook);
 
 module.exports = router;
