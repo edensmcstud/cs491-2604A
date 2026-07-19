@@ -1,19 +1,22 @@
-const express = require('express');
-const controller = require('../controllers/ordersController');
+const express = require("express");
 const router = express.Router();
 
-// Create a new customer order (Sprint 2)
-router.post('/', controller.createOrder); // TODO Sprint 2
+const controller = require("../controllers/ordersController");
+const authCustomer = require("../middleware/authCustomer");
+const requireFields = require("../middleware/requireFields");
 
-// Get order status (Sprint 2)
-router.get('/status/:id', controller.getOrderStatus); // TODO Sprint 2
+router.get("/test", controller.test);
 
-// Cancel an order (Sprint 2)
-router.post('/cancel/:id', controller.cancelOrder); // TODO Sprint 2
+router.post(
+    "/",
+    authCustomer,
+    requireFields(["items"]),
+    controller.createOrder
+);
 
-// Diagnostic
-router.get('/test', (req, res) => {
-    res.json({ ok: true });
-});
+router.get("/:id", authCustomer, controller.getOrderStatus);
+
+router.post("/:id/cancel", authCustomer, controller.cancelOrder);
+
 
 module.exports = router;

@@ -1,6 +1,6 @@
-// Load environment variables
-require('dotenv').config();
+// server.js
 
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
@@ -13,44 +13,58 @@ app.use(express.json());
 // Database connection
 const db = require('./database/connection');
 
-// Test route
+// Diagnostic test route
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Backend is running' });
 });
 
-// === Sprint 1 Routes ===
+// ===============================
+// Route Mounting (ALL ROUTES)
+// ===============================
+
+// Employee CRUD
 app.use('/api/users', require('./routes/users'));
-console.log("Mounted route:", "/api/users");
 
+// Employee Auth
 app.use('/api/auth', require('./routes/auth'));
-console.log("Mounted route:", "/api/auth");
 
+// Book CRUD
 app.use('/api/books', require('./routes/books'));
-console.log("Mounted route:", "/api/books");
 
+// Inventory Management
 app.use('/api/inventory', require('./routes/inventory'));
-console.log("Mounted route:", "/api/inventory");
 
+// Sales
 app.use('/api/sales', require('./routes/sales'));
-console.log("Mounted route:", "/api/sales");
 
-// === Sprint 2 Routes ===
+// Customer Auth
 app.use('/api/customer', require('./routes/customerAuth'));
-console.log("Mounted route:", "/api/customer");
 
+// Customer Orders
 app.use('/api/orders', require('./routes/orders'));
-console.log("Mounted route:", "/api/orders");
 
+// Supplier Orders
 app.use('/api/supplierOrders', require('./routes/supplierOrders'));
-console.log("Mounted route:", "/api/supplierOrders");
 
+// Reports
 app.use('/api/reports', require('./routes/reports'));
-console.log("Mounted route:", "/api/reports");
 
+// Role Management
+app.use('/api/roles', require('./routes/roles'));
+
+// Audit Logs
 app.use('/api/audit', require('./routes/audit'));
-console.log("Mounted route:", "/api/audit");
 
-// Start server
+// Backup / Restore
+app.use('/api/backup', require('./routes/backup'));
+
+const testRoutes = require("./routes/testRoutes");
+app.use("/test", testRoutes);
+
+
+// ===============================
+// Start Server
+// ===============================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Backend running on port ${PORT}`);

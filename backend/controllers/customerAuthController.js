@@ -1,23 +1,23 @@
-module.exports.registerCustomer = (req, res) => {
-    res.json({
-        todo: "Implement customer registration (Sprint 2)",
-        required: [
-            "Validate customer fields",
-            "Hash password",
-            "Insert customer into database",
-            "Return registration confirmation"
-        ]
-    });
+const handleError = require("../middleware/errorHandler");
+
+exports.register = async (req, res) => {
+    try {
+        // TODO: create customer record
+        res.json({ message: "customer register placeholder" });
+    } catch (err) {
+        handleError(res, err);
+    }
 };
 
-module.exports.loginCustomer = (req, res) => {
-    res.json({
-        todo: "Implement customer login (Sprint 2)",
-        required: [
-            "Validate email/password",
-            "Hash + compare password",
-            "Generate session/JWT",
-            "Return customer session token"
-        ]
-    });
+exports.login = async (req, res) => {
+    try {
+        // TODO: validate customer login
+        res.json({ message: "customer login placeholder" });
+    } catch (err) {
+        handleError(res, err);
+    }
+};
+
+exports.test = (req, res) => {
+    res.json({ message: "customer auth controller test" });
 };

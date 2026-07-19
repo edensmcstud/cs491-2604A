@@ -1,16 +1,17 @@
-const express = require('express');
-const controller = require('../controllers/authController');
+const express = require("express");
 const router = express.Router();
 
-// Employee login
-router.post('/login', controller.login);   // TODO Sprint 1
+const controller = require("../controllers/authController");
+const requireFields = require("../middleware/requireFields");
 
-// Employee logout
-router.post('/logout', controller.logout); // TODO Sprint 1
+router.post(
+    "/login",
+    requireFields(["username", "password"]),
+    controller.login
+);
 
-// Diagnostic
-router.get('/test', (req, res) => {
-    res.json({ ok: true });
-});
+router.post("/logout", controller.logout);
+
+router.get("/test", controller.test);
 
 module.exports = router;

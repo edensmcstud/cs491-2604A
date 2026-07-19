@@ -1,17 +1,21 @@
-﻿const express = require('express');
-const controller = require('../controllers/booksController');
+﻿const express = require("express");
 const router = express.Router();
 
-// Add a new book (INV‑S01)
-router.post('/', controller.addBook); // TODO Sprint 1
+const controller = require("../controllers/booksController");
+const authEmployee = require("../middleware/authEmployee");
+const requireRole = require("../middleware/requireRole");
+const requireFields = require("../middleware/requireFields");
 
-// List all books (INV‑S03)
-router.get('/', controller.listBooks); // TODO Sprint 1
+router.get("/test", controller.test);
 
-// Update book quantity (INV‑S04)
-router.put('/:id/quantity', controller.updateQuantity); // TODO Sprint 1
+router.post(
+    "/",
+    authEmployee,
+    requireRole("admin"),
+    requireFields(["isbn", "title", "author", "price"]),
+    controller.createBook
+);
 
-// Remove or deactivate a book (INV‑S02)
-router.delete('/:id', controller.removeBook); // TODO Sprint 1
+router.get("/", authEmployee, controller.getBooks);
 
 module.exports = router;

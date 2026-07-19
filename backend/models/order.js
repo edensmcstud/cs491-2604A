@@ -1,12 +1,11 @@
-exports.getBooks = (req, res) => {
-    res.json({ placeholder: "books list" });
-};
-// TODO Sprint 2:
-// Define Order table schema
-// Suggested fields:
-// id (INTEGER PRIMARY KEY AUTOINCREMENT)
-// customerId (INTEGER)
-// bookId (INTEGER)
-// quantity (INTEGER)
-// status (TEXT)  // e.g., 'pending', 'processing', 'shipped', 'cancelled'
-// createdAt (DATETIME)
+class Order {
+    constructor(row) {
+        this.id = row.id;
+        this.customerId = row.customerId;
+        this.status = row.status;
+        this.total = row.total;
+        this.createdAt = row.createdAt;
+    }
+}
+
+module.exports = Order;

@@ -1,13 +1,12 @@
-exports.getBooks = (req, res) => {
-    res.json({ placeholder: "books list" });
-};
-// TODO Sprint 1:
-// Define Book table schema
-// Suggested fields:
-// id (INTEGER PRIMARY KEY AUTOINCREMENT)
-// title (TEXT)
-// author (TEXT)
-// isbn (TEXT UNIQUE)
-// quantity (INTEGER)
-// active (BOOLEAN or INTEGER)
-// createdAt (DATETIME)
+class Book {
+    constructor(row) {
+        this.id = row.id;
+        this.title = row.title;
+        this.author = row.author;
+        this.price = row.price;
+        this.quantity = row.quantity;
+        this.active = row.active;
+    }
+}
+
+module.exports = Book;

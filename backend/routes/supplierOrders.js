@@ -1,13 +1,21 @@
-const express = require('express');
-const controller = require('../controllers/supplierOrdersController');
+const express = require("express");
 const router = express.Router();
 
-// Create a supplier restock order (Sprint 2)
-router.post('/', controller.createSupplierOrder); // TODO Sprint 2
+const controller = require("../controllers/supplierOrdersController");
+const authEmployee = require("../middleware/authEmployee");
+const requireRole = require("../middleware/requireRole");
+const requireFields = require("../middleware/requireFields");
 
-// Diagnostic
-router.get('/test', (req, res) => {
-    res.json({ ok: true });
-});
+router.post(
+    "/",
+    authEmployee,
+    requireRole("employee"),
+    requireFields(["book_id", "quantity"]),
+    controller.createSupplierOrder
+);
+
+router.get("/", authEmployee, requireRole("employee"), controller.getSupplierOrders);
+
+router.get("/test", controller.test);
 
 module.exports = router;
