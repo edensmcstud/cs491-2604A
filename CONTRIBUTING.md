@@ -1,178 +1,126 @@
-Contributing Guide
+# Contributing Guide
 
-This document explains exactly how to work with the repository for our senior project. Every team member must follow these steps to keep the project organized, stable, and easy to collaborate on.
+This document explains how to work with the repository for our senior project. Every team member must follow these steps to keep the project organized, stable, and easy to collaborate on.
 
-1. Install Required Tools
+---
 
-Git
+## General Rules
+1. Never push directly to the main or dev branches. They are protected.
+2. Do not use force push commands (git push --force or -f).
+3. Stop all local servers (frontend and backend) before switching branches to avoid Windows file-locking errors.
+4. Keep code organized, follow naming conventions, and write meaningful commit messages.
+5. Do not commit large binary files unless necessary.
 
+---
+
+## Install Required Tools
+
+### Git
 Git is the version control engine used to track changes.
+1. Download Git for Windows from the official site.
+2. Run the installer and accept default settings. Ensure "Add Git to PATH" is selected.
+3. Verify installation by running: `git --version`
 
-Download Git for Windows from the official site.
-
-Run the installer and accept default settings.
-
-Ensure "Add Git to PATH" is selected.
-
-Verify installation:
-
-git --version
-
-GitHub Desktop (Recommended)
-
+### GitHub Desktop (Recommended for beginners)
 GitHub Desktop provides a visual interface for Git operations.
+1. Download GitHub Desktop.
+2. Sign in with your GitHub account.
 
-Download GitHub Desktop.
+---
 
-Sign in with your GitHub account.
+## Clone the Repository
 
-2. Clone the Repository
+### Using GitHub Desktop
+1. Open GitHub Desktop.
+2. Select File → Clone Repository.
+3. Paste the repository URL, choose a local folder, and click Clone.
 
-Using GitHub Desktop
-
-Open GitHub Desktop.
-
-Select File → Clone Repository.
-
-Paste the repository URL.
-
-Choose a local folder.
-
-Click Clone.
-
-Using Command Line
-
+### Using Command Line
+```bash
 git clone <repository-url>
+```
 
-3. Branching Workflow
+---
 
-Never Work on main
+## Standard Workflow Loop
 
-main contains stable, production-ready code. Do not commit directly to it.
+Follow these steps for every feature, bug fix, or documentation change.
 
-Always Create a Feature Branch
-
-Branch naming conventions:
-
-feature/<task-name>
-
-bugfix/<issue-name>
-
-docs/<documentation-change>
-
-Create a Branch
-
-GitHub Desktop:
-
-Click Current Branch → New Branch.
-
-Name your branch.
-
-Click Create Branch.
-
-Command Line:
-
-git checkout -b feature/<task-name>
-
-4. Make Changes
-
-Edit files using your preferred editor (VS Code recommended).
-
-5. Commit Changes
-
-GitHub Desktop
-
-Review changed files.
-
-Write a clear commit message.
-
-Click Commit to <branch>.
-
-Command Line
-
-git add .
-git commit -m "Describe your change"
-
-6. Push Changes
-
-GitHub Desktop
-
-Click Push origin.
-
-Command Line
-
-git push -u origin <branch-name>
-
-7. Open a Pull Request (PR)
-
-All changes must be merged through a PR.
-
-Go to the repository on GitHub.
-
-Click Compare & pull request.
-
-Set the base branch to dev.
-
-Add a description of your changes.
-
-Submit the PR.
-
-8. Code Review and Merge
-
-A teammate reviews your PR.
-
-Address any comments.
-
-Once approved, the PR is merged into dev.
-
-Only maintainers merge into main.
-
-9. Keeping Your Branch Updated
-
-Before starting new work:
-
+### Step 1: Sync Your Local Dev Branch
+Before starting any new work, update your local computer with the latest repository history from the dev branch.
+* **GitHub Desktop:** Switch current branch to `dev`, then click "Fetch origin" / "Pull origin".
+* **Command Line:**
+```bash
 git checkout dev
-git pull
+git pull origin dev
+```
 
-Then update your feature branch:
+### Step 2: Create a Feature Branch
+Do not write code directly on main or dev. Create a new branch named after your specific task.
+* **Branch naming conventions:** `feature/your-task`, `bugfix/your-task`, or `docs/your-task`.
+* **GitHub Desktop:** Click Current Branch → New Branch. Name your branch and click Create Branch.
+* **Command Line:**
+```bash
+git checkout -b feature/your-feature-name
+```
 
-git checkout feature/<task-name>
-git merge dev
+### Step 3: Make Changes & Commit Progress
+Edit files using your preferred editor (VS Code recommended). Save snapshots of your work locally as you make progress.
+* **GitHub Desktop:** Review changed files in the left panel. Write a clear commit message in the summary box and click "Commit to [branch-name]".
+* **Command Line:**
+```bash
+git status
+git add .
+git commit -m "Provide a short, clear description of the changes"
+```
 
-Resolve conflicts if necessary.
+### Step 4: Merge Dev Updates (Preventing Code Drift)
+Before pushing, integrate any updates your teammates might have merged into the dev branch while you were working.
+* **GitHub Desktop:** Click Branch → Merge into current branch. Select `dev` and confirm.
+* **Command Line:**
+```bash
+git fetch origin
+git merge origin/dev
+```
+*Note: If this command triggers a merge conflict, stop and contact the repository administrator to resolve it line-by-line. Do not guess and risk breaking the repo.*
 
-10. Project Structure Expectations
+### Step 5: Push to GitHub
+Upload your local branch and history to the remote repository.
+* **GitHub Desktop:** Click "Publish branch" or "Push origin".
+* **Command Line:**
+```bash
+git push -u origin feature/your-feature-name
+```
 
-Keep code organized.
+### Step 6: Open a Pull Request (PR)
+All changes must be merged through a PR. 
+1. Navigate to the repository on GitHub.com.
+2. Click the "Compare & pull request" banner.
+3. **Crucial:** Set the base branch to `dev` (not main).
+4. Add a description of your changes and submit the PR.
+5. A teammate will review your PR. Address any comments. Once approved, a project maintainer will merge it into dev. Only maintainers merge from dev into main.
 
-Follow naming conventions.
+---
 
-Write meaningful commit messages.
+## Troubleshooting
 
-Do not commit large binary files unless necessary.
+### Error: "Unlink of file ... failed. Should I try again? (y/n)"
+* **Cause:** A running process (such as a local development server or database tool) is locking a file Git needs to modify.
+* **Fix:** Type `n` to cancel the command. Terminate all running terminals, backend servers, and database applications. Re-run the Git command.
 
-11. Communication
+### Local Branch Reset
+If your local files are corrupted or out of sync and you need to reset your branch to match the remote version exactly:
+```bash
+git reset --hard origin/your-feature-name
+```
+*(Warning: This permanently deletes all uncommitted local modifications on that branch).*
 
-If you are unsure about anything:
+---
 
-Ask in the team chat.
-
-Do not guess and risk breaking the repo.
-
-Summary
-
-Install Git and GitHub Desktop.
-
-Clone the repo.
-
-Create a feature branch.
-
-Commit and push changes.
-
-Open a pull request.
-
-Get a review.
-
-Merge into dev.
-
-Following this workflow ensures smooth collaboration and prevents accidental breakage of the project.
+## Summary Workflow Checklist
+1. Update your local `dev` branch.
+2. Create a feature branch.
+3. Commit and push changes.
+4. Merge incoming `dev` updates into your branch to check for conflicts.
+5. Open a pull request against the remote `dev` branch.
+6. Get a review and merge.
