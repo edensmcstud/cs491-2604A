@@ -1,17 +1,17 @@
-console.log("books route file loaded");
-
-const express = require('express');
+﻿const express = require('express');
+const controller = require('../controllers/booksController');
 const router = express.Router();
 
-// Import the correct controller for THIS route
-const controller = require('../controllers/booksController');
+// Add a new book (INV‑S01)
+router.post('/', controller.addBook); // TODO Sprint 1
 
-// Main endpoint for this domain
-router.get('/', controller.getBooks);
+// List all books (INV‑S03)
+router.get('/', controller.listBooks); // TODO Sprint 1
 
-// Diagnostic endpoint (Phase 1 requirement)
-router.get('/test', (req, res) => {
-    res.json({ ok: true });
-});
+// Update book quantity (INV‑S04)
+router.put('/:id/quantity', controller.updateQuantity); // TODO Sprint 1
+
+// Remove or deactivate a book (INV‑S02)
+router.delete('/:id', controller.removeBook); // TODO Sprint 1
 
 module.exports = router;

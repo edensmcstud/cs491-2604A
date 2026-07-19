@@ -1,15 +1,17 @@
-console.log("reports route file loaded");
-
 const express = require('express');
+const controller = require('../controllers/reportsController');
 const router = express.Router();
 
-// Import the correct controller for THIS route
-const controller = require('../controllers/reportsController');
+// Daily report (Sprint 2)
+router.get('/daily', controller.getDailyReport); // TODO Sprint 2
 
-// Main endpoint for this domain
-router.get('/', controller.getReports);
+// Weekly report (Sprint 2)
+router.get('/weekly', controller.getWeeklyReport); // TODO Sprint 2
 
-// Diagnostic endpoint (Phase 1 requirement)
+// Monthly report (Sprint 2)
+router.get('/monthly', controller.getMonthlyReport); // TODO Sprint 2
+
+// Diagnostic
 router.get('/test', (req, res) => {
     res.json({ ok: true });
 });

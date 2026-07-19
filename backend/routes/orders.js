@@ -1,15 +1,17 @@
-console.log("orders route file loaded");
-
 const express = require('express');
+const controller = require('../controllers/ordersController');
 const router = express.Router();
 
-// Import the correct controller for THIS route
-const controller = require('../controllers/ordersController');
+// Create a new customer order (Sprint 2)
+router.post('/', controller.createOrder); // TODO Sprint 2
 
-// Main endpoint for this domain
-router.get('/', controller.getOrders);
+// Get order status (Sprint 2)
+router.get('/status/:id', controller.getOrderStatus); // TODO Sprint 2
 
-// Diagnostic endpoint (Phase 1 requirement)
+// Cancel an order (Sprint 2)
+router.post('/cancel/:id', controller.cancelOrder); // TODO Sprint 2
+
+// Diagnostic
 router.get('/test', (req, res) => {
     res.json({ ok: true });
 });

@@ -1,15 +1,11 @@
-console.log("audit route file loaded");
-
 const express = require('express');
+const controller = require('../controllers/auditController');
 const router = express.Router();
 
-// Import the correct controller for THIS route
-const controller = require('../controllers/auditController');
+// Retrieve audit logs (Sprint 2)
+router.get('/', controller.getAuditLogs); // TODO Sprint 2
 
-// Main endpoint for this domain
-router.get('/', controller.getAudit);
-
-// Diagnostic endpoint (Phase 1 requirement)
+// Diagnostic
 router.get('/test', (req, res) => {
     res.json({ ok: true });
 });
