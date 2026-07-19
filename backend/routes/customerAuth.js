@@ -1,16 +1,21 @@
-const express = require('express');
-const controller = require('../controllers/customerAuthController');
+const express = require("express");
 const router = express.Router();
 
-// Customer registration (Sprint 2)
-router.post('/register', controller.registerCustomer); // TODO Sprint 2
+const controller = require("../controllers/customerAuthController");
+const requireFields = require("../middleware/requireFields");
 
-// Customer login (Sprint 2)
-router.post('/login', controller.loginCustomer); // TODO Sprint 2
+router.post(
+    "/register",
+    requireFields(["username", "password", "email"]),
+    controller.register
+);
 
-// Diagnostic
-router.get('/test', (req, res) => {
-    res.json({ ok: true });
-});
+router.post(
+    "/login",
+    requireFields(["username", "password"]),
+    controller.login
+);
+
+router.get("/test", controller.test);
 
 module.exports = router;

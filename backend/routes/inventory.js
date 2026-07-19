@@ -1,17 +1,36 @@
-console.log("inventory route file loaded");
-
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-// Import the correct controller for THIS route
-const controller = require('../controllers/inventoryController');
+const controller = require("../controllers/inventoryController");
+const authEmployee = require("../middleware/authEmployee");
+const requireRole = require("../middleware/requireRole");
+const requireFields = require("../middleware/requireFields");
 
-// Main endpoint for this domain
-router.get('/', controller.getInventory);
+router.get("/test", controller.test);
 
-// Diagnostic endpoint (Phase 1 requirement)
-router.get('/test', (req, res) => {
-    res.json({ ok: true });
-});
+router.post(
+    "/",
+    authEmployee,
+    requireRole("employee"),
+    requireFields(["isbn", "title", "author", "price", "quantity"]),
+    controller.addBook
+);
+
+router.put(
+    "/:id/quantity",
+    authEmployee,
+    requireRole("employee"),
+    requireFields(["quantity"]),
+    controller.updateQuantity
+);
+
+router.delete(
+    "/:id",
+    authEmployee,
+    requireRole("employee"),
+    controller.deactivateBook
+);
+
+router.get("/search", authEmployee, controller.searchInventory);
 
 module.exports = router;

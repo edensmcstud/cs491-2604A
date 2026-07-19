@@ -1,13 +1,21 @@
-const express = require('express');
-const controller = require('../controllers/rolesController');
+const express = require("express");
 const router = express.Router();
 
-// Update a user's role (Sprint 2)
-router.put('/', controller.updateRole); // TODO Sprint 2
+const controller = require("../controllers/rolesController");
+const authEmployee = require("../middleware/authEmployee");
+const requireRole = require("../middleware/requireRole");
+const requireFields = require("../middleware/requireFields");
 
-// Diagnostic
-router.get('/test', (req, res) => {
-    res.json({ ok: true });
-});
+router.post(
+    "/assign",
+    authEmployee,
+    requireRole("admin"),
+    requireFields(["user_id", "role_id"]),
+    controller.assignRole
+);
+
+router.get("/", authEmployee, requireRole("admin"), controller.getRoles);
+
+router.get("/test", controller.test);
 
 module.exports = router;

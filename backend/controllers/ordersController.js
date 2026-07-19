@@ -1,32 +1,57 @@
-module.exports.createOrder = (req, res) => {
-    res.json({
-        todo: "Implement customer order creation (Sprint 2)",
-        required: [
-            "Validate order input",
-            "Check inventory availability",
-            "Insert order into database",
-            "Return order confirmation"
-        ]
-    });
+const { query, run } = require("../utils/db");
+const handleError = require("../middleware/errorHandler");
+const { logAction } = require("../utils/audit");
+
+exports.createOrder = async (req, res) => {
+    try {
+        const { items } = req.body;
+
+        // TODO: calculate totals
+        const subtotal = 0;
+        const tax = 0;
+        const total = 0;
+
+        const orderId = await run(
+            `INSERT INTO customer_orders (customer_id, status, subtotal, tax, total)
+             VALUES (?, 'pending', ?, ?, ?)`,
+            [req.user.customer_id, subtotal, tax, total]
+        );
+
+        await logAction(req.user.customer_id, "CREATE", "ORDER", orderId);
+
+        res.json({ message: "Order created", order_id: orderId });
+    } catch (err) {
+        handleError(res, err);
+    }
 };
 
-module.exports.getOrderStatus = (req, res) => {
-    res.json({
-        todo: "Implement order status lookup (Sprint 2)",
-        required: [
-            "Retrieve order by ID",
-            "Return order status"
-        ]
-    });
+exports.getOrderStatus = async (req, res) => {
+    try {
+        const rows = await query(
+            "SELECT * FROM customer_orders WHERE customer_order_id = ?",
+            [req.params.id]
+        );
+        res.json(rows[0] || null);
+    } catch (err) {
+        handleError(res, err);
+    }
 };
 
-module.exports.cancelOrder = (req, res) => {
-    res.json({
-        todo: "Implement customer order cancellation (Sprint 2)",
-        required: [
-            "Validate order ID",
-            "Update order status to cancelled",
-            "Return cancellation confirmation"
-        ]
-    });
+exports.cancelOrder = async (req, res) => {
+    try {
+        await run(
+            `UPDATE customer_orders SET status = 'cancelled' WHERE customer_order_id = ?`,
+            [req.params.id]
+        );
+
+        await logAction(req.user.customer_id, "CANCEL", "ORDER", req.params.id);
+
+        res.json({ message: "Order cancelled" });
+    } catch (err) {
+        handleError(res, err);
+    }
+};
+
+exports.test = (req, res) => {
+    res.json({ message: "orders controller test" });
 };

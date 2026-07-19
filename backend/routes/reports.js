@@ -1,19 +1,13 @@
-const express = require('express');
-const controller = require('../controllers/reportsController');
+const express = require("express");
 const router = express.Router();
 
-// Daily report (Sprint 2)
-router.get('/daily', controller.getDailyReport); // TODO Sprint 2
+const controller = require("../controllers/reportsController");
+const authEmployee = require("../middleware/authEmployee");
+const requireRole = require("../middleware/requireRole");
 
-// Weekly report (Sprint 2)
-router.get('/weekly', controller.getWeeklyReport); // TODO Sprint 2
-
-// Monthly report (Sprint 2)
-router.get('/monthly', controller.getMonthlyReport); // TODO Sprint 2
-
-// Diagnostic
-router.get('/test', (req, res) => {
-    res.json({ ok: true });
-});
+router.get("/daily", authEmployee, requireRole("auditor"), controller.dailyReport);
+router.get("/weekly", authEmployee, requireRole("auditor"), controller.weeklyReport);
+router.get("/monthly", authEmployee, requireRole("auditor"), controller.monthlyReport);
+router.get("/test", controller.test);
 
 module.exports = router;

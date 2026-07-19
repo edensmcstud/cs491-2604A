@@ -1,17 +1,34 @@
-console.log("users route file loaded");
-
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-// Import the correct controller for THIS route
-const controller = require('../controllers/usersController');
+const controller = require("../controllers/usersController");
+const authEmployee = require("../middleware/authEmployee");
+const requireRole = require("../middleware/requireRole");
+const requireFields = require("../middleware/requireFields");
 
-// Main endpoint for this domain
-router.get('/', controller.getUsers);
+// TEST ROUTE (no auth)
+router.get("/test", controller.test);
 
-// Diagnostic endpoint (Phase 1 requirement)
-router.get('/test', (req, res) => {
-    res.json({ ok: true });
-});
+router.post(
+    "/",
+    authEmployee,
+    requireRole("admin"),
+    requireFields(["username", "password_hash", "email"]),
+    controller.createUser
+);
+
+router.get("/", authEmployee, requireRole("admin"), controller.getUsers);
+
+router.get("/:id", authEmployee, requireRole("admin"), controller.getUser);
+
+router.put(
+    "/:id",
+    authEmployee,
+    requireRole("admin"),
+    requireFields(["username", "email"]),
+    controller.updateUser
+);
+
+router.delete("/:id", authEmployee, requireRole("admin"), controller.deleteUser);
 
 module.exports = router;
