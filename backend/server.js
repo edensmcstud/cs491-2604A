@@ -1,3 +1,6 @@
+console.log("Server.js loaded");
+
+
 // Load environment variables
 require('dotenv').config();
 
