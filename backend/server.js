@@ -1,7 +1,4 @@
-<<<<<<< Updated upstream
 // Load environment variables
-=======
->>>>>>> Stashed changes
 require('dotenv').config();
 
 const express = require('express');
@@ -21,26 +18,6 @@ app.get('/api/test', (req, res) => {
     res.json({ message: 'Backend is running' });
 });
 
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Backend running on port ${PORT}`);
-});
-
-<<<<<<< Updated upstream
-
-app.get('/api/users', (req, res) => {
-    db.all('SELECT * FROM users', [], (err, rows) => {
-        if (err) {
-            console.error("SQL Error:", err);
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.json(rows);
-    });
-});
-
-=======
 // === Sprint 1 Routes ===
 app.use('/api/users', require('./routes/users'));
 console.log("Mounted route:", "/api/users");
@@ -72,4 +49,9 @@ console.log("Mounted route:", "/api/reports");
 
 app.use('/api/audit', require('./routes/audit'));
 console.log("Mounted route:", "/api/audit");
->>>>>>> Stashed changes
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Backend running on port ${PORT}`);
+});
