@@ -1,4 +1,4 @@
-import axios from "axios";
+﻿import axios from "axios";
 
 // Base URL for your Express backend
 const API_URL = "http://localhost:3000/api";
@@ -50,4 +50,20 @@ export async function del(path) {
         console.error("DELETE error:", err);
         throw err;
     }
+}
+// Phase‑2 wrapper functions
+export async function apiGet(path) {
+    return get(path);
+}
+
+export async function apiPost(path, body) {
+    return post(path, body);
+}
+
+export async function apiPut(path, body) {
+    return put(path, body);
+}
+
+export async function apiDelete(path) {
+    return del(path);
 }
