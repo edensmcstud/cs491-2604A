@@ -1,69 +1,47 @@
 # setup.ps1
-# Installs dependencies for CS491 project
+# Installs dependencies for root, frontend, and backend
 
 Write-Host "=== CS491 Project Setup ===" -ForegroundColor Cyan
 
-# Check Node.js
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-    Write-Host "Node.js is not installed. Install Node.js first: https://nodejs.org/" -ForegroundColor Red
+    Write-Host "Node.js is not installed." -ForegroundColor Red
     exit 1
 }
 
-Write-Host "Node version:"
-node -v
-
-Write-Host "npm version:"
-npm -v
-
 $root = Get-Location
 
-# Frontend setup
-if (Test-Path "$root\frontend\package.json") {
-    Write-Host "`n=== Installing frontend dependencies ===" -ForegroundColor Cyan
+function Install-Dependencies($path, $name) {
+    if (Test-Path "$path\package.json") {
+        Write-Host "`n=== Installing $name dependencies ===" -ForegroundColor Cyan
 
-    Set-Location "$root\frontend"
+        Set-Location $path
+        npm install
 
-    npm install
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "$name install failed." -ForegroundColor Red
+            exit 1
+        }
 
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Frontend install failed." -ForegroundColor Red
-        exit 1
+        Write-Host "$name setup complete." -ForegroundColor Green
     }
-
-    Write-Host "Frontend setup complete." -ForegroundColor Green
-}
-else {
-    Write-Host "No frontend/package.json found. Skipping frontend." -ForegroundColor Yellow
 }
 
-# Backend setup
-if (Test-Path "$root\backend\package.json") {
-    Write-Host "`n=== Installing backend dependencies ===" -ForegroundColor Cyan
+# Root dependencies (npm-run-all, scripts, etc.)
+Install-Dependencies $root "root"
 
-    Set-Location "$root\backend"
+# Frontend dependencies
+Install-Dependencies "$root\frontend" "frontend"
 
-    npm install
+# Backend dependencies
+Install-Dependencies "$root\backend" "backend"
 
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Backend install failed." -ForegroundColor Red
-        exit 1
-    }
-
-    Write-Host "Backend setup complete." -ForegroundColor Green
-}
-else {
-    Write-Host "No backend/package.json found. Skipping backend." -ForegroundColor Yellow
-}
-
-# Return to root
 Set-Location $root
 
 Write-Host "`n=== Setup Complete ===" -ForegroundColor Green
 Write-Host ""
-Write-Host "To start the frontend:"
-Write-Host "  cd frontend"
-Write-Host "  npm run dev"
+Write-Host "Start everything with:"
+Write-Host "  npm start"
 Write-Host ""
-Write-Host "To start the backend:"
-Write-Host "  cd backend"
-Write-Host "  npm run dev"
+Write-Host "Or individually:"
+Write-Host "  cd frontend && npm run dev"
+Write-Host "  cd backend && npm run dev"
