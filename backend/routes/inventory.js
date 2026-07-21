@@ -1,23 +1,43 @@
+// routes/inventory.js
+
 const express = require("express");
 const router = express.Router();
 
-const controller = require("../controllers/inventoryController");
+const inventoryController = require("../controllers/inventoryController");
 const auth = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 
-// Test route (no auth)
-router.get("/test", controller.test);
+// All inventory routes require authentication
+router.use(auth);
 
-// Add book to inventory (employee)
-router.post("/", auth, requireRole("employee"), controller.addBook);
+// ===============================
+// GET ALL INVENTORY ITEMS
+// ===============================
+router.get("/", requireRole("manager"), inventoryController.getInventory);
 
-// Update quantity (employee)
-router.put("/:id/quantity", auth, requireRole("employee"), controller.updateQuantity);
+// ===============================
+// GET SINGLE INVENTORY ITEM
+// ===============================
+router.get("/:id", requireRole("manager"), inventoryController.getInventoryItem);
 
-// Deactivate book (employee)
-router.delete("/:id", auth, requireRole("employee"), controller.deactivateBook);
+// ===============================
+// CREATE INVENTORY ITEM
+// ===============================
+router.post("/", requireRole("manager"), inventoryController.createInventoryItem);
 
-// Search inventory (employee)
-router.get("/search", auth, requireRole("employee"), controller.searchInventory);
+// ===============================
+// UPDATE INVENTORY ITEM
+// ===============================
+router.put("/:id", requireRole("manager"), inventoryController.updateInventoryItem);
+
+// ===============================
+// ADJUST STOCK LEVELS
+// ===============================
+router.patch("/:id/adjust", requireRole("manager"), inventoryController.adjustStock);
+
+// ===============================
+// DELETE INVENTORY ITEM
+// ===============================
+router.delete("/:id", requireRole("manager"), inventoryController.deleteInventoryItem);
 
 module.exports = router;

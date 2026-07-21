@@ -50,6 +50,24 @@ exports.getBook = async (req, res) => {
     }
 };
 
+exports.updateBookQuantity = async (req, res) => {
+    try {
+        const { quantity } = req.body;
+
+        await run(
+            `UPDATE books SET quantity = ? WHERE book_id = ?`,
+            [quantity, req.params.id]
+        );
+
+        await logAction(req.user.user_id, "UPDATE_QUANTITY", "BOOK", req.params.id);
+
+        res.json({ message: "Book quantity updated" });
+    } catch (err) {
+        handleError(res, err);
+    }
+};
+
+
 exports.updateBook = async (req, res) => {
     try {
         const { isbn, title, author, price } = req.body;

@@ -61,6 +61,11 @@ app.use('/api/backup', require('./routes/backup'));
 const testRoutes = require("./routes/testRoutes");
 app.use("/test", testRoutes);
 
+// Inventory
+const inventoryRoutes = require("./routes/inventory");
+app.use("/api/inventory", inventoryRoutes);
+
+
 
 // ===============================
 // Start Server

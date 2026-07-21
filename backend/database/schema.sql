@@ -131,3 +131,18 @@ CREATE TABLE audit_logs (
     timestamp TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+-- ============================
+-- INVENTORY
+-- ============================
+CREATE TABLE IF NOT EXISTS inventory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_id INTEGER NOT NULL,
+    quantity_on_hand INTEGER NOT NULL DEFAULT 0,
+    quantity_reserved INTEGER NOT NULL DEFAULT 0,
+    reorder_level INTEGER NOT NULL DEFAULT 0,
+    reorder_quantity INTEGER NOT NULL DEFAULT 0,
+    last_updated INTEGER NOT NULL,
+
+    FOREIGN KEY (book_id) REFERENCES books(id)
+);
