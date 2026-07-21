@@ -1,0 +1,20 @@
+# SQLite databases
+*.sqlite
+*.db
+
+# Node dependencies
+node_modules/
+
+# Environment files
+.env
+
+# Logs
+*.log
+
+# Visual Studio
+.vs/
+
+# Build output
+dist/
+build/
+
