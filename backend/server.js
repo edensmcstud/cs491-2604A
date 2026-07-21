@@ -61,6 +61,11 @@ app.use('/api/backup', require('./routes/backup'));
 const testRoutes = require("./routes/testRoutes");
 app.use("/test", testRoutes);
 
+// Inventory
+const inventoryRoutes = require("./routes/inventory");
+app.use("/api/inventory", inventoryRoutes);
+
+
 
 // ===============================
 // Start Server
@@ -68,4 +73,10 @@ app.use("/test", testRoutes);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Backend running on port ${PORT}`);
+});
+
+
+app.use((req, res, next) => {
+    console.log("BODY RECEIVED:", req.body);
+    next();
 });

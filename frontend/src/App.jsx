@@ -23,13 +23,12 @@ function App() {
             <Route
                 path="/inventory"
                 element={
-                    <ProtectedRoute>
-                        <Layout>
-                            <Inventory />
-                        </Layout>
-                    </ProtectedRoute>
+                    <Layout>
+                        <Inventory />
+                    </Layout>
                 }
             />
+
 
             <Route
                 path="/sales"
