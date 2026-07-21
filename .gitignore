@@ -10,3 +10,11 @@ node_modules/
 
 # Logs
 *.log
+
+# Visual Studio
+.vs/
+
+# Build output
+dist/
+build/
+
