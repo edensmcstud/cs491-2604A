@@ -1,9 +1,21 @@
-// middleware/auditLogger.js
+const { logAction } = require("../utils/audit");
 
-module.exports = function auditLogger(req, res, next) {
-    // TODO: Capture user identity (req.user)
-    // TODO: Capture action (req.method + req.originalUrl)
-    // TODO: Save audit log entry to DB
+module.exports = async function auditLogger(req, res, next) {
+    try {
+        // Only log if user is authenticated
+        const userId = req.user?.user_id || null;
 
-    next();
+        // Build action metadata
+        const actionType = `${req.method}`;
+        const entityType = "REQUEST";
+        const entityId = req.originalUrl;
+
+        // Save audit log entry
+        await logAction(userId, actionType, entityType, entityId);
+
+        next();
+    } catch (err) {
+        console.error("Audit logger error:", err);
+        next(); // Never block the request
+    }
 };

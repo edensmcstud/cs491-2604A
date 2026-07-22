@@ -1,7 +1,7 @@
 class AuditLog {
     constructor(row) {
         this.id = row.id;
-        this.userId = row.userId;
+        this.userId = row.user_id;     // FIXED
         this.action = row.action;
         this.timestamp = row.timestamp;
     }

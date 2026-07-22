@@ -8,10 +8,14 @@ const requireRole = require("../middleware/requireRole");
 // Test route (no auth)
 router.get("/test", controller.test);
 
-// Backup database (admin)
-router.get("/backup", auth, requireRole("admin"), controller.backup);
+// All backup/restore routes require Admin
+router.use(auth);
+router.use(requireRole("Admin"));
 
-// Restore database (admin)
-router.post("/restore", auth, requireRole("admin"), controller.restore);
+// Backup database
+router.get("/backup", controller.backup);
+
+// Restore database
+router.post("/restore", controller.restore);
 
 module.exports = router;

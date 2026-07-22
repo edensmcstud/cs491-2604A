@@ -1,79 +1,47 @@
-const crypto = require("crypto");
-const { run } = require("../utils/db");
-const { getUserByUsername, validatePassword } = require("../models/users");
+// backend/controllers/authController.js
+
+const jwt = require("jsonwebtoken");
+const Users = require("../models/Users");
 
 exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // 1. Fetch user
-        const user = await getUserByUsername(username);
+        const user = await Users.findByUsername(username);
         if (!user) {
             return res.status(401).json({ error: "Invalid username or password" });
         }
 
-        // 2. Validate password
-        const isValid = await validatePassword(password, user.password_hash);
-        if (!isValid) {
+        const valid = await user.verifyPassword(password);
+        if (!valid) {
             return res.status(401).json({ error: "Invalid username or password" });
         }
 
-        // 3. Generate token
-        const token = crypto.randomBytes(32).toString("hex");
-        const expiresAt = Date.now() + 1000 * 60 * 60 * 24; // 24 hours
+        const roles = await Users.getRoles(user.user_id);
 
-        // 4. Store session using your DB wrapper
-        await run(
-            `INSERT INTO sessions (user_id, token, expires_at)
-             VALUES (?, ?, ?)`,
-            [user.id, token, expiresAt]
-        );
-
-        // 5. Return token + user info
-        res.json({
-            message: "Login successful",
-            token,
-            user: {
-                id: user.id,
+        const token = jwt.sign(
+            {
+                user_id: user.user_id,
                 username: user.username,
-                role: user.role
-            }
-        });
-    } catch (err) {
-        console.error("Login error:", err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
-
-exports.logout = async (req, res) => {
-    try {
-        let token = req.headers.authorization;
-
-        if (!token) {
-            return res.status(400).json({ error: "Missing session token" });
-        }
-
-        // Strip Bearer prefix if present
-        if (token.startsWith("Bearer ")) {
-            token = token.slice(7);
-        }
-
-        const result = await run(
-            `DELETE FROM sessions WHERE token = ?`,
-            [token]
+                roles
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
         );
 
-        if (result.changes === 0) {
-            return res.status(400).json({ error: "Invalid session token" });
-        }
-
-        res.json({ message: "Logout successful" });
+        return res.json({ token });
     } catch (err) {
-        console.error("Logout error:", err);
-        res.status(500).json({ error: "Server error" });
+        console.error(err);
+        return res.status(500).json({ error: "Server error" });
     }
 };
 
+// Added to fix crash
+exports.logout = (req, res) => {
+    res.json({ message: "Logged out" });
+};
+
+// Added to fix crash
 exports.test = (req, res) => {
     res.json({ message: "auth controller test" });
 };

@@ -1,20 +1,72 @@
+# ================================
 # SQLite databases
+# ================================
 *.sqlite
 *.db
 
+# ================================
 # Node dependencies
+# ================================
 node_modules/
 
+# ================================
 # Environment files
+# ================================
 .env
 
+# ================================
 # Logs
+# ================================
 *.log
+npm-debug.log
 
-# Visual Studio
+# ================================
+# Visual Studio / VS Code garbage
+# ================================
 .vs/
+.vscode/
+*.vsidx
+*.wsuo
+*.suo
+*.user
+*.cache
+*.db-shm
+*.db-wal
 
+# ================================
+# OS junk
+# ================================
+Thumbs.db
+.DS_Store
+
+# ================================
 # Build output
+# ================================
 dist/
 build/
 
+# ================================
+# Coverage / testing output
+# ================================
+coverage/
+.nyc_output/
+
+# ================================
+# Temporary files
+# ================================
+*.tmp
+*.temp
+
+# ================================
+# Local scripts or dumps
+# ================================
+dump-db.js
+find-db.js
+seedAll.js
+
+# ================================
+# PowerShell test scripts
+# (optional: ignore if you don't want them in Git)
+# ================================
+test-crud-rbac.ps1
+test-rbac.ps1

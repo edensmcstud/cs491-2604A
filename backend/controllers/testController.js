@@ -1,24 +1,10 @@
-﻿const db = require("../database/connection");
+﻿const { query, run } = require("../utils/db");
+const bcrypt = require("bcrypt");
+const handleError = require("../middleware/errorHandler");
 
-function run(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.run(sql, params, function (err) {
-            if (err) reject(err);
-            else resolve(this);
-        });
-    });
-}
-
-function query(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.all(sql, params, (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
-}
-
-
+/**
+ * Check if DB has any users
+ */
 exports.dbState = async (req, res) => {
     try {
         const rows = await query("SELECT COUNT(*) AS count FROM users");
@@ -28,8 +14,18 @@ exports.dbState = async (req, res) => {
     }
 };
 
+
+/**
+ * Seed test data
+ * Creates:
+ * - roles
+ * - users
+ * - user_roles
+ * - customers
+ */
 exports.seed = async (req, res) => {
     try {
+        // Step 1: Insert roles
         await run(`
             INSERT INTO roles (role_name) VALUES
             ('admin_test'),
@@ -38,27 +34,41 @@ exports.seed = async (req, res) => {
             ('customer_test')
         `);
 
+        // Step 2: Insert users (hashed passwords)
+        const hashed = await bcrypt.hash("password", 10);
+
         await run(`
             INSERT INTO users (username, password_hash, email, is_active)
             VALUES
-            ('admin_test', 'password', 'admin_test@example.com', 1),
-            ('employee_test', 'password', 'employee_test@example.com', 1),
-            ('auditor_test', 'password', 'auditor_test@example.com', 1),
-            ('customer_test', 'password', 'customer_test@example.com', 1)
-        `);
+            ('admin_test', ?, 'admin_test@example.com', 1),
+            ('employee_test', ?, 'employee_test@example.com', 1),
+            ('auditor_test', ?, 'auditor_test@example.com', 1),
+            ('customer_test', ?, 'customer_test@example.com', 1)
+        `, [hashed, hashed, hashed, hashed]);
 
-        await run(`
-            INSERT INTO user_roles (user_id, role_id)
-            SELECT u.user_id, r.role_id
-            FROM users u, roles r
-            WHERE u.username LIKE '%_test'
-            AND r.role_name LIKE '%_test'
-        `);
+        // Step 3: Assign roles to matching users
+        const users = await query(`SELECT user_id, username FROM users WHERE username LIKE '%_test'`);
+        const roles = await query(`SELECT role_id, role_name FROM roles WHERE role_name LIKE '%_test'`);
 
-        await run(`
-            INSERT INTO customers (name, email, phone, address)
-            VALUES ('Customer Test', 'customer_test@example.com', '555-0000', 'Test Lane')
-        `);
+        for (const user of users) {
+            const role = roles.find(r => r.role_name.startsWith(user.username.split("_")[0]));
+            if (role) {
+                await run(
+                    `INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)`,
+                    [user.user_id, role.role_id]
+                );
+            }
+        }
+
+        // Step 4: Create customer profile for customer_test
+        const customerUser = users.find(u => u.username === "customer_test");
+        if (customerUser) {
+            await run(
+                `INSERT INTO customers (user_id, first_name, last_name, phone, address)
+                 VALUES (?, 'Customer', 'Test', '555-0000', 'Test Lane')`,
+                [customerUser.user_id]
+            );
+        }
 
         res.json({ message: "seed complete" });
     } catch (err) {
@@ -66,16 +76,29 @@ exports.seed = async (req, res) => {
     }
 };
 
+
+/**
+ * Cleanup test data
+ */
 exports.cleanup = async (req, res) => {
     try {
+        // Remove user_roles
         await run(`
             DELETE FROM user_roles
             WHERE user_id IN (SELECT user_id FROM users WHERE username LIKE '%_test')
         `);
 
+        // Remove customers linked to test users
+        await run(`
+            DELETE FROM customers
+            WHERE user_id IN (SELECT user_id FROM users WHERE username LIKE '%_test')
+        `);
+
+        // Remove users
         await run(`DELETE FROM users WHERE username LIKE '%_test'`);
+
+        // Remove roles
         await run(`DELETE FROM roles WHERE role_name LIKE '%_test'`);
-        await run(`DELETE FROM customers WHERE email LIKE '%_test@example.com'`);
 
         res.json({ message: "cleanup complete" });
     } catch (err) {
@@ -83,6 +106,10 @@ exports.cleanup = async (req, res) => {
     }
 };
 
+
+/**
+ * Ping endpoint
+ */
 exports.ping = (req, res) => {
     res.json({ message: "test API alive" });
 };

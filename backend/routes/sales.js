@@ -8,10 +8,14 @@ const requireRole = require("../middleware/requireRole");
 // Test route (no auth)
 router.get("/test", controller.test);
 
-// Create sale (employee)
-router.post("/", auth, requireRole("employee"), controller.createSale);
+// All real sales routes require Employee or Admin
+router.use(auth);
+router.use(requireRole("Employee", "Admin"));
 
-// Get sales (employee)
-router.get("/", auth, requireRole("employee"), controller.getSales);
+// Create sale
+router.post("/", controller.createSale);
+
+// Get sales
+router.get("/", controller.getSales);
 
 module.exports = router;

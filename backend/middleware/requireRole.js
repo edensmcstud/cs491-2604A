@@ -1,25 +1,26 @@
-// backend/middleware/requireRole.js
-const { query } = require('../utils/db');
+// middleware/requireRole.js
 
-module.exports = function requireRole(roleName) {
-    return async (req, res, next) => {
-        try {
-            const roles = await query(
-                `SELECT r.role_name
-                 FROM roles r
-                 JOIN user_roles ur ON r.role_id = ur.role_id
-                 WHERE ur.user_id = ?`,
-                [req.user.user_id]
-            );
+module.exports = function requireRole(...allowedRoles) {
+    // Normalize all roles
+    const normalized = allowedRoles.map(r =>
+        r.charAt(0).toUpperCase() + r.slice(1).toLowerCase()
+    );
 
-            if (!roles.some(r => r.role_name === roleName)) {
-                return res.status(403).json({ error: "Forbidden" });
-            }
+    // Fail-fast if developer misconfigured the middleware
+    if (normalized.length === 0) {
+        throw new Error("requireRole() called with no roles.");
+    }
 
-            next();
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: "Internal server error" });
+    return (req, res, next) => {
+        const userRoles = req.user?.roles || [];
+
+        // Check intersection
+        const hasRole = userRoles.some(r => normalized.includes(r));
+
+        if (!hasRole) {
+            return res.status(403).json({ error: "Forbidden: insufficient role" });
         }
+
+        next();
     };
 };

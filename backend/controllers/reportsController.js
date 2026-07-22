@@ -1,5 +1,8 @@
 const handleError = require("../middleware/errorHandler");
 
+/**
+ * Daily report placeholder
+ */
 exports.dailyReport = async (req, res) => {
     try {
         res.json({ message: "daily report placeholder" });
@@ -8,6 +11,9 @@ exports.dailyReport = async (req, res) => {
     }
 };
 
+/**
+ * Weekly report placeholder
+ */
 exports.weeklyReport = async (req, res) => {
     try {
         res.json({ message: "weekly report placeholder" });
@@ -16,6 +22,9 @@ exports.weeklyReport = async (req, res) => {
     }
 };
 
+/**
+ * Monthly report placeholder
+ */
 exports.monthlyReport = async (req, res) => {
     try {
         res.json({ message: "monthly report placeholder" });
@@ -24,6 +33,9 @@ exports.monthlyReport = async (req, res) => {
     }
 };
 
+/**
+ * Test endpoint
+ */
 exports.test = (req, res) => {
     res.json({ message: "reports controller test" });
 };

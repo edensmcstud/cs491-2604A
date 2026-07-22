@@ -5,13 +5,17 @@ const controller = require("../controllers/supplierOrdersController");
 const auth = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 
-// Create supplier order (employee)
-router.post("/", auth, requireRole("employee"), controller.createSupplierOrder);
-
-// Get supplier orders (employee)
-router.get("/", auth, requireRole("employee"), controller.getSupplierOrders);
-
 // Test route (no auth)
 router.get("/test", controller.test);
+
+// All supplier order routes require Employee or Admin
+router.use(auth);
+router.use(requireRole("Employee", "Admin"));
+
+// Create supplier order
+router.post("/", controller.createSupplierOrder);
+
+// Get supplier orders
+router.get("/", controller.getSupplierOrders);
 
 module.exports = router;

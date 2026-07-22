@@ -1,9 +1,0 @@
-class Customer {
-    constructor(row) {
-        this.id = row.id;
-        this.username = row.username;
-        this.passwordHash = row.passwordHash;
-    }
-}
-
-module.exports = Customer;

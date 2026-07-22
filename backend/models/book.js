@@ -4,7 +4,7 @@ class Book {
         this.title = row.title;
         this.author = row.author;
         this.price = row.price;
-        this.quantity = row.quantity;
+        this.stock = row.stock;     // FIXED
         this.active = row.active;
     }
 }

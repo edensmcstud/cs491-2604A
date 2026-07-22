@@ -6,11 +6,22 @@ const cors = require('cors');
 
 const app = express();
 
-// Middleware
+// ===============================
+// Core Middleware (MUST COME FIRST)
+// ===============================
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// Debug body logger (MUST COME BEFORE ROUTES)
+app.use((req, res, next) => {
+    console.log("BODY RECEIVED:", req.body);
+    next();
+});
+
+// ===============================
 // Database connection
+// ===============================
 const db = require('./database/connection');
 
 // Diagnostic test route
@@ -37,14 +48,11 @@ app.use('/api/inventory', require('./routes/inventory'));
 // Sales
 app.use('/api/sales', require('./routes/sales'));
 
-// Customer Auth
-app.use('/api/customer', require('./routes/customerAuth'));
-
-// Customer Orders
-app.use('/api/orders', require('./routes/orders'));
-
 // Supplier Orders
 app.use('/api/supplierOrders', require('./routes/supplierOrders'));
+
+// Suppliers
+app.use('/api/suppliers', require('./routes/suppliers'));
 
 // Reports
 app.use('/api/reports', require('./routes/reports'));
@@ -61,22 +69,10 @@ app.use('/api/backup', require('./routes/backup'));
 const testRoutes = require("./routes/testRoutes");
 app.use("/test", testRoutes);
 
-// Inventory
-const inventoryRoutes = require("./routes/inventory");
-app.use("/api/inventory", inventoryRoutes);
-
-
-
 // ===============================
 // Start Server
 // ===============================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Backend running on port ${PORT}`);
-});
-
-
-app.use((req, res, next) => {
-    console.log("BODY RECEIVED:", req.body);
-    next();
 });
