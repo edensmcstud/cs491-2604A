@@ -1,10 +1,11 @@
-import { Routes, Route } from "react-router-dom";
+﻿import { Routes, Route } from "react-router-dom";
 
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Pages
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";
 import Sales from "./pages/Sales";
 import CustomerOrders from "./pages/CustomerOrders";
@@ -19,7 +20,19 @@ function App() {
             {/* Login does NOT use the layout */}
             <Route path="/login" element={<Login />} />
 
-            {/* Protected routes */}
+            {/* Dashboard */}
+            <Route
+                path="/dashboard"
+                element={
+                    <ProtectedRoute>
+                        <Layout>
+                            <Dashboard />
+                        </Layout>
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Protected pages */}
             <Route
                 path="/inventory"
                 element={
@@ -97,13 +110,13 @@ function App() {
                 }
             />
 
-            {/* Default route */}
+            {/* Default route → Dashboard */}
             <Route
                 path="/"
                 element={
                     <ProtectedRoute>
                         <Layout>
-                            <div>Frontend is running</div>
+                            <Dashboard />
                         </Layout>
                     </ProtectedRoute>
                 }
