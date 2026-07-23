@@ -1,69 +1,129 @@
 ﻿import axios from "axios";
 
-// Base URL for your Express backend
 const API_URL = "http://localhost:3000/api";
 
-// Create a reusable axios instance
-const api = axios.create({
+// Create axios instance
+const client = axios.create({
     baseURL: API_URL,
 });
 
-// GET helper
-export async function get(path) {
-    try {
-        const response = await api.get(path);
-        return response.data;
-    } catch (err) {
-        console.error("GET error:", err);
-        throw err;
+// =========================
+// REQUEST INTERCEPTOR
+// =========================
+client.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("token");
+
+        console.group("API REQUEST");
+        console.log("→ Method:", config.method.toUpperCase());
+        console.log("→ URL:", config.baseURL + config.url);
+        console.log("→ Request Body:", config.data);
+        console.log("→ Current Token:", token ? token : "NO TOKEN FOUND");
+
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+            console.log("→ Authorization Header Set");
+        } else {
+            console.warn("→ WARNING: Authorization Header NOT Set");
+        }
+
+        console.groupEnd();
+
+        return config;
+    },
+    (error) => {
+        console.group("API REQUEST ERROR");
+        console.error("→ Request Interceptor Error:", error);
+        console.groupEnd();
+        return Promise.reject(error);
     }
-}
+);
 
-// POST helper
-export async function post(path, body) {
-    try {
-        const response = await api.post(path, body);
-        return response.data;
-    } catch (err) {
-        console.error("POST error:", err);
-        throw err;
+// =========================
+// RESPONSE INTERCEPTOR
+// =========================
+client.interceptors.response.use(
+    (response) => {
+        console.group("API RESPONSE");
+        console.log("→ Status:", response.status);
+        console.log("→ URL:", response.config.url);
+        console.log("→ Response Data:", response.data);
+        console.groupEnd();
+
+        return response;
+    },
+
+    (error) => {
+        const status = error.response?.status;
+        const url = error.response?.config?.url;
+
+        console.group("API RESPONSE ERROR");
+        console.error("→ Status:", status);
+        console.error("→ URL:", url);
+        console.error("→ Error Data:", error.response?.data);
+        console.error("→ Full Error Object:", error);
+        console.groupEnd();
+
+        // Handle 401 Unauthorized
+        if (status === 401) {
+            console.group("SESSION WIPE TRIGGERED");
+            console.warn("→ 401 Unauthorized detected");
+            console.warn("→ Removing user + token from localStorage");
+            console.warn("→ Redirecting to /login");
+            console.groupEnd();
+
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+
+            window.location.href = "/login";
+        }
+
+        return Promise.reject(error);
     }
-}
+);
 
-// PUT helper
-export async function put(path, body) {
-    try {
-        const response = await api.put(path, body);
-        return response.data;
-    } catch (err) {
-        console.error("PUT error:", err);
-        throw err;
-    }
-}
+// =========================
+// API WRAPPER
+// =========================
+const api = {
+    async get(path) {
+        console.group("API WRAPPER CALL: GET");
+        console.log("→ Path:", path);
+        console.groupEnd();
 
-// DELETE helper
-export async function del(path) {
-    try {
-        const response = await api.delete(path);
-        return response.data;
-    } catch (err) {
-        console.error("DELETE error:", err);
-        throw err;
-    }
-}
-// Phase‑2 wrapper functions
-export async function apiGet(path) {
-    return get(path);
-}
+        const res = await client.get(path);
+        return res.data;
+    },
 
-export async function apiPost(path, body) {
-    return post(path, body);
-}
+    async post(path, body) {
+        console.group("API WRAPPER CALL: POST");
+        console.log("→ Path:", path);
+        console.log("→ Body:", body);
+        console.groupEnd();
 
-export async function apiPut(path, body) {
-    return put(path, body);
-}
+        const res = await client.post(path, body);
+        return res.data;
+    },
 
-export async function apiDelete(path) {
-    return del(path);
-}
+    async put(path, body) {
+        console.group("API WRAPPER CALL: PUT");
+        console.log("→ Path:", path);
+        console.log("→ Body:", body);
+        console.groupEnd();
+
+        const res = await client.put(path, body);
+        return res.data;
+    },
+
+    async delete(path) {
+        console.group("API WRAPPER CALL: DELETE");
+        console.log("→ Path:", path);
+        console.groupEnd();
+
+        const res = await client.delete(path);
+        return res.data;
+    },
+};
+
+export default api;
+export { client };

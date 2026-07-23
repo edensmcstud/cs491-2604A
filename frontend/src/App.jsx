@@ -19,68 +19,81 @@ function App() {
             {/* Login does NOT use the layout */}
             <Route path="/login" element={<Login />} />
 
-            {/* Protected example */}
+            {/* Protected routes */}
             <Route
                 path="/inventory"
                 element={
-                    <Layout>
-                        <Inventory />
-                    </Layout>
+                    <ProtectedRoute>
+                        <Layout>
+                            <Inventory />
+                        </Layout>
+                    </ProtectedRoute>
                 }
             />
-
 
             <Route
                 path="/sales"
                 element={
-                    <Layout>
-                        <Sales />
-                    </Layout>
+                    <ProtectedRoute>
+                        <Layout>
+                            <Sales />
+                        </Layout>
+                    </ProtectedRoute>
                 }
             />
 
             <Route
                 path="/customer-orders"
                 element={
-                    <Layout>
-                        <CustomerOrders />
-                    </Layout>
+                    <ProtectedRoute>
+                        <Layout>
+                            <CustomerOrders />
+                        </Layout>
+                    </ProtectedRoute>
                 }
             />
 
             <Route
                 path="/supplier-orders"
                 element={
-                    <Layout>
-                        <SupplierOrders />
-                    </Layout>
+                    <ProtectedRoute>
+                        <Layout>
+                            <SupplierOrders />
+                        </Layout>
+                    </ProtectedRoute>
                 }
             />
 
             <Route
                 path="/reports"
                 element={
-                    <Layout>
-                        <Reports />
-                    </Layout>
+                    <ProtectedRoute>
+                        <Layout>
+                            <Reports />
+                        </Layout>
+                    </ProtectedRoute>
                 }
             />
 
             <Route
                 path="/audit-log"
                 element={
-                    <Layout>
-                        <AuditLog />
-                    </Layout>
+                    <ProtectedRoute>
+                        <Layout>
+                            <AuditLog />
+                        </Layout>
+                    </ProtectedRoute>
                 }
             />
 
             <Route
                 path="/role-management"
                 element={
-                    <Layout>
-                        <RoleManagement />
-                    </Layout>
+                    <ProtectedRoute>
+                        <Layout>
+                            <RoleManagement />
+                        </Layout>
+                    </ProtectedRoute>
                 }
             />
 
@@ -88,9 +101,11 @@ function App() {
             <Route
                 path="/"
                 element={
-                    <Layout>
-                        <div>Frontend is running</div>
-                    </Layout>
+                    <ProtectedRoute>
+                        <Layout>
+                            <div>Frontend is running</div>
+                        </Layout>
+                    </ProtectedRoute>
                 }
             />
         </Routes>

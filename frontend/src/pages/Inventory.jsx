@@ -1,28 +1,66 @@
-﻿import { apiGet } from "../api/api";
+﻿import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import api from "../api/api";
 
 export default function Inventory() {
-    console.log("API GET TEST:", apiGet);
-    apiGet("/test")
-        .then((res) => console.log("API GET RESULT:", res))
-        .catch((err) => console.log("API GET ERROR:", err));
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    const { logout } = useAuth();
+
+    useEffect(() => {
+        console.log("Inventory mounted");
+
+        api.get("/inventory")
+            .then((res) => {
+                console.log("Inventory response:", res);
+                setItems(res);
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.log("Inventory load error:", err);
+                setError("Failed to load inventory");
+                setLoading(false);
+            });
+    }, []);
 
     return (
         <div className="page">
             <h1>Inventory</h1>
 
+            <button onClick={logout}>Logout</button>
             <button>Add Book</button>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>ISBN</th>
-                        <th>Title</th>
-                        <th>Quantity</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            {loading && <p>Loading...</p>}
+            {error && <p style={{ color: "red" }}>{error}</p>}
+
+            {!loading && !error && (
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ISBN</th>
+                            <th>Title</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items.map((item) => (
+                            <tr key={item.inventory_id}>
+                                <td>{item.isbn}</td>
+                                <td>{item.title}</td>
+                                <td>{item.quantity_on_hand}</td>
+                                <td>
+                                    {item.quantity_on_hand > 0
+                                        ? "In Stock"
+                                        : "Out of Stock"}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 }
