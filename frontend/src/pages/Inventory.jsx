@@ -1,13 +1,10 @@
 ﻿import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import api from "../api/api";
 
 export default function Inventory() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-
-    const { logout } = useAuth();
 
     useEffect(() => {
         console.log("Inventory mounted");
@@ -29,7 +26,6 @@ export default function Inventory() {
         <div className="page">
             <h1>Inventory</h1>
 
-            <button onClick={logout}>Logout</button>
             <button>Add Book</button>
 
             {loading && <p>Loading...</p>}

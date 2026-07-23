@@ -20,7 +20,7 @@ export default function Login() {
             const result = await login(username, password);
             console.log("Login result:", result);
 
-            navigate("/inventory");
+            navigate("/dashboard");
         } catch (err) {
             console.log("Login error:", err.response?.data || err.message);
             setError(err.response?.data?.message || "Login failed");
