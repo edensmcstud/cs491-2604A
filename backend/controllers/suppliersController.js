@@ -81,6 +81,16 @@ exports.updateSupplier = async (req, res) => {
         const { id } = req.params;
         const { name, contact_email, phone } = req.body;
 
+        // Check existence
+        const exists = await query(
+            `SELECT supplier_id FROM suppliers WHERE supplier_id = ?`,
+            [id]
+        );
+
+        if (exists.length === 0) {
+            return res.status(404).json({ error: "Supplier not found" });
+        }
+
         await run(
             `UPDATE suppliers
              SET name = ?, contact_email = ?, phone = ?
@@ -102,6 +112,16 @@ exports.updateSupplier = async (req, res) => {
 exports.deleteSupplier = async (req, res) => {
     try {
         const { id } = req.params;
+
+        // Check existence
+        const exists = await query(
+            `SELECT supplier_id FROM suppliers WHERE supplier_id = ?`,
+            [id]
+        );
+
+        if (exists.length === 0) {
+            return res.status(404).json({ error: "Supplier not found" });
+        }
 
         await run(
             `DELETE FROM suppliers WHERE supplier_id = ?`,

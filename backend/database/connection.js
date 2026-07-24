@@ -5,6 +5,7 @@ const path = require("path");
 const dbPath = path.join(__dirname, "database.sqlite");
 const schemaPath = path.join(__dirname, "schema.sql");
 
+// Open database
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error("Database connection failed:", err);
@@ -13,12 +14,22 @@ const db = new sqlite3.Database(dbPath, (err) => {
     }
 });
 
+// Enable WAL mode for safer concurrent writes
+db.exec("PRAGMA journal_mode = WAL;", (err) => {
+    if (err) {
+        console.error("Failed to enable WAL mode:", err.message);
+    }
+});
+
 // Load schema file
 const schema = fs.readFileSync(schemaPath, "utf8");
 
-// Check if ANY tables exist
+// Check if user-defined tables exist (ignore SQLite internal tables)
 db.get(
-    "SELECT COUNT(*) AS count FROM sqlite_master WHERE type='table'",
+    `SELECT COUNT(*) AS count
+     FROM sqlite_master
+     WHERE type='table'
+       AND name NOT LIKE 'sqlite_%'`,
     (err, row) => {
         if (err) {
             console.error("Failed to check DB state:", err);

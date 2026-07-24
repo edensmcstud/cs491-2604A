@@ -3,28 +3,55 @@ const router = express.Router();
 
 const inventoryController = require("../controllers/inventoryController");
 const auth = require("../middleware/auth");
-const requireRole = require("../middleware/requireRole");
+const requirePermission = require("../middleware/requirePermission");
 
-// All inventory routes require authentication + Employee or Admin role
+// All inventory routes require authentication
 router.use(auth);
-router.use(requireRole("Employee", "Admin"));
+
+// =====================================================
+// INVENTORY ROUTES WITH RBAC
+// =====================================================
 
 // GET ALL INVENTORY ITEMS
-router.get("/", inventoryController.getInventory);
+router.get(
+    "/",
+    requirePermission("inventory", "read"),
+    inventoryController.getInventory
+);
 
 // GET SINGLE INVENTORY ITEM
-router.get("/:id", inventoryController.getInventoryItem);
+router.get(
+    "/:id",
+    requirePermission("inventory", "read"),
+    inventoryController.getInventoryItem
+);
 
-// CREATE INVENTORY ITEM
-router.post("/", inventoryController.createInventoryItem);
+// CREATE INVENTORY ITEM (ADMIN ONLY)
+router.post(
+    "/",
+    requirePermission("inventory", "create"),
+    inventoryController.createInventoryItem
+);
 
-// UPDATE INVENTORY ITEM
-router.put("/:id", inventoryController.updateInventoryItem);
+// UPDATE INVENTORY ITEM (ADMIN + EMPLOYEE)
+router.put(
+    "/:id",
+    requirePermission("inventory", "update"),
+    inventoryController.updateInventoryItem
+);
 
-// ADJUST STOCK LEVELS
-router.patch("/:id/adjust", inventoryController.adjustStock);
+// ADJUST STOCK LEVELS (ADMIN + EMPLOYEE)
+router.patch(
+    "/:id/adjust",
+    requirePermission("inventory", "adjust"),
+    inventoryController.adjustStock
+);
 
-// DELETE INVENTORY ITEM
-router.delete("/:id", inventoryController.deleteInventoryItem);
+// DELETE INVENTORY ITEM (ADMIN ONLY)
+router.delete(
+    "/:id",
+    requirePermission("inventory", "delete"),
+    inventoryController.deleteInventoryItem
+);
 
 module.exports = router;

@@ -1,11 +1,15 @@
 const { query } = require("../utils/db");
 const handleError = require("../middleware/errorHandler");
+const { logAction } = require("../utils/audit");
 
 /**
  * Get all audit logs (sanitized)
  */
 exports.getAuditLogs = async (req, res) => {
     try {
+        // Log that the user viewed audit logs
+        await logAction(req.user.user_id, "READ", "AUDIT_LOGS", null);
+
         const logs = await query(`
             SELECT audit_id,
                    user_id,

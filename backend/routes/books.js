@@ -2,7 +2,7 @@
 const router = express.Router();
 
 const auth = require("../middleware/auth");
-const requireRole = require("../middleware/requireRole");
+const requirePermission = require("../middleware/requirePermission");
 const controller = require("../controllers/booksController");
 
 // All book routes require authentication
@@ -13,25 +13,49 @@ router.use(auth);
 // ===============================
 
 // Get ALL books (active + inactive)
-router.get("/all", requireRole("Admin"), controller.getAllBooks);
+router.get(
+    "/all",
+    requirePermission("books", "read"),
+    controller.getAllBooks
+);
 
 // Create a book
-router.post("/", requireRole("Admin"), controller.createBook);
+router.post(
+    "/",
+    requirePermission("books", "create"),
+    controller.createBook
+);
 
 // Update a book
-router.put("/:id", requireRole("Admin"), controller.updateBook);
+router.put(
+    "/:id",
+    requirePermission("books", "update"),
+    controller.updateBook
+);
 
 // Hard delete a book
-router.delete("/:id", requireRole("Admin"), controller.deleteBook);
+router.delete(
+    "/:id",
+    requirePermission("books", "delete"),
+    controller.deleteBook
+);
 
 // ===============================
-// EMPLOYEE + ADMIN
+// EMPLOYEE + ADMIN (AND CUSTOMER FOR READ)
 // ===============================
 
 // Get all ACTIVE books
-router.get("/", requireRole("Employee", "Admin"), controller.getBooks);
+router.get(
+    "/",
+    requirePermission("books", "read"),
+    controller.getBooks
+);
 
 // Get single ACTIVE book
-router.get("/:id", requireRole("Employee", "Admin"), controller.getBook);
+router.get(
+    "/:id",
+    requirePermission("books", "read"),
+    controller.getBook
+);
 
 module.exports = router;

@@ -5,10 +5,12 @@ const { logAction } = require("../utils/audit");
 /**
  * Create a supplier order
  * Flow:
- * 1. Validate supplier_id and created_by (req.user.user_id)
- * 2. Insert into supplier_orders
- * 3. Insert items into supplier_order_items
- * 4. Audit log
+ * 1. Validate supplier_id and items[]
+ * 2. Validate supplier exists
+ * 3. Validate each book exists
+ * 4. Insert supplier order
+ * 5. Insert supplier order items
+ * 6. Audit log
  */
 exports.createSupplierOrder = async (req, res) => {
     try {
@@ -23,6 +25,39 @@ exports.createSupplierOrder = async (req, res) => {
             return res.status(403).json({ error: "Authentication required" });
         }
 
+        // Validate supplier exists
+        const supplierRows = await query(
+            `SELECT supplier_id FROM suppliers WHERE supplier_id = ?`,
+            [supplier_id]
+        );
+
+        if (supplierRows.length === 0) {
+            return res.status(404).json({ error: "Supplier not found" });
+        }
+
+        // Validate each item
+        for (const item of items) {
+            const { book_id, quantity, unit_cost } = item;
+
+            if (!book_id || !quantity || !unit_cost) {
+                return res.status(400).json({
+                    error: "Each item requires book_id, quantity, unit_cost"
+                });
+            }
+
+            // Validate book exists
+            const bookRows = await query(
+                `SELECT book_id FROM books WHERE book_id = ?`,
+                [book_id]
+            );
+
+            if (bookRows.length === 0) {
+                return res.status(404).json({
+                    error: `Book ${book_id} not found`
+                });
+            }
+        }
+
         // Step 1: Create supplier order
         const orderResult = await run(
             `INSERT INTO supplier_orders (supplier_id, created_by, status)
@@ -35,10 +70,6 @@ exports.createSupplierOrder = async (req, res) => {
         // Step 2: Insert items
         for (const item of items) {
             const { book_id, quantity, unit_cost } = item;
-
-            if (!book_id || !quantity || !unit_cost) {
-                return res.status(400).json({ error: "Each item requires book_id, quantity, unit_cost" });
-            }
 
             await run(
                 `INSERT INTO supplier_order_items (supplier_order_id, book_id, quantity, unit_cost)
@@ -71,7 +102,6 @@ exports.getSupplierOrders = async (req, res) => {
             ORDER BY so.created_at DESC
         `);
 
-        // Fetch items for each order
         for (const order of orders) {
             const items = await query(
                 `SELECT supplier_order_item_id, book_id, quantity, unit_cost

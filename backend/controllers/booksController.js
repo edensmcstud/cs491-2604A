@@ -34,13 +34,56 @@ exports.createBook = async (req, res, next) => {
 };
 
 /**
- * Get all ACTIVE books (Employee + Admin)
+ * Get all ACTIVE books
+ * - Customer: only active + in-stock + exact available quantity
+ * - Employee/Admin: all active books + full inventory details
  */
 exports.getBooks = async (req, res, next) => {
     try {
-        const books = await query("SELECT * FROM books WHERE active = 1");
-        res.json(books);
+        const isCustomer = req.user.roles.includes("Customer");
+
+        let sql;
+        let params = [];
+
+        if (isCustomer) {
+            // CUSTOMER VIEW
+            sql = `
+                SELECT 
+                    b.book_id,
+                    b.isbn,
+                    b.title,
+                    b.author,
+                    b.publisher,
+                    b.category,
+                    b.price,
+                    i.quantity_on_hand AS available_quantity
+                FROM books b
+                JOIN inventory i ON b.book_id = i.book_id
+                WHERE b.active = 1
+                  AND i.quantity_on_hand > 0
+                ORDER BY b.title ASC
+            `;
+        } else {
+            // EMPLOYEE + ADMIN VIEW
+            sql = `
+                SELECT 
+                    b.*,
+                    i.quantity_on_hand,
+                    i.quantity_reserved,
+                    i.reorder_level,
+                    i.reorder_quantity
+                FROM books b
+                LEFT JOIN inventory i ON b.book_id = i.book_id
+                WHERE b.active = 1
+                ORDER BY b.title ASC
+            `;
+        }
+
+        const rows = await query(sql, params);
+        res.json(rows);
+
     } catch (err) {
+        console.error("Error fetching books:", err);
         next(err);
     }
 };
@@ -59,20 +102,58 @@ exports.getAllBooks = async (req, res, next) => {
 
 /**
  * Get a single ACTIVE book
+ * - Customer: only active + in-stock + exact available quantity
+ * - Employee/Admin: full inventory details
  */
 exports.getBook = async (req, res, next) => {
     try {
-        const rows = await query(
-            "SELECT * FROM books WHERE book_id = ? AND active = 1",
-            [req.params.id]
-        );
+        const isCustomer = req.user.roles.includes("Customer");
+        const bookId = req.params.id;
+
+        let sql;
+        let params = [bookId];
+
+        if (isCustomer) {
+            sql = `
+                SELECT 
+                    b.book_id,
+                    b.isbn,
+                    b.title,
+                    b.author,
+                    b.publisher,
+                    b.category,
+                    b.price,
+                    i.quantity_on_hand AS available_quantity
+                FROM books b
+                JOIN inventory i ON b.book_id = i.book_id
+                WHERE b.book_id = ?
+                  AND b.active = 1
+                  AND i.quantity_on_hand > 0
+            `;
+        } else {
+            sql = `
+                SELECT 
+                    b.*,
+                    i.quantity_on_hand,
+                    i.quantity_reserved,
+                    i.reorder_level,
+                    i.reorder_quantity
+                FROM books b
+                LEFT JOIN inventory i ON b.book_id = i.book_id
+                WHERE b.book_id = ?
+            `;
+        }
+
+        const rows = await query(sql, params);
 
         if (rows.length === 0) {
             return res.status(404).json({ error: "Book not found" });
         }
 
         res.json(rows[0]);
+
     } catch (err) {
+        console.error("Error fetching book:", err);
         next(err);
     }
 };

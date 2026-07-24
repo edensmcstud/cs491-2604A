@@ -3,19 +3,26 @@ const router = express.Router();
 
 const controller = require("../controllers/supplierOrdersController");
 const auth = require("../middleware/auth");
-const requireRole = require("../middleware/requireRole");
+const requirePermission = require("../middleware/requirePermission");
 
 // Test route (no auth)
 router.get("/test", controller.test);
 
-// All supplier order routes require Employee or Admin
+// All supplier order routes require authentication
 router.use(auth);
-router.use(requireRole("Employee", "Admin"));
 
-// Create supplier order
-router.post("/", controller.createSupplierOrder);
+// Create supplier order (Employee + Admin)
+router.post(
+    "/",
+    requirePermission("supplier_orders", "create"),
+    controller.createSupplierOrder
+);
 
-// Get supplier orders
-router.get("/", controller.getSupplierOrders);
+// Get supplier orders (Employee + Admin)
+router.get(
+    "/",
+    requirePermission("supplier_orders", "read"),
+    controller.getSupplierOrders
+);
 
 module.exports = router;

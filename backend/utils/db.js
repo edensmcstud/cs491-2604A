@@ -1,29 +1,33 @@
-// backend/utils/db.js
-const db = require('../database/connection');
+const db = require("../database/connection");
+
+// Normalize params defensively
+function normalizeParams(params) {
+    return Array.isArray(params) ? params : [];
+}
 
 function query(sql, params = []) {
     return new Promise((resolve, reject) => {
-        db.all(sql, params, (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
+        db.all(sql, normalizeParams(params), (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
         });
     });
 }
 
 function get(sql, params = []) {
     return new Promise((resolve, reject) => {
-        db.get(sql, params, (err, row) => {
-            if (err) reject(err);
-            else resolve(row);
+        db.get(sql, normalizeParams(params), (err, row) => {
+            if (err) return reject(err);
+            resolve(row);
         });
     });
 }
 
 function run(sql, params = []) {
     return new Promise((resolve, reject) => {
-        db.run(sql, params, function (err) {
-            if (err) reject(err);
-            else resolve(this);
+        db.run(sql, normalizeParams(params), function (err) {
+            if (err) return reject(err);
+            resolve(this); // contains lastID + changes
         });
     });
 }
