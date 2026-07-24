@@ -10,30 +10,21 @@ export function AuthProvider({ children }) {
     });
 
     async function login(username, password) {
-        console.group("AUTH LOGIN");
-        console.log("→ Attempting login with:", { username, password });
-        console.groupEnd();
-
         const result = await api.post("/auth/login", { username, password });
 
-        console.group("AUTH LOGIN SUCCESS");
-        console.log("→ Received token:", result.token);
-        console.groupEnd();
-
-        // CRITICAL FIX: Save token + user
+        // Store token
         localStorage.setItem("token", result.token);
-        localStorage.setItem("user", JSON.stringify({ username }));
 
-        setUser({ username });
+        // Store full user object (roles, modules, user_id, username)
+        localStorage.setItem("user", JSON.stringify(result.user));
+
+        // Set full user object in state
+        setUser(result.user);
 
         return result;
     }
 
     function logout() {
-        console.group("AUTH LOGOUT");
-        console.log("→ Clearing session");
-        console.groupEnd();
-
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         setUser(null);
