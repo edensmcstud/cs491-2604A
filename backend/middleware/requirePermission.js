@@ -1,22 +1,34 @@
+console.log("requirePermission LOADED");
+
+const { query } = require("../utils/db");
+
 module.exports = function requirePermission(module, action) {
-    // Normalize inputs defensively
     const mod = String(module).trim();
     const act = String(action).trim();
 
-    return (req, res, next) => {
-        const perms = req.user?.modules;
+    return async (req, res, next) => {
+        try {
+            const roles = req.user.roles;
 
-        const allowed =
-            perms &&
-            perms[mod] &&
-            perms[mod][act] === true;
+            const rows = await query(
+                `SELECT 1
+                 FROM role_permissions rp
+                 JOIN permissions p ON rp.permission_id = p.permission_id
+                 JOIN roles r ON rp.role_id = r.role_id
+                 WHERE r.role_name IN (${roles.map(() => "?").join(",")})
+                   AND p.module = ?
+                   AND p.action = ?
+                 LIMIT 1`,
+                [...roles, mod, act]
+            );
 
-        if (!allowed) {
-            return res.status(403).json({
-                error: "Forbidden: insufficient permission"
-            });
+            if (rows.length === 0) {
+                return res.status(403).json({ error: "Forbidden: insufficient permission" });
+            }
+
+            next();
+        } catch (err) {
+            next(err);
         }
-
-        next();
     };
 };

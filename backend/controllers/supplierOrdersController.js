@@ -2,16 +2,9 @@ const { query, run } = require("../utils/db");
 const handleError = require("../middleware/errorHandler");
 const { logAction } = require("../utils/audit");
 
-/**
- * Create a supplier order
- * Flow:
- * 1. Validate supplier_id and items[]
- * 2. Validate supplier exists
- * 3. Validate each book exists
- * 4. Insert supplier order
- * 5. Insert supplier order items
- * 6. Audit log
- */
+// =====================================================
+// CREATE SUPPLIER ORDER (Employee + Admin)
+// =====================================================
 exports.createSupplierOrder = async (req, res) => {
     try {
         const { supplier_id, items } = req.body;
@@ -39,13 +32,12 @@ exports.createSupplierOrder = async (req, res) => {
         for (const item of items) {
             const { book_id, quantity, unit_cost } = item;
 
-            if (!book_id || !quantity || !unit_cost) {
+            if (!book_id || !quantity || quantity <= 0 || !unit_cost) {
                 return res.status(400).json({
-                    error: "Each item requires book_id, quantity, unit_cost"
+                    error: "Each item requires book_id, quantity > 0, and unit_cost"
                 });
             }
 
-            // Validate book exists
             const bookRows = await query(
                 `SELECT book_id FROM books WHERE book_id = ?`,
                 [book_id]
@@ -58,16 +50,16 @@ exports.createSupplierOrder = async (req, res) => {
             }
         }
 
-        // Step 1: Create supplier order
+        // Create supplier order
         const orderResult = await run(
-            `INSERT INTO supplier_orders (supplier_id, created_by, status)
-             VALUES (?, ?, 'Created')`,
+            `INSERT INTO supplier_orders (supplier_id, created_by, status, created_at)
+             VALUES (?, ?, 'Created', datetime('now'))`,
             [supplier_id, createdBy]
         );
 
         const supplierOrderId = orderResult.lastID;
 
-        // Step 2: Insert items
+        // Insert items
         for (const item of items) {
             const { book_id, quantity, unit_cost } = item;
 
@@ -78,27 +70,29 @@ exports.createSupplierOrder = async (req, res) => {
             );
         }
 
-        // Step 3: Audit log
+        // Audit log
         await logAction(createdBy, "CREATE", "SUPPLIER_ORDER", supplierOrderId);
 
         res.json({
             message: "Supplier order created",
             supplier_order_id: supplierOrderId
         });
+
     } catch (err) {
         handleError(res, err);
     }
 };
 
-/**
- * Get all supplier orders with items
- */
+// =====================================================
+// GET ALL SUPPLIER ORDERS (Employee + Admin)
+// =====================================================
 exports.getSupplierOrders = async (req, res) => {
     try {
         const orders = await query(`
             SELECT so.supplier_order_id, so.supplier_id, so.created_by,
-                   so.status, so.created_at
+                   so.status, so.created_at, s.name AS supplier_name
             FROM supplier_orders AS so
+            JOIN suppliers AS s ON so.supplier_id = s.supplier_id
             ORDER BY so.created_at DESC
         `);
 
@@ -114,14 +108,105 @@ exports.getSupplierOrders = async (req, res) => {
         }
 
         res.json(orders);
+
     } catch (err) {
         handleError(res, err);
     }
 };
 
-/**
- * Test route
- */
+// =====================================================
+// GET SINGLE SUPPLIER ORDER (Employee + Admin)
+// =====================================================
+exports.getSupplierOrderById = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+
+        const rows = await query(
+            `SELECT so.supplier_order_id, so.supplier_id, so.created_by,
+                    so.status, so.created_at, s.name AS supplier_name
+             FROM supplier_orders AS so
+             JOIN suppliers AS s ON so.supplier_id = s.supplier_id
+             WHERE so.supplier_order_id = ?`,
+            [orderId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: "Supplier order not found" });
+        }
+
+        const order = rows[0];
+
+        const items = await query(
+            `SELECT supplier_order_item_id, book_id, quantity, unit_cost
+             FROM supplier_order_items
+             WHERE supplier_order_id = ?`,
+            [orderId]
+        );
+
+        order.items = items;
+
+        res.json(order);
+
+    } catch (err) {
+        handleError(res, err);
+    }
+};
+
+// =====================================================
+// RECEIVE SUPPLIER ORDER (Employee + Admin)
+// =====================================================
+exports.receiveSupplierOrder = async (req, res, next) => {
+    try {
+        const orderId = req.params.id;
+        const userId = req.user?.user_id;
+
+        const rows = await query(
+            `SELECT * FROM supplier_orders WHERE supplier_order_id = ?`,
+            [orderId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: "Supplier order not found" });
+        }
+
+        const order = rows[0];
+
+        if (order.status !== "Created") {
+            return res.status(400).json({ error: "Order already received or invalid state" });
+        }
+
+        const items = await query(
+            `SELECT book_id, quantity FROM supplier_order_items
+             WHERE supplier_order_id = ?`,
+            [orderId]
+        );
+
+        for (const item of items) {
+            await run(
+                `UPDATE inventory
+                 SET quantity_on_hand = quantity_on_hand + ?
+                 WHERE book_id = ?`,
+                [item.quantity, item.book_id]
+            );
+        }
+
+        await run(
+            `UPDATE supplier_orders
+             SET status = 'Received',
+                 received_at = datetime('now')
+             WHERE supplier_order_id = ?`,
+            [orderId]
+        );
+
+        await logAction(userId, "RECEIVE", "SUPPLIER_ORDER", orderId);
+
+        res.json({ message: "Supplier order received and inventory updated" });
+
+    } catch (err) {
+        next(err);
+    }
+};
+
 exports.test = (req, res) => {
-    res.json({ message: "supplier orders controller test" });
+    res.json({ message: "Supplier Orders Test OK" });
 };

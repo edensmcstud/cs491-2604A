@@ -15,9 +15,10 @@ router.use(auth);
 // Get ALL books (active + inactive)
 router.get(
     "/all",
-    requirePermission("books", "read"),
+    requirePermission("books", "update"), // FIXED: restrict to Employee + Admin
     controller.getAllBooks
 );
+
 
 // Create a book
 router.post(

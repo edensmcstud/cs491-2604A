@@ -1,4 +1,4 @@
-// controllers/booksController.js
+﻿// controllers/booksController.js
 
 const { query, run } = require("../utils/db");
 const { logAction } = require("../utils/audit");
@@ -21,6 +21,14 @@ exports.createBook = async (req, res, next) => {
         );
 
         const bookId = result.lastID;
+
+        // AUTO‑INITIALIZE INVENTORY
+        await run(
+            `INSERT INTO inventory 
+                (book_id, quantity_on_hand, quantity_reserved, reorder_level, reorder_quantity)
+             VALUES (?, 0, 0, 0, 0)`,
+            [bookId]
+        );
 
         await logAction(req.user.user_id, "CREATE", "BOOK", bookId);
 
@@ -68,6 +76,7 @@ exports.getBooks = async (req, res, next) => {
             sql = `
                 SELECT 
                     b.*,
+                    i.inventory_id,
                     i.quantity_on_hand,
                     i.quantity_reserved,
                     i.reorder_level,

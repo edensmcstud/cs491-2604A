@@ -2,7 +2,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/api";
 
-
 export default function EditInventoryItem() {
     const navigate = useNavigate();
     const { id } = useParams(); // inventory_id
@@ -31,7 +30,6 @@ export default function EditInventoryItem() {
                     reorder_quantity: inv.reorder_quantity
                 });
 
-                // Load book title
                 const book = await api.get(`/books/${inv.book_id}`);
                 setBookTitle(book.title);
 
@@ -47,7 +45,7 @@ export default function EditInventoryItem() {
     }, [id]);
 
     function updateField(e) {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        setForm({ ...form, [e.target.name]: Number(e.target.value) });
     }
 
     async function handleSubmit(e) {
@@ -55,10 +53,10 @@ export default function EditInventoryItem() {
         setError("");
 
         const payload = {
-            quantity_on_hand: Number(form.quantity_on_hand),
-            quantity_reserved: Number(form.quantity_reserved),
-            reorder_level: Number(form.reorder_level),
-            reorder_quantity: Number(form.reorder_quantity)
+            quantity_on_hand: form.quantity_on_hand,
+            quantity_reserved: form.quantity_reserved,
+            reorder_level: form.reorder_level,
+            reorder_quantity: form.reorder_quantity
         };
 
         setSaving(true);

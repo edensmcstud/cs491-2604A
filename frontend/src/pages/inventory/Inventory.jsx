@@ -2,18 +2,15 @@
 import { Link } from "react-router-dom";
 import api from "../../api/api";
 
-
 export default function Inventory() {
+    const { user } = useAuth();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        console.log("Inventory mounted");
-
         api.get("/inventory")
             .then((res) => {
-                console.log("Inventory response:", res);
                 setItems(res);
                 setLoading(false);
             })
@@ -28,10 +25,8 @@ export default function Inventory() {
         <div className="page">
             <h1>Inventory</h1>
 
-            {/* Add Book */}
-            <Link to="/inventory/add">
-                <button>Add Book</button>
-            </Link>
+            {/* REMOVE: Add Inventory Item button */}
+            {/* Inventory is auto-created when books are created */}
 
             {loading && <p>Loading...</p>}
             {error && <p style={{ color: "red" }}>{error}</p>}
@@ -61,15 +56,20 @@ export default function Inventory() {
                                 </td>
 
                                 <td>
-                                    {/* Edit Book */}
-                                    <Link to={`/inventory/edit/${item.inventory_id}`}>
-                                        <button>Edit</button>
-                                    </Link>
+                                    {/* ADMIN ONLY: Edit */}
+                                    {user.roles.includes("Admin") && (
+                                        <Link to={`/inventory/edit/${item.inventory_id}`}>
+                                            <button>Edit</button>
+                                        </Link>
+                                    )}
 
-                                    {/* Update Quantity */}
-                                    <Link to={`/inventory/update/${item.inventory_id}`}>
-                                        <button>Update Qty</button>
-                                    </Link>
+                                    {/* ADMIN + EMPLOYEE: Update Qty */}
+                                    {(user.roles.includes("Admin") ||
+                                        user.roles.includes("Employee")) && (
+                                            <Link to={`/inventory/update/${item.inventory_id}`}>
+                                                <button>Update Qty</button>
+                                            </Link>
+                                        )}
                                 </td>
                             </tr>
                         ))}
