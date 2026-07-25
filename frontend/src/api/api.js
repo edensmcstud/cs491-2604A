@@ -123,6 +123,17 @@ const api = {
         const res = await client.delete(path);
         return res.data;
     },
+
+    async patch(path, body) {
+        console.group("API WRAPPER CALL: PATCH");
+        console.log("→ Path:", path);
+        console.log("→ Body:", body);
+        console.groupEnd();
+
+        const res = await client.patch(path, body);
+        return res.data;
+    },
+
 };
 
 export default api;

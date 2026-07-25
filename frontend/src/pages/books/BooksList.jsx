@@ -1,20 +1,24 @@
 ﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
-
+import { useAuth } from "../../context/AuthContext";
 
 export default function BooksList() {
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    // Permission checks
+    const canCreate = user?.modules?.books?.create === true;
+    const canUpdate = user?.modules?.books?.update === true;
+    const canAddInventory = user?.modules?.inventory?.adjust === true;
+
     useEffect(() => {
         api.get("/books")
             .then((res) => {
-                //console.log("Books API response:", res.data);
-
                 setBooks(res);
                 setLoading(false);
             })
@@ -40,12 +44,15 @@ export default function BooksList() {
 
             {error && <p style={{ color: "red" }}>{error}</p>}
 
-            <button
-                onClick={() => navigate("/books/add")}
-                style={{ marginBottom: "20px" }}
-            >
-                Add New Book
-            </button>
+            {/* Only show Add New Book if user has create permission */}
+            {canCreate && (
+                <button
+                    onClick={() => navigate("/books/add")}
+                    style={{ marginBottom: "20px" }}
+                >
+                    Add New Book
+                </button>
+            )}
 
             <table className="table">
                 <thead>
@@ -55,7 +62,6 @@ export default function BooksList() {
                         <th>Author</th>
                         <th>ISBN</th>
                         <th>Price</th>
-                        <th>Description</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -68,27 +74,32 @@ export default function BooksList() {
                             <td>{b.author}</td>
                             <td>{b.isbn}</td>
                             <td>${b.price}</td>
-                            <td>{b.description}</td>
 
                             <td>
-                                <button
-                                    onClick={() =>
-                                        navigate(`/books/edit/${b.book_id}`)
-                                    }
-                                >
-                                    Edit
-                                </button>
+                                {/* Edit only if user has update permission */}
+                                {canUpdate && (
+                                    <button
+                                        onClick={() =>
+                                            navigate(`/books/edit/${b.book_id}`)
+                                        }
+                                    >
+                                        Edit
+                                    </button>
+                                )}
 
-                                <button
-                                    onClick={() =>
-                                        navigate(
-                                            `/inventory/add?book_id=${b.book_id}`
-                                        )
-                                    }
-                                    style={{ marginLeft: "10px" }}
-                                >
-                                    Add Inventory
-                                </button>
+                                {/* Add Inventory only if user has inventory.adjust */}
+                                {canAddInventory && (
+                                    <button
+                                        onClick={() =>
+                                            navigate(
+                                                `/inventory/add?book_id=${b.book_id}`
+                                            )
+                                        }
+                                        style={{ marginLeft: "10px" }}
+                                    >
+                                        Add Inventory
+                                    </button>
+                                )}
                             </td>
                         </tr>
                     ))}
