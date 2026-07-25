@@ -1,44 +1,50 @@
 ﻿import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import api from "../api/api";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../../api/api";
 
-export default function AddInventoryItem() {
+
+export default function EditInventoryItem() {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
+    const { id } = useParams(); // inventory_id
 
-    const preselectedBookId = searchParams.get("book_id");
-
-    const [books, setBooks] = useState([]);
     const [form, setForm] = useState({
-        book_id: preselectedBookId || "",
         quantity_on_hand: 0,
         quantity_reserved: 0,
         reorder_level: 0,
         reorder_quantity: 0
     });
 
+    const [bookTitle, setBookTitle] = useState("");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        // If book_id was passed in the URL, no need to load all books
-        if (preselectedBookId) {
-            setLoading(false);
-            return;
+        async function loadData() {
+            try {
+                const inv = await api.get(`/inventory/${id}`);
+
+                setForm({
+                    quantity_on_hand: inv.quantity_on_hand,
+                    quantity_reserved: inv.quantity_reserved,
+                    reorder_level: inv.reorder_level,
+                    reorder_quantity: inv.reorder_quantity
+                });
+
+                // Load book title
+                const book = await api.get(`/books/${inv.book_id}`);
+                setBookTitle(book.title);
+
+                setLoading(false);
+            } catch (err) {
+                console.log("EditInventoryItem load error:", err);
+                setError("Failed to load inventory item.");
+                setLoading(false);
+            }
         }
 
-        api.get("/books")
-            .then((res) => {
-                setBooks(res);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.log("Failed to load books:", err);
-                setError("Failed to load book list.");
-                setLoading(false);
-            });
-    }, [preselectedBookId]);
+        loadData();
+    }, [id]);
 
     function updateField(e) {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -48,13 +54,7 @@ export default function AddInventoryItem() {
         e.preventDefault();
         setError("");
 
-        if (!form.book_id) {
-            setError("You must select a book.");
-            return;
-        }
-
         const payload = {
-            book_id: Number(form.book_id),
             quantity_on_hand: Number(form.quantity_on_hand),
             quantity_reserved: Number(form.quantity_reserved),
             reorder_level: Number(form.reorder_level),
@@ -64,15 +64,15 @@ export default function AddInventoryItem() {
         setSaving(true);
 
         try {
-            const res = await api.post("/inventory", payload);
+            const res = await api.put(`/inventory/${id}`, payload);
 
             if (!res || res.error) {
-                throw new Error(res?.error || "Failed to create inventory item.");
+                throw new Error(res?.error || "Failed to update inventory item.");
             }
 
             navigate("/inventory");
         } catch (err) {
-            setError(err.message || "Failed to create inventory item.");
+            setError(err.message || "Failed to update inventory item.");
         } finally {
             setSaving(false);
         }
@@ -81,7 +81,7 @@ export default function AddInventoryItem() {
     if (loading) {
         return (
             <div className="page">
-                <h1>Add Inventory Item</h1>
+                <h1>Edit Inventory Item</h1>
                 <p>Loading...</p>
             </div>
         );
@@ -89,30 +89,13 @@ export default function AddInventoryItem() {
 
     return (
         <div className="page">
-            <h1>Add Inventory Item</h1>
+            <h1>Edit Inventory Item</h1>
+
+            <p><strong>Book:</strong> {bookTitle}</p>
 
             {error && <p style={{ color: "red" }}>{error}</p>}
 
             <form onSubmit={handleSubmit}>
-                <label>Book</label>
-
-                {preselectedBookId ? (
-                    <p><strong>Book ID: {preselectedBookId}</strong></p>
-                ) : (
-                    <select
-                        name="book_id"
-                        value={form.book_id}
-                        onChange={updateField}
-                    >
-                        <option value="">-- Select a Book --</option>
-                        {books.map((b) => (
-                            <option key={b.book_id} value={b.book_id}>
-                                {b.title} (ID: {b.book_id})
-                            </option>
-                        ))}
-                    </select>
-                )}
-
                 <label>Quantity On Hand</label>
                 <input
                     type="number"
@@ -146,7 +129,7 @@ export default function AddInventoryItem() {
                 />
 
                 <button type="submit" disabled={saving}>
-                    {saving ? "Saving..." : "Add Inventory Item"}
+                    {saving ? "Saving..." : "Save Changes"}
                 </button>
             </form>
         </div>

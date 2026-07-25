@@ -4,9 +4,12 @@ import { Link } from "react-router-dom";
 export default function Dashboard() {
     const { user, logout } = useAuth();
 
-    // Permission checker based on your backend's "modules" structure
-    const can = (module, action = "read") =>
-        user?.modules?.[module]?.[action] === true;
+    const canAny = (module) => {
+        const perms = user?.modules?.[module];
+        return perms && Object.values(perms).some(v => v === true);
+    };
+
+    const isAdmin = user?.roles?.includes("Admin");
 
     return (
         <div className="page">
@@ -20,32 +23,33 @@ export default function Dashboard() {
             <h2>Available Sections</h2>
 
             <ul>
-                {can("books") && (
+                {canAny("books") && (
                     <li><Link to="/books">Books</Link></li>
                 )}
 
-                {can("inventory") && (
+                {canAny("inventory") && (
                     <li><Link to="/inventory">Inventory</Link></li>
                 )}
 
-                {can("sales") && (
+                {canAny("sales") && (
                     <li><Link to="/sales">Sales</Link></li>
                 )}
 
-                {can("customer_orders") && (
-                    <li><Link to="/customer-orders">Customer Orders</Link></li>
+                {canAny("customer_orders") && (
+                    <li><Link to="/orders/customers">Customer Orders</Link></li>
                 )}
 
-                {can("supplier_orders") && (
-                    <li><Link to="/supplier-orders">Supplier Orders</Link></li>
+                {canAny("supplier_orders") && (
+                    <li><Link to="/orders/suppliers">Supplier Orders</Link></li>
                 )}
 
-                {can("audit_logs") && (
-                    <li><Link to="/audit-log">Audit Log</Link></li>
+
+                {canAny("reports") && (
+                    <li><Link to="/reports">Reports</Link></li>
                 )}
 
-                {can("roles") && (
-                    <li><Link to="/role-management">Role Management</Link></li>
+                {isAdmin && (
+                    <li><Link to="/admin">Administration</Link></li>
                 )}
             </ul>
         </div>

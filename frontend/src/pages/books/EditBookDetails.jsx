@@ -1,10 +1,11 @@
 ﻿import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../api/api";
+import api from "../../api/api";
 
-export default function EditBook() {
+
+export default function EditBookDetails() {
     const navigate = useNavigate();
-    const { id } = useParams(); // inventory_id from route
+    const { id } = useParams(); // book_id
 
     const [form, setForm] = useState({
         title: "",
@@ -18,9 +19,9 @@ export default function EditBook() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
 
-    // Load book details on mount
+    // Load book details
     useEffect(() => {
-        api.get(`/inventory/${id}`)
+        api.get(`/books/${id}`)
             .then((res) => {
                 setForm({
                     title: res.title,
@@ -32,7 +33,7 @@ export default function EditBook() {
                 setLoading(false);
             })
             .catch((err) => {
-                console.log("EditBook load error:", err);
+                console.log("EditBookDetails load error:", err);
                 setError("Failed to load book details.");
                 setLoading(false);
             });
@@ -46,7 +47,6 @@ export default function EditBook() {
         e.preventDefault();
         setError("");
 
-        // Basic validation
         if (!form.title || !form.author || !form.isbn || !form.price) {
             setError("All required fields must be filled.");
             return;
@@ -57,16 +57,24 @@ export default function EditBook() {
             return;
         }
 
+        const payload = {
+            title: form.title,
+            author: form.author,
+            isbn: form.isbn,
+            price: Number(form.price),
+            description: form.description
+        };
+
         setSaving(true);
 
         try {
-            const res = await api.put(`/inventory/${id}`, form);
+            const res = await api.put(`/books/${id}`, payload);
 
             if (!res || res.error) {
                 throw new Error(res?.error || "Failed to update book.");
             }
 
-            navigate("/inventory");
+            navigate("/books"); // Change if you want a different redirect
         } catch (err) {
             setError(err.message || "Failed to update book.");
         } finally {
@@ -90,37 +98,38 @@ export default function EditBook() {
             {error && <p style={{ color: "red" }}>{error}</p>}
 
             <form onSubmit={handleSubmit}>
+                <label>Title</label>
                 <input
                     name="title"
-                    placeholder="Title"
                     value={form.title}
                     onChange={updateField}
                 />
 
+                <label>Author</label>
                 <input
                     name="author"
-                    placeholder="Author"
                     value={form.author}
                     onChange={updateField}
                 />
 
+                <label>ISBN</label>
                 <input
                     name="isbn"
-                    placeholder="ISBN"
                     value={form.isbn}
                     onChange={updateField}
                 />
 
+                <label>Price</label>
                 <input
+                    type="number"
                     name="price"
-                    placeholder="Price"
                     value={form.price}
                     onChange={updateField}
                 />
 
+                <label>Description</label>
                 <textarea
                     name="description"
-                    placeholder="Description"
                     value={form.description}
                     onChange={updateField}
                 />

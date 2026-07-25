@@ -9,7 +9,8 @@ export default function Modal({ title, children, onClose }) {
         </div>
     );
 }
-export default function Button({ children, onClick, type = "button" }) {
+export function Button({ children, onClick, type = "button" }) {
+
     return (
         <button type={type} onClick={onClick} className="btn">
             {children}
