@@ -3,13 +3,23 @@ const router = express.Router();
 
 const controller = require("../controllers/rolesController");
 const auth = require("../middleware/auth");
-const requireRole = require("../middleware/requireRole");
+const requirePermission = require("../middleware/requirePermission");
 
-// Assign role (admin)
-router.post("/assign", auth, requireRole("Admin"), controller.assignRole);
+// Assign role (Admin + Employee)
+router.post(
+    "/assign",
+    auth,
+    requirePermission("roles", "assign"),
+    controller.assignRole
+);
 
-// Get roles (admin)
-router.get("/", auth, requireRole("Admin"), controller.getRoles);
+// Get roles (Admin + Employee)
+router.get(
+    "/",
+    auth,
+    requirePermission("roles", "read"),
+    controller.getRoles
+);
 
 // Test route (no auth)
 router.get("/test", controller.test);

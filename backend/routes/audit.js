@@ -3,16 +3,19 @@ const router = express.Router();
 
 const controller = require("../controllers/auditController");
 const auth = require("../middleware/auth");
-const requireRole = require("../middleware/requireRole");
+const requirePermission = require("../middleware/requirePermission");
 
 // Test route (no auth)
 router.get("/test", controller.test);
 
-// All audit routes require Admin
+// All audit routes require authentication
 router.use(auth);
-router.use(requireRole("Admin"));
 
-// Get audit logs
-router.get("/", controller.getAuditLogs);
+// Get audit logs (Admin + Employee)
+router.get(
+    "/",
+    requirePermission("audit", "read"),
+    controller.getAuditLogs
+);
 
 module.exports = router;

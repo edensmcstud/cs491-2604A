@@ -3,10 +3,24 @@
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Pages
+// Auth
 import Login from "./pages/Login";
+
+// Dashboard
 import Dashboard from "./pages/Dashboard";
-import Inventory from "./pages/Inventory";
+
+// BOOKS (metadata)
+import BooksList from "./pages/BooksList";
+import AddBookDetails from "./pages/AddBookDetails";
+import EditBookDetails from "./pages/EditBookDetails";
+
+// INVENTORY (stock)
+import InventoryList from "./pages/InventoryList";
+import AddInventoryItem from "./pages/AddInventoryItem";
+import EditInventoryItem from "./pages/EditInventoryItem";
+import UpdateQuantity from "./pages/UpdateQuantity";
+
+// Other modules
 import Sales from "./pages/Sales";
 import CustomerOrders from "./pages/CustomerOrders";
 import SupplierOrders from "./pages/SupplierOrders";
@@ -32,18 +46,86 @@ function App() {
                 }
             />
 
-            {/* Protected pages */}
+            {/* BOOKS */}
             <Route
-                path="/inventory"
+                path="/books"
                 element={
                     <ProtectedRoute>
                         <Layout>
-                            <Inventory />
+                            <BooksList />
                         </Layout>
                     </ProtectedRoute>
                 }
             />
 
+            <Route
+                path="/books/add"
+                element={
+                    <ProtectedRoute>
+                        <Layout>
+                            <AddBookDetails />
+                        </Layout>
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/books/edit/:id"
+                element={
+                    <ProtectedRoute>
+                        <Layout>
+                            <EditBookDetails />
+                        </Layout>
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* INVENTORY */}
+            <Route
+                path="/inventory"
+                element={
+                    <ProtectedRoute>
+                        <Layout>
+                            <InventoryList />
+                        </Layout>
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/inventory/add"
+                element={
+                    <ProtectedRoute>
+                        <Layout>
+                            <AddInventoryItem />
+                        </Layout>
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/inventory/edit/:id"
+                element={
+                    <ProtectedRoute>
+                        <Layout>
+                            <EditInventoryItem />
+                        </Layout>
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/inventory/update/:id"
+                element={
+                    <ProtectedRoute>
+                        <Layout>
+                            <UpdateQuantity />
+                        </Layout>
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* OTHER MODULES */}
             <Route
                 path="/sales"
                 element={

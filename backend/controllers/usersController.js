@@ -56,7 +56,6 @@ exports.createUser = async (req, res) => {
     }
 };
 
-
 /**
  * Get all users (sanitized)
  */
@@ -73,7 +72,6 @@ exports.getUsers = async (req, res) => {
     }
 };
 
-
 /**
  * Get a single user (sanitized)
  */
@@ -86,12 +84,15 @@ exports.getUser = async (req, res) => {
             [req.params.id]
         );
 
-        res.json(rows[0] || null);
+        if (rows.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json(rows[0]);
     } catch (err) {
         handleError(res, err);
     }
 };
-
 
 /**
  * Update user (username/email)
@@ -100,6 +101,16 @@ exports.getUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
     try {
         const { username, email } = req.body;
+
+        // Check existence
+        const exists = await query(
+            `SELECT user_id FROM users WHERE user_id = ?`,
+            [req.params.id]
+        );
+
+        if (exists.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
 
         await run(
             `UPDATE users
@@ -117,7 +128,6 @@ exports.updateUser = async (req, res) => {
     }
 };
 
-
 /**
  * Update password
  */
@@ -127,6 +137,16 @@ exports.updatePassword = async (req, res) => {
 
         if (!password) {
             return res.status(400).json({ error: "password required" });
+        }
+
+        // Check existence
+        const exists = await query(
+            `SELECT user_id FROM users WHERE user_id = ?`,
+            [req.params.id]
+        );
+
+        if (exists.length === 0) {
+            return res.status(404).json({ error: "User not found" });
         }
 
         const hashed = await bcrypt.hash(password, 10);
@@ -147,12 +167,21 @@ exports.updatePassword = async (req, res) => {
     }
 };
 
-
 /**
  * Soft delete (deactivate user)
  */
 exports.deleteUser = async (req, res) => {
     try {
+        // Check existence
+        const exists = await query(
+            `SELECT user_id FROM users WHERE user_id = ?`,
+            [req.params.id]
+        );
+
+        if (exists.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
         await run(
             `UPDATE users
              SET is_active = 0
@@ -168,7 +197,6 @@ exports.deleteUser = async (req, res) => {
         handleError(res, err);
     }
 };
-
 
 exports.test = (req, res) => {
     res.json({ message: "users controller test" });

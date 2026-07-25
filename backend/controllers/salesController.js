@@ -6,11 +6,12 @@ const { logAction } = require("../utils/audit");
  * Create a sale
  * Flow:
  * 1. Validate items[]
- * 2. Calculate subtotal, tax, total
- * 3. Insert into sales
- * 4. Insert sale_items
- * 5. Update inventory
- * 6. Audit log
+ * 2. Validate inventory availability
+ * 3. Calculate subtotal, tax, total
+ * 4. Insert into sales
+ * 5. Insert sale_items
+ * 6. Update inventory (reduce quantity_on_hand)
+ * 7. Audit log
  */
 exports.createSale = async (req, res) => {
     try {
@@ -25,7 +26,7 @@ exports.createSale = async (req, res) => {
             return res.status(403).json({ error: "Authentication required" });
         }
 
-        // Step 1: Calculate totals
+        // Step 1: Validate stock + calculate totals
         let subtotal = 0;
 
         for (const item of items) {
@@ -35,20 +36,42 @@ exports.createSale = async (req, res) => {
                 return res.status(400).json({ error: "Each item requires book_id and quantity" });
             }
 
+            // Fetch price
             const bookRows = await query(
-                `SELECT price FROM books WHERE book_id = ?`,
+                `SELECT price FROM books WHERE book_id = ? AND active = 1`,
                 [book_id]
             );
 
             if (bookRows.length === 0) {
-                return res.status(404).json({ error: `Book ${book_id} not found` });
+                return res.status(404).json({ error: `Book ${book_id} not found or inactive` });
+            }
+
+            // Fetch inventory
+            const invRows = await query(
+                `SELECT quantity_on_hand, quantity_reserved
+                 FROM inventory
+                 WHERE book_id = ?`,
+                [book_id]
+            );
+
+            if (invRows.length === 0) {
+                return res.status(404).json({ error: `Inventory missing for book ${book_id}` });
+            }
+
+            const { quantity_on_hand, quantity_reserved } = invRows[0];
+            const available = quantity_on_hand - quantity_reserved;
+
+            if (quantity > available) {
+                return res.status(400).json({
+                    error: `Not enough stock for book ${book_id}. Requested ${quantity}, available ${available}`
+                });
             }
 
             const unitPrice = bookRows[0].price;
             subtotal += unitPrice * quantity;
         }
 
-        const taxRate = 0.07; // 7% example
+        const taxRate = 0.07; // example
         const tax = subtotal * taxRate;
         const total = subtotal + tax;
 
@@ -80,7 +103,7 @@ exports.createSale = async (req, res) => {
                 [saleId, book_id, quantity, unitPrice, lineTotal]
             );
 
-            // Update inventory
+            // Reduce inventory
             await run(
                 `UPDATE inventory
                  SET quantity_on_hand = quantity_on_hand - ?

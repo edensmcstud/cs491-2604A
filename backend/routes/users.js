@@ -3,37 +3,50 @@ const router = express.Router();
 
 const controller = require("../controllers/usersController");
 const auth = require("../middleware/auth");
-const requireRole = require("../middleware/requireRole");
+const requirePermission = require("../middleware/requirePermission");
 const requireFields = require("../middleware/requireFields");
 
 // TEST ROUTE (no auth)
 router.get("/test", controller.test);
 
-// All real user routes require Admin
+// All real user routes require authentication
 router.use(auth);
-router.use(requireRole("Admin"));
 
-// CREATE USER
+// CREATE USER (Admin + Employee)
 router.post(
     "/",
+    requirePermission("users", "create"),
     requireFields(["username", "password", "email"]),
     controller.createUser
 );
 
-// GET ALL USERS
-router.get("/", controller.getUsers);
+// GET ALL USERS (Admin + Employee)
+router.get(
+    "/",
+    requirePermission("users", "read"),
+    controller.getUsers
+);
 
-// GET SINGLE USER
-router.get("/:id", controller.getUser);
+// GET SINGLE USER (Admin + Employee)
+router.get(
+    "/:id",
+    requirePermission("users", "read"),
+    controller.getUser
+);
 
-// UPDATE USER
+// UPDATE USER (Admin + Employee)
 router.put(
     "/:id",
+    requirePermission("users", "update"),
     requireFields(["username", "email"]),
     controller.updateUser
 );
 
-// DELETE USER
-router.delete("/:id", controller.deleteUser);
+// DELETE USER (Admin + Employee)
+router.delete(
+    "/:id",
+    requirePermission("users", "delete"),
+    controller.deleteUser
+);
 
 module.exports = router;

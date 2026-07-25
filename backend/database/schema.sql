@@ -1,10 +1,6 @@
 PRAGMA foreign_keys = ON;
 
--- =====================================================
--- USERS (All authenticated users)
--- Admins, Employees, Customers
--- =====================================================
-
+-- USERS
 CREATE TABLE users (
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
@@ -14,66 +10,32 @@ CREATE TABLE users (
     created_at TEXT DEFAULT (datetime('now'))
 );
 
-
--- =====================================================
--- ROLES (RBAC)
--- Examples:
--- Admin
--- Employee
--- Customer
--- =====================================================
-
+-- ROLES
 CREATE TABLE roles (
     role_id INTEGER PRIMARY KEY AUTOINCREMENT,
     role_name TEXT NOT NULL UNIQUE
 );
 
-
--- =====================================================
 -- USER ROLES
--- Allows users to have one or more roles
--- =====================================================
-
 CREATE TABLE user_roles (
     user_id INTEGER NOT NULL,
     role_id INTEGER NOT NULL,
-
     PRIMARY KEY (user_id, role_id),
-
-    FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (role_id)
-        REFERENCES roles(role_id)
-        ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE
 );
 
-
--- =====================================================
--- USER SESSIONS
--- Used by all authenticated users
--- =====================================================
-
+-- SESSIONS
 CREATE TABLE sessions (
     session_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     token TEXT NOT NULL UNIQUE,
     expires_at INTEGER NOT NULL,
     created_at TEXT DEFAULT (datetime('now')),
-
-    FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
-        ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-
--- =====================================================
 -- CUSTOMERS
--- Customer-specific information
--- Authentication remains in USERS
--- =====================================================
-
 CREATE TABLE customers (
     customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL UNIQUE,
@@ -81,18 +43,10 @@ CREATE TABLE customers (
     last_name TEXT NOT NULL,
     phone TEXT,
     address TEXT,
-
-    FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
-        ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-
--- =====================================================
 -- BOOKS
--- Book catalog information
--- =====================================================
-
 CREATE TABLE books (
     book_id INTEGER PRIMARY KEY AUTOINCREMENT,
     isbn TEXT UNIQUE,
@@ -105,12 +59,7 @@ CREATE TABLE books (
     created_at TEXT DEFAULT (datetime('now'))
 );
 
-
--- =====================================================
 -- INVENTORY
--- Tracks stock levels
--- =====================================================
-
 CREATE TABLE inventory (
     inventory_id INTEGER PRIMARY KEY AUTOINCREMENT,
     book_id INTEGER NOT NULL UNIQUE,
@@ -119,35 +68,23 @@ CREATE TABLE inventory (
     reorder_level INTEGER DEFAULT 0,
     reorder_quantity INTEGER DEFAULT 0,
     last_updated TEXT DEFAULT (datetime('now')),
-
-    FOREIGN KEY (book_id)
-        REFERENCES books(book_id)
-        ON DELETE CASCADE
+    FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
 );
 
-
--- =====================================================
 -- CUSTOMER ORDERS
--- =====================================================
-
 CREATE TABLE customer_orders (
     order_id INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id INTEGER NOT NULL,
     order_date TEXT DEFAULT (datetime('now')),
-    status TEXT NOT NULL DEFAULT 'Pending',
+    status TEXT NOT NULL DEFAULT 'Pending'
+        CHECK (status IN ('Pending','Paid','Shipped','Cancelled')),
     subtotal REAL NOT NULL,
     tax REAL NOT NULL,
     total REAL NOT NULL,
-
-    FOREIGN KEY (customer_id)
-        REFERENCES customers(customer_id)
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE
 );
 
-
--- =====================================================
 -- CUSTOMER ORDER ITEMS
--- =====================================================
-
 CREATE TABLE customer_order_items (
     order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
     order_id INTEGER NOT NULL,
@@ -155,21 +92,11 @@ CREATE TABLE customer_order_items (
     quantity INTEGER NOT NULL,
     unit_price REAL NOT NULL,
     line_total REAL NOT NULL,
-
-    FOREIGN KEY (order_id)
-        REFERENCES customer_orders(order_id)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (book_id)
-        REFERENCES books(book_id)
+    FOREIGN KEY (order_id) REFERENCES customer_orders(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
 );
 
-
--- =====================================================
 -- SALES
--- Employee completed sales
--- =====================================================
-
 CREATE TABLE sales (
     sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
     employee_id INTEGER NOT NULL,
@@ -177,17 +104,10 @@ CREATE TABLE sales (
     subtotal REAL NOT NULL,
     tax REAL NOT NULL,
     total REAL NOT NULL,
-
-    FOREIGN KEY (employee_id)
-        REFERENCES users(user_id)
+    FOREIGN KEY (employee_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-
--- =====================================================
--- SALES ITEMS
--- Individual books sold
--- =====================================================
-
+-- SALE ITEMS
 CREATE TABLE sale_items (
     sale_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
     sale_id INTEGER NOT NULL,
@@ -195,21 +115,11 @@ CREATE TABLE sale_items (
     quantity INTEGER NOT NULL,
     unit_price REAL NOT NULL,
     line_total REAL NOT NULL,
-
-    FOREIGN KEY (sale_id)
-        REFERENCES sales(sale_id)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (book_id)
-        REFERENCES books(book_id)
+    FOREIGN KEY (sale_id) REFERENCES sales(sale_id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
 );
 
-
--- =====================================================
 -- SUPPLIERS
--- Manufacturers / Vendors
--- =====================================================
-
 CREATE TABLE suppliers (
     supplier_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -217,51 +127,30 @@ CREATE TABLE suppliers (
     phone TEXT
 );
 
-
--- =====================================================
--- SUPPLIER PURCHASE ORDERS
--- =====================================================
-
+-- SUPPLIER ORDERS
 CREATE TABLE supplier_orders (
     supplier_order_id INTEGER PRIMARY KEY AUTOINCREMENT,
     supplier_id INTEGER NOT NULL,
     created_by INTEGER NOT NULL,
-    status TEXT NOT NULL DEFAULT 'Created',
+    status TEXT NOT NULL DEFAULT 'Created'
+        CHECK (status IN ('Created','Approved','Received')),
     created_at TEXT DEFAULT (datetime('now')),
-
-    FOREIGN KEY (supplier_id)
-        REFERENCES suppliers(supplier_id),
-
-    FOREIGN KEY (created_by)
-        REFERENCES users(user_id)
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-
--- =====================================================
 -- SUPPLIER ORDER ITEMS
--- =====================================================
-
 CREATE TABLE supplier_order_items (
     supplier_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
     supplier_order_id INTEGER NOT NULL,
     book_id INTEGER NOT NULL,
     quantity INTEGER NOT NULL,
     unit_cost REAL NOT NULL,
-
-    FOREIGN KEY (supplier_order_id)
-        REFERENCES supplier_orders(supplier_order_id)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (book_id)
-        REFERENCES books(book_id)
+    FOREIGN KEY (supplier_order_id) REFERENCES supplier_orders(supplier_order_id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
 );
 
-
--- =====================================================
 -- AUDIT LOGS
--- Administrative tracking
--- =====================================================
-
 CREATE TABLE audit_logs (
     audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
@@ -269,7 +158,22 @@ CREATE TABLE audit_logs (
     entity_type TEXT NOT NULL,
     entity_id INTEGER,
     created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
 
-    FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
+-- PERMISSIONS
+CREATE TABLE permissions (
+    permission_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    module TEXT NOT NULL,
+    action TEXT NOT NULL,
+    UNIQUE (module, action)
+);
+
+-- ROLE PERMISSIONS
+CREATE TABLE role_permissions (
+    role_id INTEGER NOT NULL,
+    permission_id INTEGER NOT NULL,
+    PRIMARY KEY (role_id, permission_id),
+    FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE,
+    FOREIGN KEY (permission_id) REFERENCES permissions(permission_id) ON DELETE CASCADE
 );

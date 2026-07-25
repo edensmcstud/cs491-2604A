@@ -1,7 +1,7 @@
 class Role {
     constructor(row) {
-        this.id = row.id;
-        this.name = row.name;
+        this.role_id = row.role_id;
+        this.role_name = row.role_name;
     }
 }
 
