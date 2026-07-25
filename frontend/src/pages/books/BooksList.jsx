@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/api";
+import api from "../../api/api";
+
 
 export default function BooksList() {
     const navigate = useNavigate();
@@ -12,6 +13,8 @@ export default function BooksList() {
     useEffect(() => {
         api.get("/books")
             .then((res) => {
+                //console.log("Books API response:", res.data);
+
                 setBooks(res);
                 setLoading(false);
             })

@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../api/api";
+import api from "../../api/api";
 
 export default function UpdateQuantity() {
     const navigate = useNavigate();
@@ -40,14 +40,13 @@ export default function UpdateQuantity() {
             return;
         }
 
-        // Compute delta for backend
         const amount = parsedNewQty - currentQty;
 
         setSaving(true);
 
         try {
             const res = await api.patch(`/inventory/${id}/adjust`, {
-                amount: Number(amount) // <-- ENSURE NUMBER
+                amount: Number(amount)
             });
 
             if (!res || res.error) {
