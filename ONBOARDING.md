@@ -1,21 +1,21 @@
  Bookstore Management System — Team Onboarding Guide
 
- 1. Install Required Software
+1. Install Required Software
 These are the only tools you need.
 
-1. Node.js (LTS version)
+ 1. Node.js (LTS version)
 This runs the backend and the React dev server.
 
 Download from: https://nodejs.org  
 Choose LTS (Long Term Support).
 
-2. Git + GitHub Desktop
+ 2. Git + GitHub Desktop
 GitHub Desktop prevents beginners from breaking Git.
 
 Download GitHub Desktop: https://desktop.github.com  
 Git installs automatically with it.
 
-3. Visual Studio Code (VS Code)
+ 3. Visual Studio Code (VS Code)
 The easiest editor for beginners.
 
 Download: https://code.visualstudio.com
@@ -28,11 +28,11 @@ SQLite Viewer
 
 Prettier
 
-4. (Optional) DB Browser for SQLite
+ 4. (Optional) DB Browser for SQLite
 Only needed if someone wants to look at the database.
 Download: https://sqlitebrowser.org
 
- 2. Clone the Project Repository
+2. Clone the Project Repository
 You will use GitHub Desktop for this.
 
 Steps:
@@ -48,7 +48,7 @@ Click Clone
 
 That’s it.
 
- 3. Open the Project in VS Code
+3. Open the Project in VS Code
 Steps:
 Open VS Code
 
@@ -60,7 +60,7 @@ Click Open
 
 VS Code will load the entire project.
 
- 4. Install Dependencies
+4. Install Dependencies
 Your project will have two folders:
 
 /backend
@@ -68,17 +68,20 @@ Your project will have two folders:
 Each has its own dependencies.
 
 Backend:
+
 Open a terminal in VS Code:
 
 cd backend
 npm install
+
 Frontend:
 
 cd frontend
 npm install
+
 This installs everything you need.
 
- 5. Run the Project
+5. Run the Project
 Backend (Node/Express):
 
 cd backend
@@ -89,7 +92,7 @@ cd frontend
 npm start
 React will open automatically in the browser.
 
- 6. Project Structure Overview
+6. Project Structure Overview
 This helps beginners understand where things live.
 
 
@@ -119,7 +122,7 @@ frontend/src/components/
 
 They will not touch backend architecture.
 
- 7. How You Will Work
+7. How You Will Work
 This section sets expectations clearly.
 
 They will:
@@ -165,24 +168,23 @@ Write middleware
 Write database schema
 
 
- 8. Git Workflow (Beginner‑Friendly)
+8. Git Workflow (Beginner‑Friendly)
 
-1. Switch to the dev branch
-2. Create a feature branch
+ 1. Switch to the dev branch
+ 2. Create a feature branch
 Name it like:
 
 feature/inventory-ui
 feature/login-page
 feature/sales-form
-3. Make changes
-4. Commit in GitHub Desktop
-5. Push the branch
-6. Create a Pull Request
-7. You review and merge into dev
+ 3. Make changes
+ 4. Commit in GitHub Desktop
+ 5. Push the branch
+ 6. Create a Pull Request
+ 7. You review and merge into dev
 This keeps the project clean and safe.
 
- 9. Troubleshooting Guide
-Beginners panic easily — this section prevents that.
+9. Troubleshooting Guide
 
 Problem: “npm is not recognized”
 Fix: Node.js is not installed correctly. Reinstall Node.
