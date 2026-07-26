@@ -5,7 +5,7 @@ This document explains how to work with the repository for our senior project. E
 ---
 
 ## General Rules
-1. Never push directly to the main or dev branches. They are protected.
+1. Never push directly to the main branch. It is protected.
 2. Do not use force push commands (git push --force or -f).
 3. Stop all local servers (frontend and backend) before switching branches to avoid Windows file-locking errors.
 4. Keep code organized, follow naming conventions, and write meaningful commit messages.
@@ -47,16 +47,16 @@ git clone <repository-url>
 Follow these steps for every feature, bug fix, or documentation change.
 
 ### Step 1: Sync Your Local Dev Branch
-Before starting any new work, update your local computer with the latest repository history from the dev branch.
-* **GitHub Desktop:** Switch current branch to `dev`, then click "Fetch origin" / "Pull origin".
+Before starting any new work, update your local computer with the latest repository history from the main branch.
+* **GitHub Desktop:** Switch current branch to `main`, then click "Fetch origin" / "Pull origin".
 * **Command Line:**
 ```bash
-git checkout dev
-git pull origin dev
+git checkout main
+git pull origin main
 ```
 
 ### Step 2: Create a Feature Branch
-Do not write code directly on main or dev. Create a new branch named after your specific task.
+Do not write code directly on main. Create a new branch named after your specific task.
 * **Branch naming conventions:** `feature/your-task`, `bugfix/your-task`, or `docs/your-task`.
 * **GitHub Desktop:** Click Current Branch → New Branch. Name your branch and click Create Branch.
 * **Command Line:**
@@ -74,13 +74,13 @@ git add .
 git commit -m "Provide a short, clear description of the changes"
 ```
 
-### Step 4: Merge Dev Updates (Preventing Code Drift)
-Before pushing, integrate any updates your teammates might have merged into the dev branch while you were working.
-* **GitHub Desktop:** Click Branch → Merge into current branch. Select `dev` and confirm.
+### Step 4: Merge main Updates (Preventing Code Drift)
+Before pushing, integrate any updates your teammates might have merged into the main branch while you were working.
+* **GitHub Desktop:** Click Branch → Merge into current branch. Select `main` and confirm.
 * **Command Line:**
 ```bash
 git fetch origin
-git merge origin/dev
+git merge origin/main
 ```
 *Note: If this command triggers a merge conflict, stop and contact the repository administrator to resolve it line-by-line. Do not guess and risk breaking the repo.*
 
@@ -96,9 +96,9 @@ git push -u origin feature/your-feature-name
 All changes must be merged through a PR. 
 1. Navigate to the repository on GitHub.com.
 2. Click the "Compare & pull request" banner.
-3. **Crucial:** Set the base branch to `dev` (not main).
+3. **Crucial:** Set the base branch to `main`.
 4. Add a description of your changes and submit the PR.
-5. A teammate will review your PR. Address any comments. Once approved, a project maintainer will merge it into dev. Only maintainers merge from dev into main.
+5. A teammate will review your PR. Address any comments. Once approved, a project maintainer will merge it into main.
 
 ---
 
@@ -118,9 +118,9 @@ git reset --hard origin/your-feature-name
 ---
 
 ## Summary Workflow Checklist
-1. Update your local `dev` branch.
+1. Update your local `main` branch.
 2. Create a feature branch.
 3. Commit and push changes.
-4. Merge incoming `dev` updates into your branch to check for conflicts.
-5. Open a pull request against the remote `dev` branch.
+4. Merge incoming `main` updates into your branch to check for conflicts.
+5. Open a pull request against the main branch.
 6. Get a review and merge.
