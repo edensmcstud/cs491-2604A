@@ -170,7 +170,7 @@ Write database schema
 
 8. Git Workflow (Beginner‑Friendly)
 
- 1. Switch to the dev branch
+ 1. Switch to the main branch
  2. Create a feature branch
 Name it like:
 
@@ -181,7 +181,7 @@ feature/sales-form
  4. Commit in GitHub Desktop
  5. Push the branch
  6. Create a Pull Request
- 7. You review and merge into dev
+ 7. You review and merge into main
 This keeps the project clean and safe.
 
 9. Troubleshooting Guide
