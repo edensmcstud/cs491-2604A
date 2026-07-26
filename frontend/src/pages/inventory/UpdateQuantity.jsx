@@ -7,7 +7,7 @@ export default function UpdateQuantity() {
     const { id } = useParams();
 
     const [currentQty, setCurrentQty] = useState(0);
-    const [newQty, setNewQty] = useState("");
+    const [newQty, setNewQty] = useState(0);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -34,13 +34,12 @@ export default function UpdateQuantity() {
             return;
         }
 
-        const parsedNewQty = parseInt(newQty, 10);
-        if (parsedNewQty < 0) {
+        if (newQty < 0) {
             setError("Quantity cannot be negative.");
             return;
         }
 
-        const amount = parsedNewQty - currentQty;
+        const amount = newQty - currentQty;
 
         setSaving(true);
 
@@ -81,7 +80,7 @@ export default function UpdateQuantity() {
                 <input
                     type="number"
                     value={newQty}
-                    onChange={(e) => setNewQty(e.target.value)}
+                    onChange={(e) => setNewQty(Number(e.target.value))}
                     placeholder="New Quantity"
                 />
 

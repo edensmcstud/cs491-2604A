@@ -92,12 +92,12 @@ export default function BooksList() {
                                     <button
                                         onClick={() =>
                                             navigate(
-                                                `/inventory/add?book_id=${b.book_id}`
+                                                `/inventory/update/${b.inventory_id}`
                                             )
                                         }
                                         style={{ marginLeft: "10px" }}
                                     >
-                                        Add Inventory
+                                        Update Inventory
                                     </button>
                                 )}
                             </td>

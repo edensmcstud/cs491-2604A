@@ -32,8 +32,8 @@ exports.createSale = async (req, res) => {
         for (const item of items) {
             const { book_id, quantity } = item;
 
-            if (!book_id || !quantity) {
-                return res.status(400).json({ error: "Each item requires book_id and quantity" });
+            if (!book_id || !quantity || quantity <= 0) {
+                return res.status(400).json({ error: "Each item requires book_id and quantity > 0" });
             }
 
             // Fetch price
@@ -104,11 +104,13 @@ exports.createSale = async (req, res) => {
             );
 
             // Reduce inventory
+            const now = new Date().toISOString();
+
             await run(
                 `UPDATE inventory
-                 SET quantity_on_hand = quantity_on_hand - ?
+                 SET quantity_on_hand = quantity_on_hand - ?, last_updated = ?
                  WHERE book_id = ?`,
-                [quantity, book_id]
+                [quantity, now, book_id]
             );
         }
 

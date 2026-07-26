@@ -16,7 +16,6 @@ import EditBookDetails from "./pages/books/EditBookDetails";
 
 // INVENTORY
 import InventoryList from "./pages/inventory/InventoryList";
-import AddInventoryItem from "./pages/inventory/AddInventoryItem";
 import EditInventoryItem from "./pages/inventory/EditInventoryItem";
 import UpdateQuantity from "./pages/inventory/UpdateQuantity";
 import Inventory from "./pages/inventory/Inventory"; // missing route
@@ -28,7 +27,7 @@ import AddSale from "./pages/sales/AddSale"; // missing route
 // ORDERS
 import CustomerOrders from "./pages/orders/CustomerOrders";
 import SupplierOrders from "./pages/orders/SupplierOrders";
-import AddCustomerOrder from "./pages/orders/AddCustomerOrder.jsx"; // missing route
+import AddCustomerOrder from "./pages/orders/AddCustomerOrder"; // missing route
 import AddSupplierOrder from "./pages/orders/AddSupplierOrder"; // missing route
 
 // REPORTS
@@ -72,7 +71,6 @@ export default function App() {
 
                 {/* Inventory */}
                 <Route path="inventory" element={<InventoryList />} />
-                <Route path="inventory/add" element={<AddInventoryItem />} />
                 <Route path="inventory/edit/:id" element={<EditInventoryItem />} />
                 <Route path="inventory/update/:id" element={<UpdateQuantity />} />
                 <Route path="inventory/view" element={<Inventory />} />

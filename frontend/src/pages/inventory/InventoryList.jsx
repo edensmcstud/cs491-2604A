@@ -38,18 +38,6 @@ export default function InventoryList() {
         loadData();
     }, []);
 
-    async function deleteItem(id) {
-        if (!window.confirm("Delete this inventory item?")) return;
-
-        try {
-            await api.delete(`/inventory/${id}`);
-            setInventory(inventory.filter((i) => i.inventory_id !== id));
-        } catch (err) {
-            console.log("Delete error:", err);
-            alert("Failed to delete inventory item.");
-        }
-    }
-
     if (loading) {
         return (
             <div className="page">
@@ -65,12 +53,8 @@ export default function InventoryList() {
 
             {error && <p style={{ color: "red" }}>{error}</p>}
 
-            <button
-                onClick={() => navigate("/inventory/add")}
-                style={{ marginBottom: "20px" }}
-            >
-                Add Inventory Item
-            </button>
+            {/* REMOVED: Add Inventory Item button */}
+            {/* Inventory is auto-created when books are created */}
 
             <table className="table">
                 <thead>
@@ -119,12 +103,8 @@ export default function InventoryList() {
                                     Update Qty
                                 </button>
 
-                                <button
-                                    onClick={() => deleteItem(item.inventory_id)}
-                                    style={{ marginLeft: "10px", color: "red" }}
-                                >
-                                    Delete
-                                </button>
+                                {/* REMOVED: Delete button */}
+                                {/* Inventory is tied to books and should never be deleted */}
                             </td>
                         </tr>
                     ))}

@@ -1,18 +1,8 @@
-export default function AuditLog() {
+export default function Placeholder() {
     return (
         <div className="page">
-            <h1>Audit Log</h1>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Action</th>
-                        <th>Timestamp</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <h1>{Placeholder.name} Page</h1>
+            <p>This page has not been created yet. Future implementation planned.</p>
         </div>
     );
 }

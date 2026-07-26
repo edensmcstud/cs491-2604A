@@ -1,57 +1,53 @@
-const express = require("express");
+﻿const express = require("express");
 const router = express.Router();
 
 const inventoryController = require("../controllers/inventoryController");
-const auth = require("../middleware/auth");
 const requirePermission = require("../middleware/requirePermission");
+const auth = require("../middleware/auth");
 
-// All inventory routes require authentication
+console.log("inventoryController:", inventoryController);
+console.log("requirePermission:", requirePermission);
+console.log("auth:", auth);
+
+// Require authentication for ALL inventory routes
 router.use(auth);
 
-// =====================================================
-// INVENTORY ROUTES WITH RBAC
-// =====================================================
-
-// GET ALL INVENTORY ITEMS
+// -----------------------------------------------------
+// READ INVENTORY LIST (Admin + Employee)
+// -----------------------------------------------------
 router.get(
     "/",
     requirePermission("inventory", "read"),
     inventoryController.getInventory
 );
 
-// GET SINGLE INVENTORY ITEM
+// -----------------------------------------------------
+// READ SINGLE INVENTORY ITEM (Admin + Employee)
+// -----------------------------------------------------
 router.get(
     "/:id",
     requirePermission("inventory", "read"),
     inventoryController.getInventoryItem
 );
 
-// INITIALIZE INVENTORY ITEM (ADMIN + EMPLOYEE)
-router.post(
-    "/",
-    requirePermission("inventory", "adjust"),
-    inventoryController.createInventoryItem
-);
-
-// UPDATE INVENTORY ITEM (ADMIN + EMPLOYEE)
+// -----------------------------------------------------
+// UPDATE INVENTORY METADATA (Admin + Employee)
+// Replaces values (PUT)
+// -----------------------------------------------------
 router.put(
     "/:id",
     requirePermission("inventory", "update"),
     inventoryController.updateInventoryItem
 );
 
-// ADJUST STOCK LEVELS (ADMIN + EMPLOYEE)
+// -----------------------------------------------------
+// ADJUST QUANTITY (Admin + Employee)
+// Adds/subtracts from quantity_on_hand (PATCH)
+// -----------------------------------------------------
 router.patch(
     "/:id/adjust",
     requirePermission("inventory", "adjust"),
     inventoryController.adjustStock
-);
-
-// DELETE INVENTORY ITEM (ADMIN ONLY)
-router.delete(
-    "/:id",
-    requirePermission("inventory", "delete"),
-    inventoryController.deleteInventoryItem
 );
 
 module.exports = router;

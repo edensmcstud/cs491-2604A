@@ -1,28 +1,29 @@
 ﻿const express = require("express");
 const router = express.Router();
 
-const controller = require("../controllers/salesController");
-const auth = require("../middleware/auth");
+const salesController = require("../controllers/salesController");
 const requirePermission = require("../middleware/requirePermission");
 
-// Test route (no auth)
-router.get("/test", controller.test);
+// =====================================================
+// SALES ROUTES — RBAC OVERHAUL VERSION (Correct)
+// =====================================================
 
-// All real sales routes require authentication
-router.use(auth);
-
-// Create sale (Employee + Admin)
+// -----------------------------------------------------
+// CREATE SALE (Employee + Admin)
+// -----------------------------------------------------
 router.post(
     "/",
     requirePermission("sales", "create"),
-    controller.createSale
+    salesController.createSale
 );
 
-// Get sales (Employee + Admin)
+// -----------------------------------------------------
+// READ ALL SALES (Employee + Admin)
+// -----------------------------------------------------
 router.get(
     "/",
     requirePermission("sales", "read"),
-    controller.getSales
+    salesController.getSales
 );
 
 module.exports = router;
