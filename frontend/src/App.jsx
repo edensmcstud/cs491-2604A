@@ -27,7 +27,7 @@ import AddSale from "./pages/sales/AddSale"; // missing route
 // ORDERS
 import CustomerOrders from "./pages/orders/CustomerOrders";
 import SupplierOrders from "./pages/orders/SupplierOrders";
-import AddCustomerOrder from "./pages/orders/AddCustomerOrder.jsx"; // missing route
+import AddCustomerOrder from "./pages/orders/AddCustomerOrder"; // missing route
 import AddSupplierOrder from "./pages/orders/AddSupplierOrder"; // missing route
 
 // REPORTS

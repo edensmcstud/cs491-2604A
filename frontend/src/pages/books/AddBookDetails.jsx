@@ -53,10 +53,8 @@ export default function AddBookDetails() {
                 throw new Error(res?.error || "Failed to create book.");
             }
 
-            const newBookId = res.book_id;
-
-            // Redirect to inventory creation with the new book preselected
-            navigate(`/inventory/add?book_id=${newBookId}`);
+            // Redirect to inventory creation with the new book
+            navigate("/books");
         } catch (err) {
             setError(err.message || "Failed to create book.");
         } finally {
