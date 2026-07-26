@@ -26,10 +26,10 @@ router.get(
     inventoryController.getInventoryItem
 );
 
-// CREATE INVENTORY ITEM (ADMIN ONLY)
+// INITIALIZE INVENTORY ITEM (ADMIN + EMPLOYEE)
 router.post(
     "/",
-    requirePermission("inventory", "create"),
+    requirePermission("inventory", "adjust"),
     inventoryController.createInventoryItem
 );
 

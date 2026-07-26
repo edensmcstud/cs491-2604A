@@ -3,6 +3,9 @@
 # ================================
 *.sqlite
 *.db
+*.sqlite-wal
+*.sqlite-shm
+
 
 # ================================
 # Node dependencies
