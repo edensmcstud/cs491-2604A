@@ -61,13 +61,6 @@ coverage/
 *.temp
 
 # ================================
-# Local scripts or dumps
-# ================================
-dump-db.js
-find-db.js
-seedAll.js
-
-# ================================
 # PowerShell test scripts
 # (optional: ignore if you don't want them in Git)
 # ================================
