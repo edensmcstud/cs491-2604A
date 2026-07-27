@@ -9,6 +9,8 @@ This runs the backend and the React dev server.
 Download from: https://nodejs.org  
 Choose LTS (Long Term Support).
 
+Add to PATH, if unfamiliar ask Edens and he'll talk you through it.
+
  2. Git + GitHub Desktop
 GitHub Desktop prevents beginners from breaking Git.
 
