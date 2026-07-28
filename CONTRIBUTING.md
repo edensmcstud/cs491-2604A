@@ -46,7 +46,7 @@ git clone <repository-url>
 
 Follow these steps for every feature, bug fix, or documentation change.
 
-### Step 1: Sync Your Local Dev Branch
+### Step 1: Sync Your Local main Branch
 Before starting any new work, update your local computer with the latest repository history from the main branch.
 * **GitHub Desktop:** Switch current branch to `main`, then click "Fetch origin" / "Pull origin".
 * **Command Line:**
