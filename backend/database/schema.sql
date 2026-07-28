@@ -55,6 +55,14 @@ CREATE TABLE books (
     publisher TEXT,
     category TEXT,
     price REAL NOT NULL,
+    description TEXT,
+    publication_year INTEGER,
+    condition TEXT,
+    edition TEXT,
+    binding TEXT,
+    signed INTEGER DEFAULT 0,
+    provenance TEXT,
+    is_collectible INTEGER DEFAULT 0,
     active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT DEFAULT (datetime('now'))
 );

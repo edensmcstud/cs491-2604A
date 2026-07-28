@@ -2,7 +2,6 @@
 import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
 
-
 export default function AddBook() {
     const navigate = useNavigate();
 
@@ -18,8 +17,8 @@ export default function AddBook() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
+    const [selectedBook, setSelectedBook] = useState(null);
 
-    // Load books so user can pick book_id
     useEffect(() => {
         api.get("/books")
             .then((res) => {
@@ -34,7 +33,26 @@ export default function AddBook() {
     }, []);
 
     function updateField(e) {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setForm({ ...form, [name]: value });
+    }
+
+    function handleBookSelect(e) {
+        const bookId = e.target.value;
+        const book = books.find((b) => String(b.book_id) === String(bookId));
+
+        setForm({ ...form, book_id: bookId });
+        setSelectedBook(book || null);
+
+        if (book && book.is_collectible === 1) {
+            setForm({
+                book_id: bookId,
+                quantity_on_hand: 1,
+                quantity_reserved: 0,
+                reorder_level: 0,
+                reorder_quantity: 0
+            });
+        }
     }
 
     async function handleSubmit(e) {
@@ -87,12 +105,11 @@ export default function AddBook() {
             {error && <p style={{ color: "red" }}>{error}</p>}
 
             <form onSubmit={handleSubmit}>
-                {/* Book selection */}
                 <label>Book</label>
                 <select
                     name="book_id"
                     value={form.book_id}
-                    onChange={updateField}
+                    onChange={handleBookSelect}
                 >
                     <option value="">-- Select a Book --</option>
                     {books.map((b) => (
@@ -108,6 +125,7 @@ export default function AddBook() {
                     name="quantity_on_hand"
                     value={form.quantity_on_hand}
                     onChange={updateField}
+                    disabled={selectedBook?.is_collectible === 1}
                 />
 
                 <label>Quantity Reserved</label>
@@ -116,6 +134,7 @@ export default function AddBook() {
                     name="quantity_reserved"
                     value={form.quantity_reserved}
                     onChange={updateField}
+                    disabled={selectedBook?.is_collectible === 1}
                 />
 
                 <label>Reorder Level</label>
@@ -124,6 +143,7 @@ export default function AddBook() {
                     name="reorder_level"
                     value={form.reorder_level}
                     onChange={updateField}
+                    disabled={selectedBook?.is_collectible === 1}
                 />
 
                 <label>Reorder Quantity</label>
@@ -132,6 +152,7 @@ export default function AddBook() {
                     name="reorder_quantity"
                     value={form.reorder_quantity}
                     onChange={updateField}
+                    disabled={selectedBook?.is_collectible === 1}
                 />
 
                 <button type="submit" disabled={saving}>

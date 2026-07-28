@@ -11,7 +11,6 @@ export default function BooksList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // Permission checks
     const canCreate = user?.modules?.books?.create === true;
     const canUpdate = user?.modules?.books?.update === true;
     const canAddInventory = user?.modules?.inventory?.adjust === true;
@@ -44,7 +43,6 @@ export default function BooksList() {
 
             {error && <p style={{ color: "red" }}>{error}</p>}
 
-            {/* Only show Add New Book if user has create permission */}
             {canCreate && (
                 <button
                     onClick={() => navigate("/books/add")}
@@ -61,7 +59,11 @@ export default function BooksList() {
                         <th>Title</th>
                         <th>Author</th>
                         <th>ISBN</th>
+                        <th>Publisher</th>
+                        <th>Category</th>
                         <th>Price</th>
+                        <th>Collectible</th>
+                        <th>Available</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -73,10 +75,18 @@ export default function BooksList() {
                             <td>{b.title}</td>
                             <td>{b.author}</td>
                             <td>{b.isbn}</td>
-                            <td>${b.price}</td>
+                            <td>{b.publisher}</td>
+                            <td>{b.category}</td>
+                            <td>${Number(b.price).toFixed(2)}</td>
+                            <td>{b.is_collectible ? "Yes" : "No"}</td>
 
                             <td>
-                                {/* Edit only if user has update permission */}
+                                {canAddInventory
+                                    ? b.quantity_on_hand
+                                    : b.available_quantity}
+                            </td>
+
+                            <td>
                                 {canUpdate && (
                                     <button
                                         onClick={() =>
@@ -87,17 +97,16 @@ export default function BooksList() {
                                     </button>
                                 )}
 
-                                {/* Add Inventory only if user has inventory.adjust */}
-                                {canAddInventory && (
+                                {canAddInventory && b.inventory_id && (
                                     <button
                                         onClick={() =>
                                             navigate(
-                                                `/inventory/update/${b.inventory_id}`
+                                                `/inventory/edit/${b.inventory_id}`
                                             )
                                         }
                                         style={{ marginLeft: "10px" }}
                                     >
-                                        Update Inventory
+                                        Edit Inventory
                                     </button>
                                 )}
                             </td>

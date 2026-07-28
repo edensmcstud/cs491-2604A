@@ -4,37 +4,121 @@ const { query, run } = require("../utils/db");
 const { logAction } = require("../utils/audit");
 
 /**
+ * Normalize numeric flags (signed, is_collectible)
+ */
+function normalizeFlag(value) {
+    return value ? 1 : 0;
+}
+
+/**
+ * Normalize price to 2 decimals
+ */
+function normalizePrice(price) {
+    const num = Number(price);
+    if (isNaN(num)) return null;
+    return Math.round(num * 100) / 100;
+}
+
+/**
+ * Normalize publication year
+ */
+function normalizeYear(year) {
+    if (!year) return null;
+    const num = Number(year);
+    if (isNaN(num) || !Number.isInteger(num)) return null;
+    return num;
+}
+
+/**
+ * Normalize text fields (trim empty → null)
+ */
+function normalizeText(value) {
+    if (!value) return null;
+    const trimmed = String(value).trim();
+    return trimmed.length === 0 ? null : trimmed;
+}
+
+/**
  * Create a book
  */
 exports.createBook = async (req, res, next) => {
     try {
-        const { isbn, title, author, price } = req.body;
+        const {
+            isbn,
+            title,
+            author,
+            publisher,
+            category,
+            price,
+            description,
+            publication_year,
+            condition,
+            edition,
+            binding,
+            signed,
+            provenance,
+            is_collectible
+        } = req.body;
 
-        if (!isbn || !title || !author || price == null) {
-            return res.status(400).json({ error: "Missing required fields" });
+        // Required fields
+        if (!title || price == null) {
+            return res.status(400).json({ error: "Title and price are required." });
         }
 
+        // Normalize fields
+        const normalizedPrice = normalizePrice(price);
+        if (normalizedPrice == null) {
+            return res.status(400).json({ error: "Price must be numeric." });
+        }
+
+        const normalizedYear = normalizeYear(publication_year);
+        const signedVal = normalizeFlag(signed);
+        const collectibleVal = normalizeFlag(is_collectible);
+
         const result = await run(
-            `INSERT INTO books (isbn, title, author, price, active)
-             VALUES (?, ?, ?, ?, 1)`,
-            [isbn, title, author, price]
+            `INSERT INTO books (
+                isbn, title, author, publisher, category, price,
+                description, publication_year, condition, edition,
+                binding, signed, provenance, is_collectible, active
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+            [
+                normalizeText(isbn),
+                normalizeText(title),
+                normalizeText(author),
+                normalizeText(publisher),
+                normalizeText(category),
+                normalizedPrice,
+                normalizeText(description),
+                normalizedYear,
+                normalizeText(condition),
+                normalizeText(edition),
+                normalizeText(binding),
+                signedVal,
+                normalizeText(provenance),
+                collectibleVal
+            ]
         );
 
         const bookId = result.lastID;
 
         // AUTO‑INITIALIZE INVENTORY
+        const qty = collectibleVal === 1 ? 1 : 0;
+        const reorderLevel = collectibleVal === 1 ? 0 : 0;
+        const reorderQty = collectibleVal === 1 ? 0 : 0;
+
         await run(
             `INSERT INTO inventory 
                 (book_id, quantity_on_hand, quantity_reserved, reorder_level, reorder_quantity)
-             VALUES (?, 0, 0, 0, 0)`,
-            [bookId]
+             VALUES (?, ?, 0, ?, ?)`,
+            [bookId, qty, reorderLevel, reorderQty]
         );
 
         await logAction(req.user.user_id, "CREATE", "BOOK", bookId);
 
         res.json({ message: "Book created", book_id: bookId });
+
     } catch (err) {
-        if (err && err.message && err.message.includes("UNIQUE constraint failed: books.isbn")) {
+        if (err?.message?.includes("UNIQUE constraint failed: books.isbn")) {
             return res.status(409).json({ error: "ISBN already exists" });
         }
         next(err);
@@ -44,17 +128,15 @@ exports.createBook = async (req, res, next) => {
 /**
  * Get all ACTIVE books
  * - Customer: only active + in-stock + exact available quantity
- * - Employee/Admin: all active books + full inventory details
+ * - Employee/Admin: full inventory details
  */
 exports.getBooks = async (req, res, next) => {
     try {
         const isCustomer = req.user.roles.includes("Customer");
 
         let sql;
-        let params = [];
 
         if (isCustomer) {
-            // CUSTOMER VIEW
             sql = `
                 SELECT 
                     b.book_id,
@@ -64,6 +146,14 @@ exports.getBooks = async (req, res, next) => {
                     b.publisher,
                     b.category,
                     b.price,
+                    b.description,
+                    b.publication_year,
+                    b.condition,
+                    b.edition,
+                    b.binding,
+                    b.signed,
+                    b.provenance,
+                    b.is_collectible,
                     i.quantity_on_hand AS available_quantity
                 FROM books b
                 JOIN inventory i ON b.book_id = i.book_id
@@ -72,7 +162,6 @@ exports.getBooks = async (req, res, next) => {
                 ORDER BY b.title ASC
             `;
         } else {
-            // EMPLOYEE + ADMIN VIEW
             sql = `
                 SELECT 
                     b.*,
@@ -88,11 +177,10 @@ exports.getBooks = async (req, res, next) => {
             `;
         }
 
-        const rows = await query(sql, params);
+        const rows = await query(sql);
         res.json(rows);
 
     } catch (err) {
-        console.error("Error fetching books:", err);
         next(err);
     }
 };
@@ -111,8 +199,6 @@ exports.getAllBooks = async (req, res, next) => {
 
 /**
  * Get a single ACTIVE book
- * - Customer: only active + in-stock + exact available quantity
- * - Employee/Admin: full inventory details
  */
 exports.getBook = async (req, res, next) => {
     try {
@@ -120,7 +206,6 @@ exports.getBook = async (req, res, next) => {
         const bookId = req.params.id;
 
         let sql;
-        let params = [bookId];
 
         if (isCustomer) {
             sql = `
@@ -132,6 +217,14 @@ exports.getBook = async (req, res, next) => {
                     b.publisher,
                     b.category,
                     b.price,
+                    b.description,
+                    b.publication_year,
+                    b.condition,
+                    b.edition,
+                    b.binding,
+                    b.signed,
+                    b.provenance,
+                    b.is_collectible,
                     i.quantity_on_hand AS available_quantity
                 FROM books b
                 JOIN inventory i ON b.book_id = i.book_id
@@ -153,7 +246,7 @@ exports.getBook = async (req, res, next) => {
             `;
         }
 
-        const rows = await query(sql, params);
+        const rows = await query(sql, [bookId]);
 
         if (rows.length === 0) {
             return res.status(404).json({ error: "Book not found" });
@@ -162,7 +255,6 @@ exports.getBook = async (req, res, next) => {
         res.json(rows[0]);
 
     } catch (err) {
-        console.error("Error fetching book:", err);
         next(err);
     }
 };
@@ -172,20 +264,75 @@ exports.getBook = async (req, res, next) => {
  */
 exports.updateBook = async (req, res, next) => {
     try {
-        const { isbn, title, author, price } = req.body;
+        const {
+            isbn,
+            title,
+            author,
+            publisher,
+            category,
+            price,
+            description,
+            publication_year,
+            condition,
+            edition,
+            binding,
+            signed,
+            provenance,
+            is_collectible
+        } = req.body;
+
+        const normalizedPrice = normalizePrice(price);
+        if (normalizedPrice == null) {
+            return res.status(400).json({ error: "Price must be numeric." });
+        }
+
+        const normalizedYear = normalizeYear(publication_year);
+        const signedVal = normalizeFlag(signed);
+        const collectibleVal = normalizeFlag(is_collectible);
 
         await run(
-            `UPDATE books
-             SET isbn = ?, title = ?, author = ?, price = ?
+            `UPDATE books SET
+                isbn = ?, title = ?, author = ?, publisher = ?, category = ?, price = ?,
+                description = ?, publication_year = ?, condition = ?, edition = ?,
+                binding = ?, signed = ?, provenance = ?, is_collectible = ?
              WHERE book_id = ?`,
-            [isbn, title, author, price, req.params.id]
+            [
+                normalizeText(isbn),
+                normalizeText(title),
+                normalizeText(author),
+                normalizeText(publisher),
+                normalizeText(category),
+                normalizedPrice,
+                normalizeText(description),
+                normalizedYear,
+                normalizeText(condition),
+                normalizeText(edition),
+                normalizeText(binding),
+                signedVal,
+                normalizeText(provenance),
+                collectibleVal,
+                req.params.id
+            ]
         );
+
+        // Update inventory rules for collectible books
+        if (collectibleVal === 1) {
+            await run(
+                `UPDATE inventory SET 
+                    quantity_on_hand = 1,
+                    reorder_level = 0,
+                    reorder_quantity = 0
+                 WHERE book_id = ?`,
+                [req.params.id]
+            );
+        }
 
         await logAction(req.user.user_id, "UPDATE", "BOOK", req.params.id);
 
         res.json({ message: "Book updated" });
+
     } catch (err) {
-        if (err && err.message && err.message.includes("UNIQUE constraint failed: books.isbn")) {
+        if (err?.message?.includes("UNIQUE constraint failed: books.isbn")) {
             return res.status(409).json({ error: "ISBN already exists" });
         }
         next(err);
@@ -211,6 +358,91 @@ exports.deleteBook = async (req, res, next) => {
         await logAction(req.user.user_id, "DELETE", "BOOK", id);
 
         res.json({ message: "Book deleted" });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const axios = require("axios");
+
+/**
+ * ISBN Lookup Controller
+ * - Fetches metadata from OpenLibrary
+ * - Normalizes fields to match your schema
+ * - Does NOT write to the database
+ */
+exports.lookupISBN = async (req, res, next) => {
+    try {
+        const isbn = req.params.isbn?.trim();
+
+        if (!isbn) {
+            return res.status(400).json({ error: "ISBN is required." });
+        }
+
+        // OpenLibrary API URL
+        const url = `https://openlibrary.org/isbn/${isbn}.json`;
+
+        let bookData;
+        try {
+            const response = await axios.get(url);
+            bookData = response.data;
+        } catch (err) {
+            return res.status(404).json({ error: "No metadata found for this ISBN." });
+        }
+
+        // Normalize fields
+        const title = bookData.title || null;
+        const publishYear = bookData.publish_date
+            ? parseInt(bookData.publish_date)
+            : null;
+
+        // Fetch author name if available
+        let authorName = null;
+        if (bookData.authors && bookData.authors.length > 0) {
+            try {
+                const authorUrl = `https://openlibrary.org${bookData.authors[0].key}.json`;
+                const authorResp = await axios.get(authorUrl);
+                authorName = authorResp.data.name || null;
+            } catch {
+                authorName = null;
+            }
+        }
+
+        // Fetch description (OpenLibrary returns either string or object)
+        let description = null;
+        if (bookData.description) {
+            if (typeof bookData.description === "string") {
+                description = bookData.description;
+            } else if (bookData.description.value) {
+                description = bookData.description.value;
+            }
+        }
+
+        // Category/subjects (optional)
+        let category = null;
+        if (bookData.subjects && bookData.subjects.length > 0) {
+            category = bookData.subjects[0]; // pick first subject
+        }
+
+        // Publisher (optional)
+        let publisher = null;
+        if (bookData.publishers && bookData.publishers.length > 0) {
+            publisher = bookData.publishers[0];
+        }
+
+        // Build normalized response
+        const normalized = {
+            isbn,
+            title,
+            author: authorName,
+            publisher,
+            category,
+            description,
+            publication_year: publishYear
+        };
+
+        res.json(normalized);
+
     } catch (err) {
         next(err);
     }

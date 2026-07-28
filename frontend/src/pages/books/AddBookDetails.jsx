@@ -2,7 +2,6 @@
 import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
 
-
 export default function AddBookDetails() {
     const navigate = useNavigate();
 
@@ -11,37 +10,83 @@ export default function AddBookDetails() {
         author: "",
         isbn: "",
         price: "",
-        description: ""
+        description: "",
+        publisher: "",
+        category: "",
+        publication_year: "",
+        condition: "",
+        edition: "",
+        binding: "",
+        signed: false,
+        provenance: "",
+        is_collectible: false
     });
 
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
+    const [lookupLoading, setLookupLoading] = useState(false);
 
     function updateField(e) {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value, type, checked } = e.target;
+        setForm({
+            ...form,
+            [name]: type === "checkbox" ? checked : value
+        });
+    }
+
+    async function handleISBNLookup() {
+        if (!form.isbn || form.isbn.trim().length < 10) {
+            return;
+        }
+
+        setLookupLoading(true);
+        setError("");
+
+        try {
+            const data = await api.get(`/books/lookup/${form.isbn.trim()}`);
+
+            setForm((prev) => ({
+                ...prev,
+                title: data.title || prev.title,
+                author: data.author || prev.author,
+                publisher: data.publisher || prev.publisher,
+                category: data.category || prev.category,
+                description: data.description || prev.description,
+                publication_year: data.publication_year || prev.publication_year
+            }));
+        } catch (err) {
+            setError("ISBN lookup failed or no metadata found.");
+        } finally {
+            setLookupLoading(false);
+        }
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
         setError("");
 
-        // Basic validation
-        if (!form.title || !form.author || !form.isbn || !form.price) {
-            setError("All required fields must be filled.");
-            return;
-        }
-
-        if (!/^[0-9\-]{10,13}$/.test(form.isbn)) {
-            setError("ISBN must be 10–13 digits.");
+        if (!form.title || !form.price) {
+            setError("Title and price are required.");
             return;
         }
 
         const payload = {
-            title: form.title,
-            author: form.author,
-            isbn: form.isbn,
+            title: form.title.trim(),
+            author: form.author.trim() || null,
+            isbn: form.isbn.trim() || null,
             price: Number(form.price),
-            description: form.description
+            description: form.description.trim() || null,
+            publisher: form.publisher.trim() || null,
+            category: form.category.trim() || null,
+            publication_year: form.publication_year
+                ? Number(form.publication_year)
+                : null,
+            condition: form.is_collectible ? form.condition.trim() || null : null,
+            edition: form.is_collectible ? form.edition.trim() || null : null,
+            binding: form.is_collectible ? form.binding.trim() || null : null,
+            signed: form.is_collectible ? (form.signed ? 1 : 0) : 0,
+            provenance: form.is_collectible ? form.provenance.trim() || null : null,
+            is_collectible: form.is_collectible ? 1 : 0
         };
 
         setSaving(true);
@@ -53,7 +98,6 @@ export default function AddBookDetails() {
                 throw new Error(res?.error || "Failed to create book.");
             }
 
-            // Redirect to inventory creation with the new book
             navigate("/books");
         } catch (err) {
             setError(err.message || "Failed to create book.");
@@ -69,6 +113,16 @@ export default function AddBookDetails() {
             {error && <p style={{ color: "red" }}>{error}</p>}
 
             <form onSubmit={handleSubmit}>
+                <label>ISBN</label>
+                <input
+                    name="isbn"
+                    value={form.isbn}
+                    onChange={updateField}
+                    onBlur={handleISBNLookup}
+                    placeholder="ISBN (optional)"
+                />
+                {lookupLoading && <p>Looking up ISBN...</p>}
+
                 <label>Title</label>
                 <input
                     name="title"
@@ -85,18 +139,28 @@ export default function AddBookDetails() {
                     placeholder="Author Name"
                 />
 
-                <label>ISBN</label>
+                <label>Publisher</label>
                 <input
-                    name="isbn"
-                    value={form.isbn}
+                    name="publisher"
+                    value={form.publisher}
                     onChange={updateField}
-                    placeholder="ISBN (10–13 digits)"
+                    placeholder="Publisher"
+                />
+
+                <label>Category</label>
+                <input
+                    name="category"
+                    value={form.category}
+                    onChange={updateField}
+                    placeholder="Category"
                 />
 
                 <label>Price</label>
                 <input
                     type="number"
                     name="price"
+                    step="0.01"
+                    min="0"
                     value={form.price}
                     onChange={updateField}
                     placeholder="Price"
@@ -109,6 +173,60 @@ export default function AddBookDetails() {
                     onChange={updateField}
                     placeholder="Description"
                 />
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="is_collectible"
+                        checked={form.is_collectible}
+                        onChange={updateField}
+                    />
+                    Rare / Collectible Book
+                </label>
+
+                {form.is_collectible && (
+                    <>
+                        <label>Condition</label>
+                        <input
+                            name="condition"
+                            value={form.condition}
+                            onChange={updateField}
+                            placeholder="Condition"
+                        />
+
+                        <label>Edition</label>
+                        <input
+                            name="edition"
+                            value={form.edition}
+                            onChange={updateField}
+                            placeholder="Edition"
+                        />
+
+                        <label>Binding</label>
+                        <input
+                            name="binding"
+                            value={form.binding}
+                            onChange={updateField}
+                            placeholder="Binding"
+                        />
+
+                        <label>Signed</label>
+                        <input
+                            type="checkbox"
+                            name="signed"
+                            checked={form.signed}
+                            onChange={updateField}
+                        />
+
+                        <label>Provenance</label>
+                        <textarea
+                            name="provenance"
+                            value={form.provenance}
+                            onChange={updateField}
+                            placeholder="Provenance / History"
+                        />
+                    </>
+                )}
 
                 <button type="submit" disabled={saving}>
                     {saving ? "Saving..." : "Create Book"}

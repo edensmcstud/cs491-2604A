@@ -27,6 +27,13 @@ router.post(
     controller.createBook
 );
 
+// Lookup a book by ISBN (for creating a new book)
+router.get(
+    "/lookup/:isbn",
+    requirePermission("books", "create"),
+    controller.lookupISBN
+);
+
 // Update a book
 router.put(
     "/:id",
