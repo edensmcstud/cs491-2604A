@@ -13,7 +13,7 @@ export default function EditInventoryItem() {
         reorder_quantity: 0
     });
 
-    const [bookTitle, setBookTitle] = useState("");
+    const [book, setBook] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -30,8 +30,8 @@ export default function EditInventoryItem() {
                     reorder_quantity: inv.reorder_quantity
                 });
 
-                const book = await api.get(`/books/${inv.book_id}`);
-                setBookTitle(book.title);
+                const bookData = await api.get(`/books/${inv.book_id}`);
+                setBook(bookData);
 
                 setLoading(false);
             } catch (err) {
@@ -45,18 +45,21 @@ export default function EditInventoryItem() {
     }, [id]);
 
     function updateField(e) {
-        setForm({ ...form, [e.target.name]: Number(e.target.value) });
+        const { name, value } = e.target;
+        setForm({ ...form, [name]: Number(value) });
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
         setError("");
 
+        const isCollectible = book?.is_collectible === 1;
+
         const payload = {
-            quantity_on_hand: form.quantity_on_hand,
-            quantity_reserved: form.quantity_reserved,
-            reorder_level: form.reorder_level,
-            reorder_quantity: form.reorder_quantity
+            quantity_on_hand: isCollectible ? 1 : form.quantity_on_hand,
+            quantity_reserved: isCollectible ? 0 : form.quantity_reserved,
+            reorder_level: isCollectible ? 0 : form.reorder_level,
+            reorder_quantity: isCollectible ? 0 : form.reorder_quantity
         };
 
         setSaving(true);
@@ -89,7 +92,12 @@ export default function EditInventoryItem() {
         <div className="page">
             <h1>Edit Inventory Item</h1>
 
-            <p><strong>Book:</strong> {bookTitle}</p>
+            {book && (
+                <p>
+                    <strong>Book:</strong> {book.title}{" "}
+                    {book.is_collectible === 1 && "(Collectible)"}
+                </p>
+            )}
 
             {error && <p style={{ color: "red" }}>{error}</p>}
 
@@ -100,6 +108,7 @@ export default function EditInventoryItem() {
                     name="quantity_on_hand"
                     value={form.quantity_on_hand}
                     onChange={updateField}
+                    disabled={book?.is_collectible === 1}
                 />
 
                 <label>Quantity Reserved</label>
@@ -108,6 +117,7 @@ export default function EditInventoryItem() {
                     name="quantity_reserved"
                     value={form.quantity_reserved}
                     onChange={updateField}
+                    disabled={book?.is_collectible === 1}
                 />
 
                 <label>Reorder Level</label>
@@ -116,6 +126,7 @@ export default function EditInventoryItem() {
                     name="reorder_level"
                     value={form.reorder_level}
                     onChange={updateField}
+                    disabled={book?.is_collectible === 1}
                 />
 
                 <label>Reorder Quantity</label>
@@ -124,6 +135,7 @@ export default function EditInventoryItem() {
                     name="reorder_quantity"
                     value={form.reorder_quantity}
                     onChange={updateField}
+                    disabled={book?.is_collectible === 1}
                 />
 
                 <button type="submit" disabled={saving}>

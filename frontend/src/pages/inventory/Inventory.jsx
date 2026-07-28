@@ -1,12 +1,19 @@
 ﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../api/api";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Inventory() {
     const { user } = useAuth();
+
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const canEditInventory =
+        user.roles.includes("Admin") || user.roles.includes("Employee");
+
+    const canEditBook = user.modules?.books?.update === true;
 
     useEffect(() => {
         api.get("/inventory")
@@ -25,18 +32,16 @@ export default function Inventory() {
         <div className="page">
             <h1>Inventory</h1>
 
-            {/* REMOVE: Add Inventory Item button */}
-            {/* Inventory is auto-created when books are created */}
-
             {loading && <p>Loading...</p>}
             {error && <p style={{ color: "red" }}>{error}</p>}
 
             {!loading && !error && (
-                <table>
+                <table className="table">
                     <thead>
                         <tr>
                             <th>ISBN</th>
                             <th>Title</th>
+                            <th>Collectible</th>
                             <th>Quantity</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -48,7 +53,9 @@ export default function Inventory() {
                             <tr key={item.inventory_id}>
                                 <td>{item.isbn}</td>
                                 <td>{item.title}</td>
+                                <td>{item.is_collectible === 1 ? "Yes" : "No"}</td>
                                 <td>{item.quantity_on_hand}</td>
+
                                 <td>
                                     {item.quantity_on_hand > 0
                                         ? "In Stock"
@@ -56,20 +63,19 @@ export default function Inventory() {
                                 </td>
 
                                 <td>
-                                    {/* ADMIN ONLY: Edit */}
-                                    {user.roles.includes("Admin") && (
-                                        <Link to={`/inventory/edit/${item.inventory_id}`}>
-                                            <button>Edit</button>
+                                    {canEditBook && (
+                                        <Link to={`/books/edit/${item.book_id}`}>
+                                            <button>Edit Book</button>
                                         </Link>
                                     )}
 
-                                    {/* ADMIN + EMPLOYEE: Update Qty */}
-                                    {(user.roles.includes("Admin") ||
-                                        user.roles.includes("Employee")) && (
-                                            <Link to={`/inventory/update/${item.inventory_id}`}>
-                                                <button>Update Qty</button>
-                                            </Link>
-                                        )}
+                                    {canEditInventory && (
+                                        <Link to={`/inventory/edit/${item.inventory_id}`}>
+                                            <button style={{ marginLeft: "10px" }}>
+                                                Edit Inventory
+                                            </button>
+                                        </Link>
+                                    )}
                                 </td>
                             </tr>
                         ))}

@@ -17,9 +17,15 @@ const { query, run } = require("./utils/db");
         console.log("Roles seeded:", roles);
 
         // =====================================================
-        // PERMISSIONS — FINAL RBAC MODEL
+        // PERMISSIONS — FINAL RBAC MODEL (CORRECTED)
         // =====================================================
         const permissions = [
+            // BOOKS
+            { module: "books", action: "read" },
+            { module: "books", action: "create" },
+            { module: "books", action: "update" },
+            { module: "books", action: "delete" },
+
             // INVENTORY
             { module: "inventory", action: "read" },
             { module: "inventory", action: "initialize" },
@@ -90,6 +96,7 @@ const { query, run } = require("./utils/db");
 
             ["inventory", "read"],
             ["inventory", "adjust"],
+            ["inventory", "update"],   // IMPORTANT FIX
 
             ["sales", "read"],
             ["sales", "create"],
