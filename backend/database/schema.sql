@@ -49,7 +49,7 @@ CREATE TABLE customers (
 -- BOOKS
 CREATE TABLE books (
     book_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    isbn TEXT UNIQUE,
+    isbn TEXT,
     title TEXT NOT NULL,
     author TEXT,
     publisher TEXT,

@@ -1,7 +1,10 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
+
+import FiltersPanel from "../../components/BooksList/FiltersPanel";
+import BooksTable from "../../components/BooksTable/BooksTable";
 
 export default function BooksList() {
     const navigate = useNavigate();
@@ -15,10 +18,38 @@ export default function BooksList() {
     const canUpdate = user?.modules?.books?.update === true;
     const canAddInventory = user?.modules?.inventory?.adjust === true;
 
+    // FILTER STATE
+    const [inStock, setInStock] = useState(false);
+    const [rareOnly, setRareOnly] = useState(false);
+
+    const [minPrice, setMinPrice] = useState(0);
+    const [maxPrice, setMaxPrice] = useState(500);
+    const [priceLimit, setPriceLimit] = useState(500);
+
+    // COLUMN VISIBILITY STATE
+    const [visibleColumns, setVisibleColumns] = useState({
+        bookId: true,
+        title: true,
+        author: true,
+        isbn: true,
+        publisher: true,
+        category: true,
+        price: true,
+        collectible: true,
+        available: true,
+        actions: true
+    });
+
+    // LOAD BOOKS
     useEffect(() => {
         api.get("/books")
             .then((res) => {
                 setBooks(res);
+
+                const highest = Math.max(...res.map(b => b.price));
+                setPriceLimit(highest || 500);
+                setMaxPrice(highest || 500);
+
                 setLoading(false);
             })
             .catch((err) => {
@@ -27,6 +58,14 @@ export default function BooksList() {
                 setLoading(false);
             });
     }, []);
+
+    // APPLY FILTERS
+    const filteredBooks = useMemo(() => {
+        return books
+            .filter(b => !inStock || b.quantity_on_hand > 0)
+            .filter(b => !rareOnly || b.is_collectible === 1)
+            .filter(b => b.price >= minPrice && b.price <= maxPrice);
+    }, [books, inStock, rareOnly, minPrice, maxPrice]);
 
     if (loading) {
         return (
@@ -38,82 +77,48 @@ export default function BooksList() {
     }
 
     return (
-        <div className="page">
-            <h1>Books</h1>
+        <div className="page books-layout">
+            {/* SIDEBAR FILTERS */}
+            <FiltersPanel
+                inStock={inStock}
+                rareOnly={rareOnly}
+                setInStock={setInStock}
+                setRareOnly={setRareOnly}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                priceLimit={priceLimit}
+                setMinPrice={setMinPrice}
+                setMaxPrice={setMaxPrice}
+                visibleColumns={visibleColumns}
+                setVisibleColumns={setVisibleColumns}
+            />
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            {/* MAIN CONTENT */}
+            <main className="books-main">
+                <h1>Books</h1>
 
-            {canCreate && (
-                <button
-                    onClick={() => navigate("/books/add")}
-                    style={{ marginBottom: "20px" }}
-                >
-                    Add New Book
-                </button>
-            )}
+                {error && <p style={{ color: "red" }}>{error}</p>}
 
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th>Book ID</th>
-                        <th>Title</th>
-                        <th>Author</th>
-                        <th>ISBN</th>
-                        <th>Publisher</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Collectible</th>
-                        <th>Available</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+                {canCreate && (
+                    <button
+                        onClick={() => navigate("/books/add")}
+                        style={{ marginBottom: "20px" }}
+                    >
+                        Add New Book
+                    </button>
+                )}
 
-                <tbody>
-                    {books.map((b) => (
-                        <tr key={b.book_id}>
-                            <td>{b.book_id}</td>
-                            <td>{b.title}</td>
-                            <td>{b.author}</td>
-                            <td>{b.isbn}</td>
-                            <td>{b.publisher}</td>
-                            <td>{b.category}</td>
-                            <td>${Number(b.price).toFixed(2)}</td>
-                            <td>{b.is_collectible ? "Yes" : "No"}</td>
-
-                            <td>
-                                {canAddInventory
-                                    ? b.quantity_on_hand
-                                    : b.available_quantity}
-                            </td>
-
-                            <td>
-                                {canUpdate && (
-                                    <button
-                                        onClick={() =>
-                                            navigate(`/books/edit/${b.book_id}`)
-                                        }
-                                    >
-                                        Edit
-                                    </button>
-                                )}
-
-                                {canAddInventory && b.inventory_id && (
-                                    <button
-                                        onClick={() =>
-                                            navigate(
-                                                `/inventory/edit/${b.inventory_id}`
-                                            )
-                                        }
-                                        style={{ marginLeft: "10px" }}
-                                    >
-                                        Edit Inventory
-                                    </button>
-                                )}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                <BooksTable
+                    books={filteredBooks}
+                    visibleColumns={visibleColumns}
+                    canUpdate={canUpdate}
+                    canAddInventory={canAddInventory}
+                    onEditBook={(id) => navigate(`/books/edit/${id}`)}
+                    onEditInventory={(inventoryId) =>
+                        navigate(`/inventory/edit/${inventoryId}`)
+                    }
+                />
+            </main>
         </div>
     );
 }
