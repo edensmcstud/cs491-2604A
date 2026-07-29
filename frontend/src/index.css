@@ -248,3 +248,10 @@ a {
     .sidebar-nav a:hover {
         color: var(--accent);
     }
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text: #d1d5db; /* brighter */
+        --text-h: #f9fafb; /* brighter */
+    }
+}
