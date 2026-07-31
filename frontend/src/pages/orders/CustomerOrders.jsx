@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
 import api from "../../api/api";
+import { useAuth } from "../../context/AuthContext";
 
 export default function CustomerOrders() {
+    const { user } = useAuth();
+
     const [books, setBooks] = useState([]);
     const [customerId, setCustomerId] = useState("");
     const [bookId, setBookId] = useState("");
     const [quantity, setQuantity] = useState(1);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+
+    const isCustomer = user?.roles?.includes("Customer");
 
     useEffect(() => {
         async function loadBooks() {
@@ -29,7 +34,9 @@ export default function CustomerOrders() {
         setMessage("");
         setError("");
 
-        if (!customerId) {
+        // Staff members must identify the customer for whom
+        // they are creating the order.
+        if (!isCustomer && !customerId) {
             setError("Please enter a customer ID.");
             return;
         }
@@ -44,16 +51,23 @@ export default function CustomerOrders() {
             return;
         }
 
+        const orderData = {
+            items: [
+                {
+                    book_id: Number(bookId),
+                    quantity: Number(quantity)
+                }
+            ]
+        };
+
+        // Customers do not send a customer ID. The backend finds
+        // their customer profile from the logged-in user account.
+        if (!isCustomer) {
+            orderData.customer_id = Number(customerId);
+        }
+
         try {
-            await api.post("/customerOrders", {
-                customer_id: Number(customerId),
-                items: [
-                    {
-                        book_id: Number(bookId),
-                        quantity: Number(quantity)
-                    }
-                ]
-            });
+            await api.post("/customerOrders", orderData);
 
             setMessage("Customer order created successfully.");
             setBookId("");
@@ -73,20 +87,30 @@ export default function CustomerOrders() {
         <div className="page">
             <h1>Customer Orders</h1>
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="customerId">Customer ID</label>
+            {isCustomer && (
+                <p>
+                    Place an order for your account. Your customer information
+                    will be added automatically.
+                </p>
+            )}
 
-                    <input
-                        id="customerId"
-                        type="number"
-                        min="1"
-                        value={customerId}
-                        onChange={(event) =>
-                            setCustomerId(event.target.value)
-                        }
-                    />
-                </div>
+            <form onSubmit={handleSubmit}>
+                {!isCustomer && (
+                    <div>
+                        <label htmlFor="customerId">Customer ID</label>
+
+                        <input
+                            id="customerId"
+                            type="number"
+                            min="1"
+                            value={customerId}
+                            onChange={(event) =>
+                                setCustomerId(event.target.value)
+                            }
+                            required
+                        />
+                    </div>
+                )}
 
                 <div>
                     <label htmlFor="bookId">Book</label>
@@ -97,6 +121,7 @@ export default function CustomerOrders() {
                         onChange={(event) =>
                             setBookId(event.target.value)
                         }
+                        required
                     >
                         <option value="">Select a book</option>
 
@@ -122,21 +147,17 @@ export default function CustomerOrders() {
                         onChange={(event) =>
                             setQuantity(event.target.value)
                         }
+                        required
                     />
                 </div>
 
                 <button type="submit">
-                    Create Order
+                    Place Order
                 </button>
             </form>
 
-            {message && (
-                <p>{message}</p>
-            )}
-
-            {error && (
-                <p>{error}</p>
-            )}
+            {message && <p>{message}</p>}
+            {error && <p>{error}</p>}
 
             <h2>Orders</h2>
 

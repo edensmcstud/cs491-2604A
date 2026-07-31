@@ -17,18 +17,39 @@ exports.createCustomerOrder = async (req, res) => {
     try {
         const { customer_id, items } = req.body;
 
-if (!customer_id || !Array.isArray(items) || items.length === 0) {
+if (!Array.isArray(items) || items.length === 0) {
     return res.status(400).json({
-    error: "customer_id and items[] required"
+        error: "At least one order item is required"
     });
 }
 
-// Validate customer exists
+let orderCustomerId = customer_id;
+
+// If no customer ID was supplied, use the profile
+// linked to the currently logged-in user.
+if (!orderCustomerId) {
+    const profileRows = await query(
+        `SELECT customer_id
+         FROM customers
+         WHERE user_id = ?`,
+        [req.user.user_id]
+    );
+
+    if (profileRows.length === 0) {
+        return res.status(400).json({
+            error: "No customer profile is linked to this account"
+        });
+    }
+
+    orderCustomerId = profileRows[0].customer_id;
+}
+
+// Confirm the selected or linked customer exists.
 const custRows = await query(
     `SELECT customer_id
      FROM customers
      WHERE customer_id = ?`,
-    [customer_id]
+    [orderCustomerId]
 );
 
 if (custRows.length === 0) {
@@ -87,7 +108,7 @@ if (custRows.length === 0) {
         const orderResult = await run(
             `INSERT INTO customer_orders (customer_id, subtotal, tax, total, status)
              VALUES (?, ?, ?, ?, 'Pending')`,
-            [customer_id, subtotal, tax, total]
+            [orderCustomerId, subtotal, tax, total]
         );
 
         const orderId = orderResult.lastID;
