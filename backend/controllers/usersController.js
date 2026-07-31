@@ -14,7 +14,8 @@ const bcrypt = require("bcrypt");
  */
 exports.createUser = async (req, res) => {
     try {
-        const { username, password, email, roles } = req.body;
+        const { username, email, password, confirmPassword } = req.body;
+
 
         if (!username || !password) {
             return res.status(400).json({ error: "username and password required" });

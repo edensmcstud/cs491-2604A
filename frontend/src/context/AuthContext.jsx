@@ -12,16 +12,27 @@ export function AuthProvider({ children }) {
     async function login(username, password) {
         const result = await api.post("/auth/login", { username, password });
 
-        // Store token
         localStorage.setItem("token", result.token);
-
-        // Store full user object (roles, modules, user_id, username)
         localStorage.setItem("user", JSON.stringify(result.user));
-
-        // Set full user object in state
         setUser(result.user);
 
         return result;
+    }
+
+    // Register function — FIXED to correctly throw Axios errors
+    async function register(username, email, password, confirmPassword) {
+        try {
+            const response = await api.post("/auth/register", {
+                username,
+                email,
+                password,
+                confirmPassword
+            });
+
+            return response; // success
+        } catch (err) {
+            throw err; // IMPORTANT: let Register.jsx handle errorCode + message
+        }
     }
 
     function logout() {
@@ -31,7 +42,7 @@ export function AuthProvider({ children }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, login, logout, register }}>
             {children}
         </AuthContext.Provider>
     );

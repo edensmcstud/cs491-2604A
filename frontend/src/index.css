@@ -255,3 +255,55 @@ a {
         --text-h: #f9fafb; /* brighter */
     }
 }
+
+.auth-container {
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 32px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+}
+
+    .auth-container h2 {
+        margin-bottom: 24px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .auth-container form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .auth-container input {
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+
+    .auth-container button {
+        padding: 12px;
+        font-size: 16px;
+        background: #0078d4;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+        .auth-container button:hover {
+            background: #005fa3;
+        }
+
+.error {
+    background: #ffe5e5;
+    color: #b30000;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    text-align: center;
+}

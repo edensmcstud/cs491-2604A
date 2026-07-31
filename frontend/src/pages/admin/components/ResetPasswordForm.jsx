@@ -1,21 +1,20 @@
 import { useState } from "react";
 import api from "../../../api/api";
 
-export default function ResetPasswordForm({ user, onDone, onClose }) {
+export default function ResetPasswordForm({ user, onSuccess, onCancel }) {
     const [password, setPassword] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            await api.put(`/users/${user.user_id}/password`, {
+            await api.put(`/admin/users/${user.user_id}/password`, {
                 password
             });
 
-            onDone();
-            onClose();
+            onSuccess();
         } catch (err) {
-            console.error(err);
+            console.error("Reset password error:", err);
             alert("Failed to reset password");
         }
     };
@@ -32,8 +31,12 @@ export default function ResetPasswordForm({ user, onDone, onClose }) {
                 required
             />
 
-            <button type="submit">Reset</button>
-            <button type="button" onClick={onClose}>Cancel</button>
+            <div style={{ marginTop: "1rem" }}>
+                <button type="submit">Reset</button>
+                <button type="button" onClick={onCancel} style={{ marginLeft: "1rem" }}>
+                    Cancel
+                </button>
+            </div>
         </form>
     );
 }

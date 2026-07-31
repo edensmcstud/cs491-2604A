@@ -1,24 +1,27 @@
 import api from "../../../api/api";
 
-export default function DeleteUserConfirm({ user, onDone, onClose }) {
+export default function DeleteUserConfirm({ user, onSuccess, onCancel }) {
     const handleDelete = async () => {
         try {
-            await api.delete(`/users/${user.user_id}`);
-            onDone();
-            onClose();
+            await api.delete(`/admin/users/${user.user_id}`);
+            onSuccess();
         } catch (err) {
-            console.error(err);
-            alert("Failed to deactivate user");
+            console.error("Delete user error:", err);
+            alert("Failed to delete user");
         }
     };
 
     return (
         <div>
-            <h2>Deactivate User</h2>
-            <p>Are you sure you want to deactivate {user.username}?</p>
+            <h2>Delete User</h2>
+            <p>Are you sure you want to delete <strong>{user.username}</strong>?</p>
 
-            <button onClick={handleDelete}>Deactivate</button>
-            <button onClick={onClose}>Cancel</button>
+            <button onClick={handleDelete} style={{ marginRight: "1rem" }}>
+                Delete
+            </button>
+            <button onClick={onCancel}>
+                Cancel
+            </button>
         </div>
     );
 }

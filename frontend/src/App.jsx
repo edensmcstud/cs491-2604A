@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 // Auth
 import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
 
 // Dashboard
 import Dashboard from "./pages/Dashboard";
@@ -52,6 +53,8 @@ export default function App() {
         <Routes>
             {/* Public */}
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
 
             {/* Protected */}
             <Route

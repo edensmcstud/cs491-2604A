@@ -1,4 +1,4 @@
-﻿const { query } = require("../utils/db");
+﻿const { query, run } = require("../utils/db");
 const bcrypt = require("bcrypt");
 
 class Users {
@@ -28,6 +28,99 @@ class Users {
     }
 
     /**
+     * Find user by email
+     */
+    static async findByEmail(email) {
+        const rows = await query(
+            `SELECT *
+             FROM users
+             WHERE email = ?
+             LIMIT 1`,
+            [email]
+        );
+
+        if (rows.length === 0) return null;
+        return new Users(rows[0]);
+    }
+
+    /**
+     * Create a new user
+     */
+    static async create(username, email, password) {
+        const password_hash = await bcrypt.hash(password, 10);
+
+        const result = await run(
+            `INSERT INTO users (username, email, password_hash, is_active, created_at)
+             VALUES (?, ?, ?, 1, datetime('now'))`,
+            [username, email, password_hash]
+        );
+
+        return {
+            user_id: result.lastID,
+            username,
+            email,
+            created_at: new Date().toISOString()
+        };
+    }
+
+    /**
+     * Assign a role to a user
+     */
+    static async assignRole(user_id, role_id) {
+        await run(
+            `INSERT INTO user_roles (user_id, role_id)
+             VALUES (?, ?)`,
+            [user_id, role_id]
+        );
+    }
+
+    /**
+     * Remove ALL roles from a user (single-role model)
+     */
+    static async removeRoles(user_id) {
+        await run(
+            `DELETE FROM user_roles
+             WHERE user_id = ?`,
+            [user_id]
+        );
+    }
+
+    /**
+     * Set a user's role (single-role model)
+     * Removes old role → assigns new role
+     */
+    static async setUserRole(user_id, roleName) {
+        const role_id = await Users.getRoleId(roleName);
+        if (!role_id) throw new Error(`Role not found: ${roleName}`);
+
+        await Users.removeRoles(user_id);
+        await Users.assignRole(user_id, role_id);
+    }
+
+    /**
+     * Delete a user (and their roles)
+     */
+    static async deleteUser(user_id) {
+        await run(`DELETE FROM user_roles WHERE user_id = ?`, [user_id]);
+        await run(`DELETE FROM users WHERE user_id = ?`, [user_id]);
+    }
+
+    /**
+     * Lookup role_id by role_name
+     */
+    static async getRoleId(roleName) {
+        const rows = await query(
+            `SELECT role_id
+             FROM roles
+             WHERE role_name = ?
+             LIMIT 1`,
+            [roleName]
+        );
+
+        return rows.length ? rows[0].role_id : null;
+    }
+
+    /**
      * Get role names for a user
      */
     static async getRoles(user_id) {
@@ -43,6 +136,25 @@ class Users {
     }
 
     /**
+     * Get ALL users (for admin panel)
+     */
+    static async getAllUsers() {
+        const rows = await query(
+            `SELECT user_id, username, email, is_active, created_at
+             FROM users
+             ORDER BY created_at DESC`
+        );
+
+        // Attach roles to each user
+        for (const row of rows) {
+            const roles = await Users.getRoles(row.user_id);
+            row.roles = roles;
+        }
+
+        return rows;
+    }
+
+    /**
      * Verify password
      */
     async verifyPassword(password) {
@@ -55,7 +167,6 @@ class Users {
     static async getPermissionsForRoles(roleNames) {
         if (!roleNames || roleNames.length === 0) return [];
 
-        // Convert role names → role_ids
         const placeholders = roleNames.map(() => "?").join(",");
         const roleRows = await query(
             `SELECT role_id
@@ -68,7 +179,6 @@ class Users {
 
         const roleIds = roleRows.map(r => r.role_id);
 
-        // Load permissions for those role_ids
         const permPlaceholders = roleIds.map(() => "?").join(",");
         const permRows = await query(
             `SELECT p.module, p.action

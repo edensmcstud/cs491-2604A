@@ -1,3 +1,4 @@
+
 // server.js
 
 require('dotenv').config();
@@ -68,6 +69,13 @@ app.use('/api/audit', require('./routes/audit'));
 
 // Backup / Restore
 app.use('/api/backup', require('./routes/backup'));
+
+console.log("Mounting /api/admin...");
+app.use('/api/admin', require('./routes/adminRoutes'));
+console.log("Mounted /api/admin.");
+
+
+
 
 const testRoutes = require("./routes/testRoutes");
 app.use("/test", testRoutes);
