@@ -79,6 +79,75 @@ exports.logout = async (req, res) => {
 };
 
 /**
+ * Register
+ */
+exports.register = async (req, res) => {
+    try {
+        const { username, email, password, confirmPassword } = req.body;
+
+        // Basic validation
+        if (!email || !password || !confirmPassword || !username) {
+            return res.status(400).json({
+                errorCode: "MISSING_FIELDS",
+                message: "Username, email, password, and confirmPassword are required."
+            });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                errorCode: "INVALID_EMAIL",
+                message: "Email format is invalid."
+            });
+        }
+
+        if (password !== confirmPassword) {
+            return res.status(400).json({
+                errorCode: "PASSWORD_MISMATCH",
+                message: "Passwords do not match."
+            });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({
+                errorCode: "WEAK_PASSWORD",
+                message: "Password must be at least 8 characters long."
+            });
+        }
+
+        // Check if user exists
+        const existing = await Users.findByEmail(email);
+        if (existing) {
+            return res.status(409).json({
+                errorCode: "EMAIL_EXISTS",
+                message: "An account with this email already exists."
+            });
+        }
+
+        // Create user
+        const newUser = await Users.create(username, email, password);
+
+        // Assign default role: Customer
+        const customerRoleId = await Users.getRoleId("Customer");
+        await Users.assignRole(newUser.user_id, customerRoleId);
+
+        return res.status(201).json({
+            id: newUser.user_id,
+            username: newUser.username,
+            email: newUser.email,
+            createdAt: newUser.created_at
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            errorCode: "SERVER_ERROR",
+            message: "An unexpected error occurred."
+        });
+    }
+};
+
+/**
  * Test endpoint
  */
 exports.test = (req, res) => {

@@ -1,77 +1,116 @@
 ﻿import { useState, useEffect } from "react";
 import api from "../../api/api";
+
 import Table from "../../components/Table";
 import Modal from "../../components/Modal";
 
+import CreateUserForm from "./components/CreateUserForm";
+import EditUserForm from "./components/EditUserForm";
+import DeleteUserConfirm from "./components/DeleteUserConfirm";
+
 export default function UserAccounts() {
-    const [users, setUsers] = useState([]); // always an array
-    const [showModal, setShowModal] = useState(false);
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    const [modalType, setModalType] = useState(null); // "create" | "edit" | "delete"
     const [selectedUser, setSelectedUser] = useState(null);
 
+    // Load users from backend
+    async function loadUsers() {
+        try {
+            setLoading(true);
+            const data = await api.get("/admin/users");
+            setUsers(data);
+        } catch (err) {
+            console.error("Load users error:", err);
+            setError("Failed to load users");
+        } finally {
+            setLoading(false);
+        }
+    }
+
     useEffect(() => {
-        loadUsersStub();   // backend forbidden → stub
+        loadUsers();
     }, []);
 
-    // -----------------------------
-    // FUTURE IMPROVEMENT: /api/users
-    // -----------------------------
-    const loadUsersStub = () => {
-        console.warn("FUTURE IMPROVEMENT: /api/users backend not available or forbidden");
-
-        const stub = [
-            { user_id: 1, username: "admin", email: "admin@example.com" },
-            { user_id: 2, username: "manager", email: "manager@example.com" },
-            { user_id: 3, username: "staff", email: "staff@example.com" }
-        ];
-
-        setUsers(Array.isArray(stub) ? stub : []);
+    // Open modals
+    const openCreateModal = () => {
+        setSelectedUser(null);
+        setModalType("create");
     };
 
     const openEditModal = (user) => {
         setSelectedUser(user);
-        setShowModal(true);
+        setModalType("edit");
     };
 
-    const saveUser = async () => {
-        console.warn("FUTURE IMPROVEMENT: saveUser backend not implemented");
-
-        alert("User updated (stub mode)");
-        setShowModal(false);
+    const openDeleteModal = (user) => {
+        setSelectedUser(user);
+        setModalType("delete");
     };
+
+    const closeModal = () => {
+        setModalType(null);
+        setSelectedUser(null);
+    };
+
+    // After any action, reload users
+    const refresh = async () => {
+        await loadUsers();
+        closeModal();
+    };
+
+    if (loading) return <p>Loading...</p>;
 
     return (
         <div className="page">
             <h1>User Accounts</h1>
 
-            <p style={{ color: "orange", fontWeight: "bold" }}>
-                FUTURE IMPROVEMENT: User management will be connected to backend once
-                /api/users and related routes are implemented.
-            </p>
+            {error && <p style={{ color: "red" }}>{error}</p>}
+
+            <button onClick={openCreateModal} style={{ marginBottom: "1rem" }}>
+                Create Employee/Admin
+            </button>
 
             <Table
-                columns={["ID", "Username", "Email", "Actions"]}
-                data={Array.isArray(users) ? users.map((u) => ({
+                columns={["ID", "Username", "Email", "Role", "Actions"]}
+                data={users.map((u) => ({
                     ID: u.user_id,
                     Username: u.username,
                     Email: u.email,
+                    Role: u.roles?.[0] || "Customer",
                     Actions: (
-                        <button onClick={() => openEditModal(u)}>
-                            Edit
-                        </button>
+                        <>
+                            <button onClick={() => openEditModal(u)}>Edit</button>
+                            <button onClick={() => openDeleteModal(u)}>Delete</button>
+                        </>
                     )
-                })) : []}
+                }))}
             />
 
-            {showModal && selectedUser && (
-                <Modal onClose={() => setShowModal(false)}>
-                    <div>
-                        <h2>Edit User: {selectedUser.username}</h2>
+            {/* Modal Controller */}
+            {modalType && (
+                <Modal onClose={closeModal}>
+                    {modalType === "create" && (
+                        <CreateUserForm onSuccess={refresh} onCancel={closeModal} />
+                    )}
 
-                        <p>Email: {selectedUser.email}</p>
+                    {modalType === "edit" && selectedUser && (
+                        <EditUserForm
+                            user={selectedUser}
+                            onSuccess={refresh}
+                            onCancel={closeModal}
+                        />
+                    )}
 
-                        <button onClick={saveUser}>Save</button>
-                        <button onClick={() => setShowModal(false)}>Cancel</button>
-                    </div>
+                    {modalType === "delete" && selectedUser && (
+                        <DeleteUserConfirm
+                            user={selectedUser}
+                            onSuccess={refresh}
+                            onCancel={closeModal}
+                        />
+                    )}
                 </Modal>
             )}
         </div>

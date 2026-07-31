@@ -38,15 +38,22 @@ db.get(
 
         if (row.count === 0) {
             console.log("Database is empty — initializing schema...");
-            db.exec(schema, (err) => {
+            db.exec(schema, async (err) => {
                 if (err) {
                     console.error("Failed to initialize database schema:");
                     console.error(err.message);
                 } else {
                     console.log("Database schema initialized");
+
+                    // Run RBAC bootstrap
+                    const bootstrapRBAC = require("./bootstrapRBAC");
+                    await bootstrapRBAC(db);
+
+                    console.log("RBAC bootstrap complete.");
                 }
             });
-        } else {
+        }
+ else {
             console.log("Database schema already present");
         }
     }

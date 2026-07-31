@@ -1,7 +1,6 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -12,19 +11,22 @@ export default function Login() {
     const navigate = useNavigate();
 
     async function handleSubmit(e) {
-        e.preventDefault(); // CRITICAL: stops raw form POST
+        e.preventDefault();
         setError("");
-
-        console.log("Submitting login:", { username, password });
 
         try {
             const result = await login(username, password);
-            console.log("Login result:", result);
-
             navigate("/dashboard");
+
         } catch (err) {
-            console.log("Login error:", err.response?.data || err.message);
-            setError(err.response?.data?.message || "Login failed");
+            const data = err.response?.data;
+
+            // Prefer backend message → fallback to backend error → fallback to generic
+            setError(
+                data?.message ||
+                data?.error ||
+                "Login failed"
+            );
         }
     }
 
@@ -32,7 +34,6 @@ export default function Login() {
         <div className="page">
             <h1>Login</h1>
 
-            {/* CRITICAL FIX: onSubmit handler */}
             <form onSubmit={handleSubmit}>
                 <label>Username</label>
                 <input
@@ -50,9 +51,12 @@ export default function Login() {
 
                 {error && <p style={{ color: "red" }}>{error}</p>}
 
-                {/* CRITICAL FIX: type="submit" */}
                 <button type="submit">Login</button>
             </form>
+
+            <div className="auth-link">
+                <a href="/register">Create an account</a>
+            </div>
         </div>
     );
 }
