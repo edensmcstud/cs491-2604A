@@ -48,6 +48,9 @@ app.use('/api/inventory', require('./routes/inventory'));
 // Sales
 app.use('/api/sales', require('./routes/sales'));
 
+// Customer Orders
+app.use('/api/customerOrders', require('./routes/customerOrders'));
+
 // Supplier Orders
 app.use('/api/supplierOrders', require('./routes/supplierOrders'));
 
