@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 
@@ -52,6 +52,9 @@ export default function Login() {
 
                 {/* CRITICAL FIX: type="submit" */}
                 <button type="submit">Login</button>
+                <p>
+                    Don&apos;t have an account? <Link to="/register">Create one</Link>
+                </p>
             </form>
         </div>
     );
