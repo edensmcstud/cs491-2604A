@@ -6,7 +6,7 @@ const requirePermission = require("../middleware/requirePermission");
 const requireAuth = require("../middleware/requireAuth");
 
 // =====================================================
-// CUSTOMER ORDER ROUTES — RBAC OVERHAUL VERSION
+// CUSTOMER ORDER ROUTES ï¿½ RBAC OVERHAUL VERSION
 // =====================================================
 
 // -----------------------------------------------------
@@ -17,8 +17,8 @@ const requireAuth = require("../middleware/requireAuth");
 // -----------------------------------------------------
 router.post(
     "/",
-    requirePermission("customer_orders", "create"),
     requireAuth,
+    requirePermission("customer_orders", "create"),
     customerOrdersController.createCustomerOrder
 );
 
@@ -28,8 +28,9 @@ router.post(
 // -----------------------------------------------------
 router.get(
     "/",
+    requireAuth,
     requirePermission("customer_orders", "read"),
-    customerOrdersController.getAllCustomerOrders
+    customerOrdersController.getCustomerOrders
 );
 
 // -----------------------------------------------------
@@ -39,8 +40,8 @@ router.get(
 // -----------------------------------------------------
 router.get(
     "/:id",
-    requirePermission("customer_orders", "read"),
     requireAuth,
+    requirePermission("customer_orders", "read"),
     customerOrdersController.getCustomerOrderById
 );
 
