@@ -1,21 +1,20 @@
 module.exports = (err, req, res, next) => {
-    // Always log the full error for debugging
     console.error("ERROR:", err);
 
-    // Normalize error object
     const status =
-        typeof err.status === "number"
+        (err && typeof err === "object" && typeof err.status === "number")
             ? err.status
             : 500;
 
-    // Prevent leaking raw SQL errors or stack traces
     const message =
-        typeof err.message === "string"
+        (err && typeof err === "object" && typeof err.message === "string")
             ? err.message
-            : "Internal server error";
+            : String(err || "Internal server error");
 
-    // Send safe JSON response
-    res.status(status).json({
-        error: message
-    });
+    if (!res || typeof res.status !== "function") {
+        console.error("FATAL: res is undefined in error handler");
+        return;
+    }
+
+    res.status(status).json({ error: message });
 };

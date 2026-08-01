@@ -86,6 +86,8 @@ CREATE TABLE customer_orders (
     order_date TEXT DEFAULT (datetime('now')),
     status TEXT NOT NULL DEFAULT 'Pending'
         CHECK (status IN ('Pending','Paid','Shipped','Cancelled')),
+    fulfillment_type TEXT DEFAULT 'Shipped'
+    CHECK (fulfillment_type IN ('Shipped', 'InStore')),
     subtotal REAL NOT NULL,
     tax REAL NOT NULL,
     total REAL NOT NULL,
