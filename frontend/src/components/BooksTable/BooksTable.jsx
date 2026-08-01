@@ -1,14 +1,21 @@
 ﻿import { useState, useMemo } from "react";
+import { useCart } from "../../context/CartContext";
 import SortHeader from "./SortHeader";
+import api from "../../api/api.js";
+
+
 
 export default function BooksTable({
     books,
     visibleColumns,
+    canUseCart,
     canUpdate,
     canAddInventory,
     onEditBook,
     onEditInventory
 }) {
+    const { addToCart, loadCart } = useCart();
+
     const [sortColumn, setSortColumn] = useState("title");
     const [sortDirection, setSortDirection] = useState("asc");
 
@@ -156,16 +163,31 @@ export default function BooksTable({
 
                                 {canAddInventory && b.inventory_id && (
                                     <button
-                                        onClick={() =>
-                                            onEditInventory(b.inventory_id)
-                                        }
+                                        onClick={() => onEditInventory(b.inventory_id)}
                                         style={{ marginLeft: "10px" }}
                                     >
                                         Edit Inventory
                                     </button>
                                 )}
+
+                                {canUseCart && (
+                                    <button
+                                        onClick={async () => {
+                                            const token = localStorage.getItem("token");
+
+                                            await addToCart(b.book_id);
+
+
+                                            alert("Added to cart");
+                                        }}
+                                        style={{ marginLeft: "10px" }}
+                                    >
+                                        Add to Cart
+                                    </button>
+                                )}
                             </div>
                         )}
+
                     </div>
                 ))}
             </div>
