@@ -45,7 +45,7 @@ export default function BooksList() {
 
     // LOAD BOOKS
     useEffect(() => {
-        api.get("/books")
+        api.get("/books/withInventory")
             .then((res) => {
                 setBooks(res);
 

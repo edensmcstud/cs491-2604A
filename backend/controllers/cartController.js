@@ -48,13 +48,14 @@ exports.addToCart = async (req, res) => {
         const user_id = req.user.user_id;
         const { book_id, quantity } = req.body;
 
+        // Basic input validation
         if (!book_id || !quantity || quantity < 1) {
             return res.status(400).json({ error: "Invalid book or quantity" });
         }
 
-        // Validate inventory stock
+        // Load inventory for this book
         const invRows = await query(
-            `SELECT quantity_on_hand
+            `SELECT quantity_on_hand, quantity_reserved
              FROM inventory
              WHERE book_id = ?`,
             [book_id]
@@ -64,25 +65,46 @@ exports.addToCart = async (req, res) => {
             return res.status(404).json({ error: "Inventory record not found" });
         }
 
-        const available = invRows[0].quantity_on_hand;
+        const { quantity_on_hand, quantity_reserved } = invRows[0];
 
-        if (available < quantity) {
-            return res.status(400).json({ error: "Not enough stock available" });
+        // Compute effective available stock
+        const effectiveAvailable = quantity_on_hand - quantity_reserved;
+
+        if (effectiveAvailable <= 0) {
+            return res.status(400).json({
+                error: "No stock available for this book"
+            });
         }
 
-        // Check if already in cart
+        // Check existing cart quantity for this user/book
         const existing = await query(
-            `SELECT quantity FROM cart_items
+            `SELECT quantity
+             FROM cart_items
              WHERE user_id = ? AND book_id = ?`,
             [user_id, book_id]
         );
 
+        const currentQty = existing.length > 0 ? existing[0].quantity : 0;
+        const newQty = currentQty + quantity;
+
+        // Enforce that cart quantity cannot exceed effective available stock
+        if (newQty > effectiveAvailable) {
+            return res.status(400).json({
+                error: "Not enough stock available",
+                details: {
+                    requested_total_quantity: newQty,
+                    available_quantity: effectiveAvailable
+                }
+            });
+        }
+
+        // Insert or update cart item
         if (existing.length > 0) {
             await run(
                 `UPDATE cart_items
-                 SET quantity = quantity + ?
+                 SET quantity = ?
                  WHERE user_id = ? AND book_id = ?`,
-                [quantity, user_id, book_id]
+                [newQty, user_id, book_id]
             );
         } else {
             await run(
@@ -98,6 +120,7 @@ exports.addToCart = async (req, res) => {
         res.status(500).json({ error: "Failed to add to cart" });
     }
 };
+
 
 /**
  * ============================
@@ -163,13 +186,15 @@ exports.checkout = async (req, res) => {
         // Load cart
         const cart = await query(
             `SELECT ci.book_id,
-                    ci.quantity,
-                    b.price,
-                    inv.quantity_on_hand
-             FROM cart_items ci
-             JOIN books b ON b.book_id = ci.book_id
-             JOIN inventory inv ON inv.book_id = ci.book_id
-             WHERE ci.user_id = ?`,
+       ci.quantity,
+       b.price,
+       inv.quantity_on_hand,
+       inv.quantity_reserved
+FROM cart_items ci
+JOIN books b ON b.book_id = ci.book_id
+JOIN inventory inv ON inv.book_id = ci.book_id
+WHERE ci.user_id = ?
+`,
             [user_id]
         );
 
@@ -177,11 +202,18 @@ exports.checkout = async (req, res) => {
             return res.status(400).json({ error: "Cart is empty" });
         }
 
-        // Validate stock
+        // Validate effective stock (quantity_on_hand - quantity_reserved)
         for (const item of cart) {
-            if (item.quantity_on_hand < item.quantity) {
+            const effectiveAvailable = item.quantity_on_hand - item.quantity_reserved;
+
+            if (effectiveAvailable < item.quantity) {
                 return res.status(400).json({
-                    error: `Not enough stock for book ${item.book_id}`
+                    error: "INSUFFICIENT_STOCK",
+                    message: `Not enough stock for book ${item.book_id}`,
+                    details: {
+                        requested_quantity: item.quantity,
+                        available_quantity: effectiveAvailable
+                    }
                 });
             }
         }
@@ -238,7 +270,7 @@ exports.checkout = async (req, res) => {
 
             await run(
                 `UPDATE inventory
-                 SET quantity_on_hand = quantity_on_hand - ?
+                SET quantity_reserved = quantity_reserved + ?
                  WHERE book_id = ?`,
                 [item.quantity, item.book_id]
             );

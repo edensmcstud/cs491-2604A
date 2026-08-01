@@ -2,7 +2,7 @@
 const { query, run } = require("../utils/db");
 
 module.exports = async function bootstrapRBAC() {
-    console.log("=== Initializing Unified RBAC ===");
+    console.log("=== Initializing Unified RBAC (Corrected) ===");
 
     // =====================================================
     // ROLES
@@ -39,16 +39,17 @@ module.exports = async function bootstrapRBAC() {
         { module: "sales", action: "read" },
         { module: "sales", action: "create" },
 
-        // CUSTOMER ORDERS
+        // CUSTOMER ORDERS (Unified)
         { module: "customer_orders", action: "read" },
         { module: "customer_orders", action: "create" },
+        { module: "customer_orders", action: "fulfill" },   // NEW
 
         // SUPPLIER ORDERS
         { module: "supplier_orders", action: "read" },
         { module: "supplier_orders", action: "create" },
         { module: "supplier_orders", action: "receive" },
 
-        // CART (NEW)
+        // CART
         { module: "cart", action: "use" },
 
         // AUDIT LOGS
@@ -104,12 +105,10 @@ module.exports = async function bootstrapRBAC() {
         ["sales", "create"],
 
         ["customer_orders", "read"],
-        ["customer_orders", "create"],
+        ["customer_orders", "fulfill"],   // NEW
 
         ["supplier_orders", "read"],
-        ["supplier_orders", "create"],
-
-        // Employees DO NOT get cart/use (customer only)
+        ["supplier_orders", "create"]
     ];
 
     for (const [module, action] of employeePerms) {
@@ -119,8 +118,8 @@ module.exports = async function bootstrapRBAC() {
     // CUSTOMER: minimal access
     const customerPerms = [
         ["books", "read"],
-        ["cart", "use"],
-        ["customer_orders", "create"]
+        ["cart", "use"]
+        // Removed customer_orders entirely
     ];
 
     for (const [module, action] of customerPerms) {

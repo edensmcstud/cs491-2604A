@@ -55,6 +55,9 @@ app.use("/api/cart", require('./routes/cartRoutes'));
 // Customer Orders
 app.use('/api/customerOrders', require('./routes/customerOrders'));
 
+// Fulfillment Orders
+app.use('/api/orders', require('./routes/orders'));
+
 // Supplier Orders
 app.use('/api/supplierOrders', require('./routes/supplierOrders'));
 
