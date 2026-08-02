@@ -74,9 +74,10 @@ export default function UserAccounts() {
             </button>
 
             <Table
-                columns={["ID", "Username", "Email", "Role", "Actions"]}
+                columns={["User ID", "Customer ID", "Username", "Email", "Role", "Actions"]}
                 data={users.map((u) => ({
-                    ID: u.user_id,
+                    "User ID": u.user_id,
+                    "Customer ID": u.customer_id ?? "—",
                     Username: u.username,
                     Email: u.email,
                     Role: u.roles?.[0] || "Customer",

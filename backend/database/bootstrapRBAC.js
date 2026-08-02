@@ -1,4 +1,4 @@
-﻿const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 const { query, run } = require("../utils/db");
 
 module.exports = async function bootstrapRBAC() {
@@ -108,7 +108,9 @@ module.exports = async function bootstrapRBAC() {
         ["customer_orders", "fulfill"],   // NEW
 
         ["supplier_orders", "read"],
-        ["supplier_orders", "create"]
+        ["supplier_orders", "create"],
+        ["supplier_orders", "receive"],
+
     ];
 
     for (const [module, action] of employeePerms) {
@@ -176,6 +178,10 @@ module.exports = async function bootstrapRBAC() {
              )`,
             [userId, roleName]
         );
+
+        if (roleName === "Customer") {
+            await run(`INSERT OR IGNORE INTO customers (user_id) VALUES (?)`, [userId]);
+        }
 
         return { username, email, role: roleName };
     }

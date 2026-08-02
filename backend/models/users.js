@@ -63,6 +63,18 @@ class Users {
         };
     }
 
+    static async ensureCustomerProfile(user_id) {
+        await run(
+            `INSERT OR IGNORE INTO customers (user_id) VALUES (?)`,
+            [user_id]
+        );
+        const rows = await query(
+            `SELECT customer_id FROM customers WHERE user_id = ?`,
+            [user_id]
+        );
+        return rows[0];
+    }
+
     /**
      * Assign a role to a user
      */
@@ -95,6 +107,10 @@ class Users {
 
         await Users.removeRoles(user_id);
         await Users.assignRole(user_id, role_id);
+
+        if (roleName === "Customer") {
+            await Users.ensureCustomerProfile(user_id);
+        }
     }
 
     /**
@@ -140,9 +156,11 @@ class Users {
      */
     static async getAllUsers() {
         const rows = await query(
-            `SELECT user_id, username, email, is_active, created_at
-             FROM users
-             ORDER BY created_at DESC`
+            `SELECT u.user_id, u.username, u.email, u.is_active, u.created_at,
+                    c.customer_id
+             FROM users AS u
+             LEFT JOIN customers AS c ON c.user_id = u.user_id
+             ORDER BY u.created_at DESC`
         );
 
         // Attach roles to each user

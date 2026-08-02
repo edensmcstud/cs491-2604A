@@ -1,4 +1,4 @@
-﻿const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 const { query, run } = require("./utils/db");
 
 (async () => {
@@ -103,9 +103,12 @@ const { query, run } = require("./utils/db");
 
             ["customer_orders", "read"],
             ["customer_orders", "create"],
+            ["customer_orders", "fulfill"],
 
             ["supplier_orders", "read"],
-            ["supplier_orders", "create"]
+            ["supplier_orders", "create"],
+        ["supplier_orders", "receive"],
+
         ];
 
         for (const [module, action] of employeePerms) {
@@ -182,6 +185,10 @@ const { query, run } = require("./utils/db");
                  )`,
                 [userId, roleName]
             );
+
+            if (roleName === "Customer") {
+                await run(`INSERT OR IGNORE INTO customers (user_id) VALUES (?)`, [userId]);
+            }
 
             return { username, email, password, role: roleName };
         }

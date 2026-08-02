@@ -1,5 +1,4 @@
 const { query, run } = require("../utils/db");
-const handleError = require("../middleware/errorHandler");
 const { logAction } = require("../utils/audit");
 
 // =====================================================
@@ -7,10 +6,10 @@ const { logAction } = require("../utils/audit");
 // =====================================================
 exports.createSupplierOrder = async (req, res) => {
     try {
-        const { supplier_id, items } = req.body;
+        const { items } = req.body;
 
-        if (!supplier_id || !Array.isArray(items) || items.length === 0) {
-            return res.status(400).json({ error: "supplier_id and items[] required" });
+        if (!Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ error: "items[] required" });
         }
 
         const createdBy = req.user?.user_id;
@@ -18,15 +17,22 @@ exports.createSupplierOrder = async (req, res) => {
             return res.status(403).json({ error: "Authentication required" });
         }
 
-        // Validate supplier exists
-        const supplierRows = await query(
-            `SELECT supplier_id FROM suppliers WHERE supplier_id = ?`,
-            [supplier_id]
+        // This project is a tech demo, so all purchase orders use one
+        // automatically-created placeholder supplier.
+        let supplierRows = await query(
+            `SELECT supplier_id FROM suppliers WHERE name = ? LIMIT 1`,
+            ["Demo Supplier"]
         );
 
         if (supplierRows.length === 0) {
-            return res.status(404).json({ error: "Supplier not found" });
+            const supplierResult = await run(
+                `INSERT INTO suppliers (name) VALUES (?)`,
+                ["Demo Supplier"]
+            );
+            supplierRows = [{ supplier_id: supplierResult.lastID }];
         }
+
+        const supplierId = supplierRows[0].supplier_id;
 
         // Validate each item
         for (const item of items) {
@@ -54,7 +60,7 @@ exports.createSupplierOrder = async (req, res) => {
         const orderResult = await run(
             `INSERT INTO supplier_orders (supplier_id, created_by, status, created_at)
              VALUES (?, ?, 'Created', datetime('now'))`,
-            [supplier_id, createdBy]
+            [supplierId, createdBy]
         );
 
         const supplierOrderId = orderResult.lastID;
@@ -79,7 +85,7 @@ exports.createSupplierOrder = async (req, res) => {
         });
 
     } catch (err) {
-        handleError(res, err);
+        res.status(500).json({ error: err.message || "Internal server error" });
     }
 };
 
@@ -110,7 +116,7 @@ exports.getSupplierOrders = async (req, res) => {
         res.json(orders);
 
     } catch (err) {
-        handleError(res, err);
+        res.status(500).json({ error: err.message || "Internal server error" });
     }
 };
 
@@ -148,7 +154,7 @@ exports.getSupplierOrderById = async (req, res) => {
         res.json(order);
 
     } catch (err) {
-        handleError(res, err);
+        res.status(500).json({ error: err.message || "Internal server error" });
     }
 };
 
@@ -192,8 +198,7 @@ exports.receiveSupplierOrder = async (req, res, next) => {
 
         await run(
             `UPDATE supplier_orders
-             SET status = 'Received',
-                 received_at = datetime('now')
+             SET status = 'Received'
              WHERE supplier_order_id = ?`,
             [orderId]
         );

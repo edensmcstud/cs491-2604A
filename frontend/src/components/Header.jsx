@@ -1,19 +1,25 @@
-﻿import { Link } from "react-router-dom";
+﻿import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 
 export default function Header() {
     const { count } = useCart();
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate("/login", { replace: true });
+    };
 
     return (
         <header className="header">
-            <h1>Bookstore Management System</h1>
+            <Link to="/dashboard" className="header-dashboard">Dashboard</Link>
 
             <nav className="header-nav">
 
-                {/* Cart only visible for Customer role */}
-                {user?.roles?.includes("Customer") && (
+                {/* Cart visible for anyone with cart permission */}
+                {user?.modules?.cart?.use === true && (
                     <Link to="/cart">
                         Cart ({count})
                     </Link>
@@ -22,9 +28,9 @@ export default function Header() {
                 {/* Logout always visible when logged in */}
                 {user && (
                     <button
-                        onClick={logout}
+                        type="button"
+                        onClick={handleLogout}
                         className="logout-button"
-                        style={{ marginLeft: "1rem" }}
                     >
                         Logout
                     </button>
