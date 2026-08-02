@@ -109,11 +109,21 @@ CREATE TABLE customer_order_items (
 -- SALES
 CREATE TABLE sales (
     sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    employee_id INTEGER NOT NULL,
+    customer_id INTEGER NULL,
+    employee_id INTEGER NULL,
     sale_date TEXT DEFAULT (datetime('now')),
     subtotal REAL NOT NULL,
     tax REAL NOT NULL,
     total REAL NOT NULL,
+    sale_source TEXT NOT NULL DEFAULT 'POS'
+        CHECK (sale_source IN ('POS','Fulfillment')),
+    fulfillment_type TEXT
+        CHECK (fulfillment_type IN ('Shipped','InStore')),
+    payment_method TEXT NOT NULL
+        CHECK (payment_method IN ('Cash','Card','GiftCard','StoreCredit')),
+    notes TEXT,
+    status TEXT NOT NULL DEFAULT 'Completed'
+    CHECK (status IN ('Completed','Voided','Refunded')),
     FOREIGN KEY (employee_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 

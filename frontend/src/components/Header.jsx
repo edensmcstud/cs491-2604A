@@ -1,22 +1,35 @@
 ﻿import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Header() {
-    const { count, loadCart } = useCart();
+    const { count } = useCart();
+    const { user, logout } = useAuth();
 
-
-    console.log("Header rendered → count =", count);
     return (
         <header className="header">
             <h1>Bookstore Management System</h1>
-            
-            <nav className="header-nav">
-                <Link to="/cart">
-                    Cart ({count})
-                    
 
-                </Link>
+            <nav className="header-nav">
+
+                {/* Cart only visible for Customer role */}
+                {user?.roles?.includes("Customer") && (
+                    <Link to="/cart">
+                        Cart ({count})
+                    </Link>
+                )}
+
+                {/* Logout always visible when logged in */}
+                {user && (
+                    <button
+                        onClick={logout}
+                        className="logout-button"
+                        style={{ marginLeft: "1rem" }}
+                    >
+                        Logout
+                    </button>
+                )}
+
             </nav>
         </header>
     );

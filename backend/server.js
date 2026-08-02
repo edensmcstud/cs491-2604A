@@ -15,10 +15,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Debug body logger (MUST COME BEFORE ROUTES)
+/*
 app.use((req, res, next) => {
     console.log("BODY RECEIVED:", req.body);
     next();
 });
+*/
 
 // ===============================
 // Database connection

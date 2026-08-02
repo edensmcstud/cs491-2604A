@@ -394,6 +394,43 @@ exports.deleteBook = async (req, res, next) => {
     }
 };
 
+
+/**
+ * Search books by title or author
+ */
+exports.searchBooks = async (req, res) => {
+    try {
+        const q = req.query.q?.trim();
+
+        if (!q) {
+            return res.json([]);
+        }
+
+        const rows = await query(
+            `SELECT 
+                b.book_id,
+                b.isbn,
+                b.title,
+                b.author,
+                b.publisher,
+                b.category,
+                b.price,
+                b.description,
+                b.publication_year,
+                b.is_collectible
+             FROM books b
+             WHERE b.title LIKE ?
+                OR b.author LIKE ?`,
+            [`%${q}%`, `%${q}%`]
+        );
+
+        res.json(rows);
+    } catch (err) {
+        console.error("BOOK SEARCH ERROR:", err);
+        res.status(500).json({ error: "Failed to search books" });
+    }
+};
+
 const axios = require("axios");
 
 /**

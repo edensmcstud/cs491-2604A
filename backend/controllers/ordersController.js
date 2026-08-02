@@ -352,7 +352,6 @@ exports.fulfillOrder = async (req, res) => {
                 );
             }
 
-            // Consume reserved → reduce both on_hand and reserved
             await run(
                 `UPDATE inventory
                  SET quantity_on_hand = quantity_on_hand - ?,
@@ -373,10 +372,80 @@ exports.fulfillOrder = async (req, res) => {
 
         await logAction(req.user.user_id, "FULFILL", "CUSTOMER_ORDER", orderId);
 
+        // === INSERT SALE FROM FULFILLMENT ===
+
+        const orderDetails = await query(
+            `SELECT customer_id, subtotal, tax, total, fulfillment_type
+             FROM customer_orders
+             WHERE order_id = ?`,
+            [orderId]
+        );
+
+        if (orderDetails.length === 0) {
+            throw new Error("Order details missing during fulfillment → sale insertion aborted");
+        }
+
+        const order = orderDetails[0];
+
+        // employee_id = user_id (because your DB has no employees table)
+        const employeeId = req.user.user_id;
+
+        await run(
+            `INSERT INTO sales (
+                employee_id,
+                customer_id,
+                sale_date,
+                subtotal,
+                tax,
+                total,
+                sale_source,
+                fulfillment_type,
+                payment_method
+            ) VALUES (?, ?, datetime('now'), ?, ?, ?, 'Fulfillment', ?, 'Card')`,
+            [
+                employeeId,
+                order.customer_id,
+                order.subtotal,
+                order.tax,
+                order.total,
+                order.fulfillment_type
+            ]
+        );
+
+        const saleIdRow = await query(`SELECT last_insert_rowid() AS sale_id`);
+        const saleId = saleIdRow[0].sale_id;
+
+        const orderItems = await query(
+            `SELECT book_id, quantity, unit_price, line_total
+             FROM customer_order_items
+             WHERE order_id = ?`,
+            [orderId]
+        );
+
+        for (const item of orderItems) {
+            await run(
+                `INSERT INTO sale_items (
+                    sale_id,
+                    book_id,
+                    quantity,
+                    unit_price,
+                    line_total
+                ) VALUES (?, ?, ?, ?, ?)`,
+                [
+                    saleId,
+                    item.book_id,
+                    item.quantity,
+                    item.unit_price,
+                    item.line_total
+                ]
+            );
+        }
+
         await run("COMMIT");
         transactionStarted = false;
 
         res.json({ message: "Order fulfilled (shipped)" });
+
     } catch (err) {
         if (transactionStarted) {
             await run("ROLLBACK");
