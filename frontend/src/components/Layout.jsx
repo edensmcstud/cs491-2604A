@@ -1,13 +1,8 @@
-<<<<<<< HEAD
-﻿import React from "react";
+import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-=======
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import Header from './Header';
->>>>>>> 81b38342e22a9033afc61e410aa16f37fb493e13
+import Header from "./Header";
 
 export default function Layout() {
     const navigate = useNavigate();
@@ -16,42 +11,6 @@ export default function Layout() {
 
     return (
         <div className="layout" style={{ position: "relative" }}>
-
-            {/* Top‑Right Action Bar */}
-            <div
-                style={{
-                    position: "absolute",
-                    top: "20px",
-                    right: "20px",
-                    display: "flex",
-                    gap: "10px",
-                    zIndex: 10
-                }}
-            >
-                {/* Back Button */}
-                <button onClick={() => navigate(-1)}>
-                    Back
-                </button>
-
-                {/* Dashboard Button */}
-                <button onClick={() => navigate("/dashboard")}>
-                    Dashboard
-                </button>
-
-                {/* Cart Button — Customers Only */}
-                {user?.roles?.includes("Customer") && (
-                    <button onClick={() => navigate("/cart")}>
-                        Cart ({count})
-                    </button>
-                )}
-
-                {/* Logout Button */}
-                {user && (
-                    <button onClick={logout}>
-                        Logout
-                    </button>
-                )}
-            </div>
 
             {/* Global Header Container */}
             <div style={{ width: "100%", textAlign: "center", padding: "30px 0 10px 0" }}>
@@ -95,6 +54,7 @@ export default function Layout() {
                 </div>
             </div>
 
+            {/* Remote Header Component */}
             <Header />
 
             {/* Core App View Frame */}
