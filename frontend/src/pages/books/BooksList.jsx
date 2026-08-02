@@ -19,6 +19,7 @@ export default function BooksList() {
     const canAddInventory = user?.modules?.inventory?.adjust === true;
 
     // FILTER STATE
+    const [searchTerm, setSearchTerm] = useState("");
     const [inStock, setInStock] = useState(false);
     const [rareOnly, setRareOnly] = useState(false);
 
@@ -61,11 +62,28 @@ export default function BooksList() {
 
     // APPLY FILTERS
     const filteredBooks = useMemo(() => {
+        const search = searchTerm.trim().toLowerCase();
+
         return books
+            .filter((book) => {
+                if (!search) {
+                    return true;
+                }
+
+                const title = book.title?.toLowerCase() || "";
+                const author = book.author?.toLowerCase() || "";
+                const isbn = String(book.isbn || "").toLowerCase();
+
+                return (
+                    title.includes(search) ||
+                    author.includes(search) ||
+                    isbn.includes(search)
+                );
+            })
             .filter(b => !inStock || b.quantity_on_hand > 0)
             .filter(b => !rareOnly || b.is_collectible === 1)
             .filter(b => b.price >= minPrice && b.price <= maxPrice);
-    }, [books, inStock, rareOnly, minPrice, maxPrice]);
+    }, [books, searchTerm, inStock, rareOnly, minPrice, maxPrice]);
 
     if (loading) {
         return (
@@ -80,6 +98,8 @@ export default function BooksList() {
         <div className="page books-layout">
             {/* SIDEBAR FILTERS */}
             <FiltersPanel
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
                 inStock={inStock}
                 rareOnly={rareOnly}
                 setInStock={setInStock}

@@ -1,6 +1,8 @@
 ﻿import PriceSlider from "./PriceSlider";
 
 export default function FiltersPanel({
+    searchTerm,
+    setSearchTerm,
     inStock,
     rareOnly,
     setInStock,
@@ -23,6 +25,33 @@ export default function FiltersPanel({
     return (
         <aside className="filters">
             <h3>Filters</h3>
+
+<div className="filter-group">
+    <label htmlFor="book-search">Search Books</label>
+
+    <input
+        id="book-search"
+        type="text"
+        placeholder="Title, author, or ISBN"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+            width: "100%",
+            marginTop: "5px",
+            marginBottom: "8px"
+        }}
+    />
+
+    {searchTerm && (
+        <button
+            type="button"
+            onClick={() => setSearchTerm("")}
+            style={{ marginBottom: "12px" }}
+        >
+            Clear Search
+        </button>
+    )}
+</div>
 
             <div className="filter-group">
                 <label>
