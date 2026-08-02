@@ -26,6 +26,9 @@ export default function BooksList() {
     const [maxPrice, setMaxPrice] = useState(500);
     const [priceLimit, setPriceLimit] = useState(500);
 
+    const canUseCart = user?.modules?.cart?.use === true;
+
+
     // COLUMN VISIBILITY STATE
     const [visibleColumns, setVisibleColumns] = useState({
         bookId: true,
@@ -42,7 +45,7 @@ export default function BooksList() {
 
     // LOAD BOOKS
     useEffect(() => {
-        api.get("/books")
+        api.get("/books/withInventory")
             .then((res) => {
                 setBooks(res);
 
@@ -113,11 +116,13 @@ export default function BooksList() {
                     visibleColumns={visibleColumns}
                     canUpdate={canUpdate}
                     canAddInventory={canAddInventory}
+                    canUseCart={canUseCart}
                     onEditBook={(id) => navigate(`/books/edit/${id}`)}
                     onEditInventory={(inventoryId) =>
                         navigate(`/inventory/edit/${inventoryId}`)
                     }
                 />
+
             </main>
         </div>
     );

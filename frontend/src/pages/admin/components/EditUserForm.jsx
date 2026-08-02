@@ -1,10 +1,11 @@
 import { useState } from "react";
 import api from "../../../api/api";
 
-export default function EditUserForm({ user, onDone, onClose }) {
+export default function EditUserForm({ user, onSuccess, onCancel }) {
     const [form, setForm] = useState({
         username: user.username,
-        email: user.email
+        email: user.email,
+        role: user.roles?.[0] || "Customer"
     });
 
     const handleChange = (e) => {
@@ -15,15 +16,20 @@ export default function EditUserForm({ user, onDone, onClose }) {
         e.preventDefault();
 
         try {
-            await api.put(`/users/${user.user_id}`, {
-                username: form.username,
-                email: form.email
+            // Update role (single-role model)
+            await api.put(`/admin/users/${user.user_id}/role`, {
+                role: form.role
             });
 
-            onDone();
-            onClose();
+            // OPTIONAL: username/email update (future backend support)
+            // await api.put(`/admin/users/${user.user_id}`, {
+            //     username: form.username,
+            //     email: form.email
+            // });
+
+            onSuccess();
         } catch (err) {
-            console.error(err);
+            console.error("Edit user error:", err);
             alert("Failed to update user");
         }
     };
@@ -33,13 +39,38 @@ export default function EditUserForm({ user, onDone, onClose }) {
             <h2>Edit User</h2>
 
             <label>Username</label>
-            <input name="username" value={form.username} onChange={handleChange} required />
+            <input
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                disabled
+            />
 
             <label>Email</label>
-            <input name="email" value={form.email} onChange={handleChange} required />
+            <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                disabled
+            />
 
-            <button type="submit">Save</button>
-            <button type="button" onClick={onClose}>Cancel</button>
+            <label>Role</label>
+            <select
+                name="role"
+                value={form.role}
+                onChange={handleChange}
+            >
+                <option value="Customer">Customer</option>
+                <option value="Employee">Employee</option>
+                <option value="Admin">Admin</option>
+            </select>
+
+            <div style={{ marginTop: "1rem" }}>
+                <button type="submit">Save</button>
+                <button type="button" onClick={onCancel} style={{ marginLeft: "1rem" }}>
+                    Cancel
+                </button>
+            </div>
         </form>
     );
 }

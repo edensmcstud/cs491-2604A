@@ -17,6 +17,7 @@ client.interceptors.request.use(
         console.group("API REQUEST");
         console.log("→ Method:", config.method.toUpperCase());
         console.log("→ URL:", config.baseURL + config.url);
+        console.log("→ Headers:", config.headers);
         console.log("→ Request Body:", config.data);
         console.log("→ Current Token:", token ? token : "NO TOKEN FOUND");
 
@@ -47,6 +48,7 @@ client.interceptors.response.use(
         console.group("API RESPONSE");
         console.log("→ Status:", response.status);
         console.log("→ URL:", response.config.url);
+        console.log("→ Headers:", response.headers);
         console.log("→ Response Data:", response.data);
         console.groupEnd();
 
@@ -60,7 +62,14 @@ client.interceptors.response.use(
         console.group("API RESPONSE ERROR");
         console.error("→ Status:", status);
         console.error("→ URL:", url);
+        console.error("→ Headers:", error.response?.headers);
         console.error("→ Error Data:", error.response?.data);
+
+        // Capture raw HTML/text errors (like your 500 stack trace)
+        if (error.response?.data && typeof error.response.data === "string") {
+            console.error("→ Raw Error Text:", error.response.data);
+        }
+
         console.error("→ Full Error Object:", error);
         console.groupEnd();
 
@@ -133,7 +142,6 @@ const api = {
         const res = await client.patch(path, body);
         return res.data;
     },
-
 };
 
 export default api;

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function Dashboard() {
     const { user, logout } = useAuth();
+    console.log(user.modules);
 
     const canAny = (module) => {
         const perms = user?.modules?.[module];
@@ -38,6 +39,11 @@ export default function Dashboard() {
                 {canAny("customer_orders") && (
                     <li><Link to="/orders/customers">Customer Orders</Link></li>
                 )}
+
+                {canAny("customer_orders") && (
+                    <li><Link to="/orders/fulfillment">Order Fulfillment</Link></li>
+                )}
+
 
                 {canAny("supplier_orders") && (
                     <li><Link to="/orders/suppliers">Supplier Orders</Link></li>

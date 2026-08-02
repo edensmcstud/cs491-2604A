@@ -1,4 +1,4 @@
-const { query, run } = require("../utils/db");
+﻿const { query, run } = require("../utils/db");
 const handleError = require("../middleware/errorHandler");
 const { logAction } = require("../utils/audit");
 
@@ -123,7 +123,7 @@ exports.createOrder = async (req, res) => {
             total
         });
     } catch (err) {
-        handleError(res, err);
+        handleError(err, req, res);
     }
 };
 
@@ -174,7 +174,43 @@ exports.getOrderStatus = async (req, res) => {
 
         res.json(order);
     } catch (err) {
-        handleError(res, err);
+        handleError(err, req, res);
+    }
+};
+
+/**
+ * List all pending orders (Employee/Admin only)
+ */
+exports.listPendingOrders = async (req, res) => {
+    try {
+        const orders = await query(
+            `SELECT order_id, customer_id, order_date, status, subtotal, tax, total
+             FROM customer_orders
+             WHERE status = 'Pending'
+             ORDER BY order_date ASC`
+        );
+
+        // Load items for each order
+        for (const order of orders) {
+            const items = await query(
+                `SELECT coi.order_item_id,
+                        coi.book_id,
+                        b.title,
+                        coi.quantity,
+                        coi.unit_price,
+                        coi.line_total
+                 FROM customer_order_items coi
+                 JOIN books b ON b.book_id = coi.book_id
+                 WHERE coi.order_id = ?`,
+                [order.order_id]
+            );
+
+            order.items = items;
+        }
+
+        res.json({ orders });
+    } catch (err) {
+        handleError(err, req, res);
     }
 };
 
@@ -186,6 +222,11 @@ exports.getOrderStatus = async (req, res) => {
 exports.cancelOrder = async (req, res) => {
     try {
         const orderId = req.params.id;
+
+        const { fulfillment_type } = req.body;
+
+        // Validate fulfillment type
+        const type = fulfillment_type === "InStore" ? "InStore" : "Shipped";
 
         const orderRows = await query(
             `SELECT customer_id, status FROM customer_orders WHERE order_id = ?`,
@@ -240,7 +281,107 @@ exports.cancelOrder = async (req, res) => {
 
         res.json({ message: "Order cancelled" });
     } catch (err) {
-        handleError(res, err);
+        handleError(err, req, res);
+    }
+};
+
+/**
+ * Fulfill (ship) an order
+ * - Employee/Admin only
+ * - Converts reserved inventory into consumed inventory
+ * - Marks order as Shipped
+ */
+exports.fulfillOrder = async (req, res) => {
+    let transactionStarted = false;
+
+    try {
+        const orderId = req.params.id;
+
+        // Load order
+        const orderRows = await query(
+            `SELECT status
+             FROM customer_orders
+             WHERE order_id = ?`,
+            [orderId]
+        );
+
+        if (orderRows.length === 0) {
+            return res.status(404).json({ error: "Order not found" });
+        }
+
+        const { status } = orderRows[0];
+
+        if (status !== "Pending") {
+            return res.status(400).json({ error: "Order is not pending" });
+        }
+
+        // Load order items
+        const items = await query(
+            `SELECT book_id, quantity
+             FROM customer_order_items
+             WHERE order_id = ?`,
+            [orderId]
+        );
+
+        if (items.length === 0) {
+            return res.status(400).json({ error: "Order has no items" });
+        }
+
+        // Begin transaction
+        await run("BEGIN TRANSACTION");
+        transactionStarted = true;
+
+        // Consume reserved inventory
+        for (const item of items) {
+            const invRows = await query(
+                `SELECT quantity_on_hand, quantity_reserved
+                 FROM inventory
+                 WHERE book_id = ?`,
+                [item.book_id]
+            );
+
+            if (invRows.length === 0) {
+                throw new Error(`Inventory missing for book ${item.book_id}`);
+            }
+
+            const { quantity_on_hand, quantity_reserved } = invRows[0];
+
+            if (quantity_reserved < item.quantity) {
+                throw new Error(
+                    `Reserved quantity mismatch for book ${item.book_id}`
+                );
+            }
+
+            // Consume reserved → reduce both on_hand and reserved
+            await run(
+                `UPDATE inventory
+                 SET quantity_on_hand = quantity_on_hand - ?,
+                     quantity_reserved = quantity_reserved - ?
+                 WHERE book_id = ?`,
+                [item.quantity, item.quantity, item.book_id]
+            );
+        }
+
+        // Mark order shipped
+        await run(
+            `UPDATE customer_orders
+             SET status = 'Shipped',
+                 fulfillment_type = ?
+             WHERE order_id = ?`,
+            [req.body.fulfillment_type || "Shipped", orderId]
+        );
+
+        await logAction(req.user.user_id, "FULFILL", "CUSTOMER_ORDER", orderId);
+
+        await run("COMMIT");
+        transactionStarted = false;
+
+        res.json({ message: "Order fulfilled (shipped)" });
+    } catch (err) {
+        if (transactionStarted) {
+            await run("ROLLBACK");
+        }
+        handleError(err, req, res);
     }
 };
 

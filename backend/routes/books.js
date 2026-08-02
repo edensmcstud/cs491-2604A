@@ -59,11 +59,18 @@ router.get(
     controller.getBooks
 );
 
+// Get all ACTIVE books with inventory
+router.get(
+    "/withInventory",
+    requirePermission("books", "read"),
+    controller.getBooksWithInventory);
+
 // Get single ACTIVE book
 router.get(
     "/:id",
     requirePermission("books", "read"),
     controller.getBook
 );
+
 
 module.exports = router;

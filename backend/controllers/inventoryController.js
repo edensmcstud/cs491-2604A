@@ -8,8 +8,14 @@ const { logAction } = require("../utils/audit");
 exports.getInventory = async (req, res) => {
     try {
         const items = await query(`
-            SELECT inventory_id, book_id, quantity_on_hand, quantity_reserved,
-                   reorder_level, reorder_quantity, last_updated
+            SELECT 
+                inventory_id, 
+                book_id, 
+                quantity_on_hand, 
+                quantity_reserved,
+                reorder_level, 
+                reorder_quantity, 
+                last_updated
             FROM inventory
         `);
 

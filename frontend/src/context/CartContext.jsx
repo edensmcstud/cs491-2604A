@@ -1,0 +1,92 @@
+﻿import { createContext, useContext, useState } from "react";
+import api from "../api/api";
+
+const CartContext = createContext();
+
+export function CartProvider({ children }) {
+    const [items, setItems] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [count, setCount] = useState(0);
+
+    async function loadCart() {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setItems([]);
+            setTotal(0);
+            setCount(0);
+            return;
+        }
+
+        try {
+            const res = await api.get("/cart");
+
+            const updatedItems = res.items || [];
+            const updatedTotal = res.total || 0;
+
+            const qtyCount = updatedItems.reduce(
+                (sum, item) => sum + item.quantity,
+                0
+            );
+
+            setItems(updatedItems);
+            setTotal(updatedTotal);
+            setCount(qtyCount);
+
+        } catch (err) {
+            console.log("CartContext loadCart ERROR:", err);
+            setItems([]);
+            setTotal(0);
+            setCount(0);
+        }
+    }
+
+    async function addToCart(book_id) {
+        await api.post("/cart/add", { book_id, quantity: 1 });
+        await loadCart();
+    }
+
+    async function removeFromCart(book_id) {
+        await api.delete(`/cart/remove/${book_id}`);
+        await loadCart();
+    }
+
+    async function decrement(book_id) {
+        await api.delete(`/cart/decrement/${book_id}`);
+        await loadCart();
+    }
+
+    async function clearCart() {
+        await api.delete("/cart");
+        await loadCart();
+    }
+
+    async function checkout() {
+        await api.post("/cart/checkout", {
+            payment_method: "N/A",
+            shipping_address: "N/A"
+        });
+        await loadCart();
+    }
+
+    return (
+        <CartContext.Provider
+            value={{
+                items,
+                total,
+                count,
+                loadCart,
+                addToCart,
+                removeFromCart,
+                decrement,   // <-- REQUIRED
+                clearCart,
+                checkout     // <-- REQUIRED
+            }}
+        >
+            {children}
+        </CartContext.Provider>
+    );
+}
+
+export function useCart() {
+    return useContext(CartContext);
+}

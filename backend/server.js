@@ -1,3 +1,4 @@
+
 // server.js
 
 require('dotenv').config();
@@ -48,6 +49,15 @@ app.use('/api/inventory', require('./routes/inventory'));
 // Sales
 app.use('/api/sales', require('./routes/sales'));
 
+// Cart
+app.use("/api/cart", require('./routes/cartRoutes'));
+
+// Customer Orders
+app.use('/api/customerOrders', require('./routes/customerOrders'));
+
+// Fulfillment Orders
+app.use('/api/orders', require('./routes/orders'));
+
 // Supplier Orders
 app.use('/api/supplierOrders', require('./routes/supplierOrders'));
 
@@ -65,6 +75,13 @@ app.use('/api/audit', require('./routes/audit'));
 
 // Backup / Restore
 app.use('/api/backup', require('./routes/backup'));
+
+console.log("Mounting /api/admin...");
+app.use('/api/admin', require('./routes/adminRoutes'));
+console.log("Mounted /api/admin.");
+
+
+
 
 const testRoutes = require("./routes/testRoutes");
 app.use("/test", testRoutes);

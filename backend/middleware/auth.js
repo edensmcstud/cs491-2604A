@@ -1,5 +1,6 @@
 ﻿const jwt = require("jsonwebtoken");
 const { query } = require("../utils/db");
+const Users = require("../models/Users");
 
 module.exports = async (req, res, next) => {
     const header = req.headers.authorization;
@@ -26,7 +27,7 @@ module.exports = async (req, res, next) => {
         }
 
         // Load roles from DB
-        const roles = await query(
+        const roleRows = await query(
             `SELECT r.role_name
              FROM user_roles ur
              JOIN roles r ON ur.role_id = r.role_id
@@ -34,10 +35,16 @@ module.exports = async (req, res, next) => {
             [payload.user_id]
         );
 
+        const roleNames = roleRows.map(r => r.role_name);
+
+        // Load permissions via existing RBAC helper
+        const permRows = await Users.getPermissionsForRoles(roleNames);
+
         req.user = {
             user_id: users[0].user_id,
             username: users[0].username,
-            roles: roles.map(r => r.role_name)
+            roles: roleNames,
+            permissions: permRows   // [{ module, action }, ...]
         };
 
         next();
