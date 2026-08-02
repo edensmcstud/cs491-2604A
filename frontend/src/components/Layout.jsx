@@ -1,7 +1,13 @@
+<<<<<<< HEAD
 ﻿import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+=======
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Header from './Header';
+>>>>>>> 81b38342e22a9033afc61e410aa16f37fb493e13
 
 export default function Layout() {
     const navigate = useNavigate();
@@ -88,6 +94,8 @@ export default function Layout() {
                     </div>
                 </div>
             </div>
+
+            <Header />
 
             {/* Core App View Frame */}
             <div className="layout-body" style={{ width: "100%" }}>

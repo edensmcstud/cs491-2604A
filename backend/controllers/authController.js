@@ -130,9 +130,11 @@ exports.register = async (req, res) => {
         // Assign default role: Customer
         const customerRoleId = await Users.getRoleId("Customer");
         await Users.assignRole(newUser.user_id, customerRoleId);
+        const customerProfile = await Users.ensureCustomerProfile(newUser.user_id);
 
         return res.status(201).json({
             id: newUser.user_id,
+            customerId: customerProfile.customer_id,
             username: newUser.username,
             email: newUser.email,
             createdAt: newUser.created_at

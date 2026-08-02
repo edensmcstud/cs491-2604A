@@ -95,7 +95,7 @@ exports.getSale = async (req, res) => {
 };
 
 // =====================================================
-// POS SALE — Inventory Safe (matches your schema)
+// POS SALE â€” Inventory Safe (matches your schema)
 // =====================================================
 
 exports.createPosSale = async (req, res) => {
@@ -186,7 +186,7 @@ exports.createPosSale = async (req, res) => {
         await db.run("ROLLBACK");
 
         return res.status(500).json({
-            error: "Internal POS error — check server logs"
+            error: "Internal POS error â€” check server logs"
         });
     }
 };

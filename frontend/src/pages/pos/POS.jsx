@@ -76,7 +76,7 @@ export default function POS() {
             <ul>
                 {results.map(book => (
                     <li key={book.book_id}>
-                        {book.title} — ${book.price}
+                        {book.title} â€” ${book.price}
                         <button onClick={() => addItem(book)}>Add</button>
                     </li>
                 ))}
@@ -87,7 +87,7 @@ export default function POS() {
             <ul>
                 {items.map(item => (
                     <li key={item.book_id}>
-                        {item.title} — ${item.price}
+                        {item.title} â€” ${item.price}
                         <input
                             type="number"
                             min="1"

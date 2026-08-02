@@ -1,134 +1,85 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
 
+const money = value => Number(value || 0).toFixed(2);
+
 export default function Sales() {
+    const navigate = useNavigate();
     const [sales, setSales] = useState([]);
-    const [selectedSale, setSelectedSale] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // Load all sales
-    useEffect(() => {
-        api.get("/sales")
-            .then(setSales)
-            .catch(() => setError("Failed to load sales"));
+    const loadSales = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError("");
+            const data = await api.get("/sales");
+            setSales(Array.isArray(data) ? data : []);
+        } catch (err) {
+            setError(err?.response?.data?.error || "Failed to load sales history.");
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    // Load a single sale when clicked
-    async function loadSaleDetails(saleId) {
-        try {
-            const sale = await api.get(`/sales/${saleId}`);
-            setSelectedSale(sale);
-        } catch (err) {
-            console.error(err);
-            setError("Failed to load sale details");
-        }
-    }
+    useEffect(() => {
+        loadSales();
+    }, [loadSales]);
 
     return (
-        <div className="page">
-            <h1>Sales History</h1>
+        <div className="page sales-history-page">
+            <div className="page-heading-row">
+                <div>
+                    <h1>Sales History</h1>
+                    <p className="page-subtitle">Completed POS sales and fulfilled customer orders appear here.</p>
+                </div>
+                <button className="secondary-button" onClick={loadSales} disabled={loading}>Refresh</button>
+            </div>
 
-            {error && (
-                <div style={{ color: "red", marginBottom: "10px" }}>
-                    {error}
+            {error && <div className="form-error">{error}</div>}
+            {loading && <p>Loading sales...</p>}
+
+            {!loading && sales.length === 0 && (
+                <div className="empty-state">
+                    <h2>No completed sales yet</h2>
+                    <p>Customer checkouts remain in Order Fulfillment until an employee fulfills them.</p>
                 </div>
             )}
 
-            {/* Sales List */}
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Employee</th>
-                        <th>Total</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {sales.map(s => (
-                        <tr
-                            key={s.sale_id}
-                            style={{ cursor: "pointer" }}
-                            onClick={() => loadSaleDetails(s.sale_id)}
-                        >
-                            <td>{s.sale_id}</td>
-                            <td>{s.employee_id}</td>
-                            <td>${s.total.toFixed(2)}</td>
-                            <td>{s.sale_date}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            {/* Sale Details Panel */}
-            {selectedSale && (
-                <>
-                    {console.log("SELECTED SALE:", selectedSale)}
-
-                    <div
-                        style={{
-                            marginTop: "30px",
-                            padding: "15px",
-                            border: "1px solid #ccc",
-                            background: "#fafafa"
-                        }}
-                    >
-                        <h2>Sale #{selectedSale.sale_id}</h2>
-                        <p><strong>Date:</strong> {selectedSale.sale_date}</p>
-                        <p><strong>Employee:</strong> {selectedSale.employee_id}</p>
-                        <p><strong>Payment:</strong> {selectedSale.payment_method}</p>
-
-                        <h3>Items</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Qty</th>
-                                    <th>Unit Price</th>
-                                    <th>Total</th>
+            {!loading && sales.length > 0 && (
+                <div className="table-card">
+                    <table className="data-table">
+                        <thead>
+                            <tr>
+                                <th>Sale</th>
+                                <th>Source</th>
+                                <th>Employee</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th className="numeric-cell">Total</th>
+                                <th aria-label="Actions" />
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sales.map(sale => (
+                                <tr key={sale.sale_id}>
+                                    <td><strong>#{sale.sale_id}</strong></td>
+                                    <td>{sale.sale_source === "Fulfillment" ? "Customer order" : "POS"}</td>
+                                    <td>{sale.employee_username || `User #${sale.employee_id}`}</td>
+                                    <td>{sale.sale_date}</td>
+                                    <td><span className="status-badge status-healthy">{sale.status || "Completed"}</span></td>
+                                    <td className="numeric-cell">${money(sale.total)}</td>
+                                    <td className="actions-cell">
+                                        <button className="secondary-button" onClick={() => navigate(`/sales/${sale.sale_id}`)}>
+                                            View Details
+                                        </button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {selectedSale.items.map(i => (
-                                    <tr key={i.sale_item_id}>
-                                        <td>{i.title}</td>
-                                        <td>{i.quantity}</td>
-                                        <td>${i.unit_price.toFixed(2)}</td>
-                                        <td>${i.line_total.toFixed(2)}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-
-                        <h3>Totals</h3>
-                        <p><strong>Subtotal:</strong> ${selectedSale.subtotal.toFixed(2)}</p>
-                        <p><strong>Tax:</strong> ${selectedSale.tax.toFixed(2)}</p>
-                        <p><strong>Total:</strong> ${selectedSale.total.toFixed(2)}</p>
-
-                        <button
-                            style={{
-                                marginTop: "20px",
-                                marginRight: "10px",
-                                padding: "10px 15px",
-                                background: "#007bff",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                cursor: "pointer"
-                            }}
-                            onClick={() => window.location.href = `/sales/${selectedSale.sale_id}/receipt`}
-                        >
-                            View Receipt
-                        </button>
-
-                        <button
-                            style={{ marginTop: "20px" }}
-                            onClick={() => setSelectedSale(null)}
-                        >
-                            Close
-                        </button>
-                    </div>
-                </>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             )}
         </div>
     );
