@@ -26,7 +26,12 @@ import Inventory from "./pages/inventory/Inventory";
 
 // SALES
 import Sales from "./pages/sales/Sales";
-import AddSale from "./pages/sales/AddSale";
+import SaleDetails from "./pages/sales/SaleDetails";
+import ReceiptPage from "./pages/sales/ReceiptPage";
+
+
+// POS (NEW)
+import POS from "./pages/pos/POS";
 
 // ORDERS
 import CustomerOrders from "./pages/orders/CustomerOrders";
@@ -81,9 +86,14 @@ export default function App() {
                     <Route path="inventory/update/:id" element={<UpdateQuantity />} />
                     <Route path="inventory/view" element={<Inventory />} />
 
-                    {/* Sales */}
+                    {/* Sales (Sales History) */}
                     <Route path="sales" element={<Sales />} />
-                    <Route path="sales/add" element={<AddSale />} />
+                    <Route path="sales/:id" element={<SaleDetails />} />
+                    <Route path="sales/:id/receipt" element={<ReceiptPage />} />
+
+
+                    {/* POS (NEW) */}
+                    <Route path="pos" element={<POS />} />
 
                     {/* Orders */}
                     <Route path="orders/customers" element={<CustomerOrders />} />
@@ -91,8 +101,6 @@ export default function App() {
                     <Route path="orders/suppliers" element={<SupplierOrders />} />
                     <Route path="orders/suppliers/add" element={<AddSupplierOrder />} />
                     <Route path="orders/fulfillment" element={<OrderFulfillment />} />
-                    
-
 
                     {/* Reports */}
                     <Route path="reports" element={<Reports />} />

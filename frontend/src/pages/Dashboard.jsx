@@ -18,7 +18,6 @@ export default function Dashboard() {
 
             <div style={{ marginBottom: "20px" }}>
                 <p>Welcome, {user?.username}</p>
-                <button onClick={logout}>Logout</button>
             </div>
 
             <h2>Available Sections</h2>
@@ -33,7 +32,7 @@ export default function Dashboard() {
                 )}
 
                 {canAny("sales") && (
-                    <li><Link to="/sales">Sales</Link></li>
+                    <li><Link to="/sales">Sales History</Link></li>
                 )}
 
                 {canAny("customer_orders") && (

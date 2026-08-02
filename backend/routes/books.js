@@ -9,16 +9,24 @@ const controller = require("../controllers/booksController");
 router.use(auth);
 
 // ===============================
-// ADMIN-ONLY: MUST COME FIRST
+// SEARCH ROUTE — MUST COME FIRST
+// ===============================
+router.get(
+    "/search",
+    requirePermission("books", "read"),
+    controller.searchBooks
+);
+
+// ===============================
+// ADMIN-ONLY: MUST COME NEXT
 // ===============================
 
 // Get ALL books (active + inactive)
 router.get(
     "/all",
-    requirePermission("books", "update"), // FIXED: restrict to Employee + Admin
+    requirePermission("books", "update"),
     controller.getAllBooks
 );
-
 
 // Create a book
 router.post(
@@ -63,7 +71,8 @@ router.get(
 router.get(
     "/withInventory",
     requirePermission("books", "read"),
-    controller.getBooksWithInventory);
+    controller.getBooksWithInventory
+);
 
 // Get single ACTIVE book
 router.get(
@@ -71,6 +80,5 @@ router.get(
     requirePermission("books", "read"),
     controller.getBook
 );
-
 
 module.exports = router;

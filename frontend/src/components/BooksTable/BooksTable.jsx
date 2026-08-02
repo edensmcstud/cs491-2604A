@@ -3,8 +3,6 @@ import { useCart } from "../../context/CartContext";
 import SortHeader from "./SortHeader";
 import api from "../../api/api.js";
 
-
-
 export default function BooksTable({
     books,
     visibleColumns,
@@ -12,9 +10,10 @@ export default function BooksTable({
     canUpdate,
     canAddInventory,
     onEditBook,
-    onEditInventory
+    onEditInventory,
+    onSelectBook        // <-- NEW OPTIONAL PROP
 }) {
-    const { addToCart, loadCart } = useCart();
+    const { addToCart } = useCart();
 
     const [sortColumn, setSortColumn] = useState("title");
     const [sortDirection, setSortDirection] = useState("asc");
@@ -102,7 +101,9 @@ export default function BooksTable({
                         onSort={handleSort}
                     />
                 )}
-                {visibleColumns.collectible && <div className="books-grid-header-cell">Collectible</div>}
+                {visibleColumns.collectible && (
+                    <div className="books-grid-header-cell">Collectible</div>
+                )}
                 {visibleColumns.available && (
                     <SortHeader
                         label="Available"
@@ -112,7 +113,9 @@ export default function BooksTable({
                         onSort={handleSort}
                     />
                 )}
-                {visibleColumns.actions && <div className="books-grid-header-cell">Actions</div>}
+                {visibleColumns.actions && (
+                    <div className="books-grid-header-cell">Actions</div>
+                )}
             </div>
 
             <div className="books-grid-body">
@@ -153,6 +156,7 @@ export default function BooksTable({
                                     : b.available_quantity}
                             </div>
                         )}
+
                         {visibleColumns.actions && (
                             <div className="books-grid-cell">
                                 {canUpdate && (
@@ -173,11 +177,7 @@ export default function BooksTable({
                                 {canUseCart && (
                                     <button
                                         onClick={async () => {
-                                            const token = localStorage.getItem("token");
-
                                             await addToCart(b.book_id);
-
-
                                             alert("Added to cart");
                                         }}
                                         style={{ marginLeft: "10px" }}
@@ -185,9 +185,18 @@ export default function BooksTable({
                                         Add to Cart
                                     </button>
                                 )}
+
+                                {/* NEW POS BUTTON — ONLY SHOWS IF onSelectBook IS PROVIDED */}
+                                {onSelectBook && (
+                                    <button
+                                        onClick={() => onSelectBook(b)}
+                                        style={{ marginLeft: "10px" }}
+                                    >
+                                        Add to Sale
+                                    </button>
+                                )}
                             </div>
                         )}
-
                     </div>
                 ))}
             </div>
@@ -207,8 +216,10 @@ function compare(a, b, column, direction) {
             case "publisher": return obj.publisher || "";
             case "category": return obj.category || "";
             case "price": return Number(obj.price) || 0;
-            case "available_quantity": return Number(obj.available_quantity ?? obj.quantity_on_hand) || 0;
-            default: return "";
+            case "available_quantity":
+                return Number(obj.available_quantity ?? obj.quantity_on_hand) || 0;
+            default:
+                return "";
         }
     };
 
