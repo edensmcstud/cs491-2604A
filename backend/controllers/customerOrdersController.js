@@ -171,9 +171,11 @@ exports.getCustomerOrders = async (req, res) => {
 
         for (const order of orders) {
             const items = await query(
-                `SELECT order_item_id, book_id, quantity, unit_price, line_total
-                 FROM customer_order_items
-                 WHERE order_id = ?`,
+                `SELECT coi.order_item_id, coi.book_id, b.title,
+                        coi.quantity, coi.unit_price, coi.line_total
+                 FROM customer_order_items AS coi
+                 JOIN books AS b ON b.book_id = coi.book_id
+                 WHERE coi.order_id = ?`,
                 [order.order_id]
             );
 

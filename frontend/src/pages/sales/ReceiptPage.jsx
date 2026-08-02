@@ -24,7 +24,7 @@ export default function ReceiptPage() {
     }, [id]);
 
     if (loading) {
-        return <div>Loading receipt�</div>;
+        return <div>Loading receipt…</div>;
     }
 
     if (error) {
@@ -92,6 +92,7 @@ export default function ReceiptPage() {
                     <thead>
                         <tr>
                             <th style={{ textAlign: "left" }}>Title</th>
+                            <th style={{ textAlign: "left" }}>ISBN</th>
                             <th>Qty</th>
                             <th>Price</th>
                             <th>Total</th>
@@ -101,6 +102,7 @@ export default function ReceiptPage() {
                         {items.map(item => (
                             <tr key={item.sale_item_id}>
                                 <td>{item.title}</td>
+                                <td>{item.isbn || "—"}</td>
                                 <td style={{ textAlign: "center" }}>{item.quantity}</td>
                                 <td style={{ textAlign: "right" }}>${item.unit_price.toFixed(2)}</td>
                                 <td style={{ textAlign: "right" }}>${item.line_total.toFixed(2)}</td>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import Header from './Header';
 
 export default function Layout() {
     return (
@@ -47,6 +48,8 @@ export default function Layout() {
                     </div>
                 </div>
             </div>
+
+            <Header />
 
             {/* Core App View Frame */}
             <div className="layout-body" style={{ width: '100%' }}>
