@@ -12,20 +12,24 @@ export default function Header() {
         navigate("/login", { replace: true });
     };
 
+    // Normalize role
+    const isCustomer =
+        Array.isArray(user?.roles) &&
+        user.roles[0]?.toLowerCase() === "customer";
+
     return (
         <header className="header">
             <Link to="/dashboard" className="header-dashboard">Dashboard</Link>
 
             <nav className="header-nav">
 
-                {/* Cart visible for anyone with cart permission */}
-                {user?.modules?.cart?.use === true && (
+                {/* Cart visible only for customers with cart permission */}
+                {isCustomer && user?.modules?.cart?.use === true && (
                     <Link to="/cart">
                         Cart ({count})
                     </Link>
                 )}
 
-                {/* Logout always visible when logged in */}
                 {user && (
                     <button
                         type="button"
