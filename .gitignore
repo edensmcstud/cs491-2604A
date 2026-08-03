@@ -3,8 +3,11 @@
 # ================================
 *.sqlite
 *.db
-*.sqlite-wal
 *.sqlite-shm
+*.sqlite-wal
+*.sqlite-journal
+*.db-shm
+*.db-wal
 
 
 # ================================
