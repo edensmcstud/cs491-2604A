@@ -396,7 +396,7 @@ exports.deleteBook = async (req, res, next) => {
 
 
 /**
- * Search books by title or author
+ * Search books by title or author — WITH INVENTORY FIELDS
  */
 exports.searchBooks = async (req, res) => {
     try {
@@ -417,8 +417,16 @@ exports.searchBooks = async (req, res) => {
                 b.price,
                 b.description,
                 b.publication_year,
-                b.is_collectible
+                b.is_collectible,
+
+                i.inventory_id,
+                i.quantity_on_hand,
+                i.quantity_reserved,
+                (i.quantity_on_hand - i.quantity_reserved) AS available_quantity
+
              FROM books b
+             JOIN inventory i ON i.book_id = b.book_id
+
              WHERE b.title LIKE ?
                 OR b.author LIKE ?`,
             [`%${q}%`, `%${q}%`]
@@ -430,6 +438,7 @@ exports.searchBooks = async (req, res) => {
         res.status(500).json({ error: "Failed to search books" });
     }
 };
+
 
 const axios = require("axios");
 

@@ -1,15 +1,21 @@
 ﻿import PriceSlider from "./PriceSlider";
 
 export default function FiltersPanel({
+    search,
+    setSearch,
+    handleSearch,
+
     inStock,
     rareOnly,
     setInStock,
     setRareOnly,
+
     minPrice,
     maxPrice,
     priceLimit,
     setMinPrice,
     setMaxPrice,
+
     visibleColumns,
     setVisibleColumns
 }) {
@@ -24,6 +30,52 @@ export default function FiltersPanel({
         <aside className="filters">
             <h3>Filters</h3>
 
+            {/* SEARCH (Backend-driven, POS-style + Enter key support) */}
+            <div className="filter-group">
+                <label htmlFor="book-search">Search Books</label>
+
+                <input
+                    id="book-search"
+                    type="text"
+                    placeholder="Title, author, ISBN, publisher, category"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleSearch();
+                        }
+                    }}
+                    style={{
+                        width: "100%",
+                        marginTop: "5px",
+                        marginBottom: "8px"
+                    }}
+                />
+
+                <button
+                    type="button"
+                    onClick={handleSearch}
+                    style={{ marginBottom: "12px" }}
+                >
+                    Search
+                </button>
+
+                {search && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearch("");
+                            handleSearch(); // reload full catalog
+                        }}
+                        style={{ marginBottom: "12px" }}
+                    >
+                        Clear Search
+                    </button>
+                )}
+            </div>
+
+            {/* STOCK + COLLECTIBLE FILTERS */}
             <div className="filter-group">
                 <label>
                     <input
@@ -44,6 +96,7 @@ export default function FiltersPanel({
                 </label>
             </div>
 
+            {/* PRICE SLIDER */}
             <PriceSlider
                 minPrice={minPrice}
                 maxPrice={maxPrice}
@@ -52,6 +105,7 @@ export default function FiltersPanel({
                 setMaxPrice={setMaxPrice}
             />
 
+            {/* COLUMN VISIBILITY */}
             <div className="filter-group" style={{ marginTop: "20px" }}>
                 <h4>Columns</h4>
 
