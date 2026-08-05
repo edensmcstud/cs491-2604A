@@ -258,6 +258,37 @@ exports.getBook = async (req, res, next) => {
         next(err);
     }
 };
+/**
+ * Get all books with their inventory details
+ */
+exports.getBooksWithInventory = async (req, res) => {
+    try {
+        const rows = await query(`
+            SELECT 
+                b.book_id,
+                b.isbn,
+                b.title,
+                b.author,
+                b.publisher,
+                b.category,
+                b.price,
+                b.description,
+                b.publication_year,
+                b.is_collectible,
+                i.inventory_id,
+                i.quantity_on_hand,
+                i.quantity_reserved,
+                (i.quantity_on_hand - i.quantity_reserved) AS available_quantity
+            FROM books b
+            JOIN inventory i ON i.book_id = b.book_id
+        `);
+
+        res.json(rows);
+    } catch (err) {
+        handleError(res, err);
+    }
+};
+
 
 /**
  * Update book details
@@ -360,6 +391,43 @@ exports.deleteBook = async (req, res, next) => {
         res.json({ message: "Book deleted" });
     } catch (err) {
         next(err);
+    }
+};
+
+
+/**
+ * Search books by title or author
+ */
+exports.searchBooks = async (req, res) => {
+    try {
+        const q = req.query.q?.trim();
+
+        if (!q) {
+            return res.json([]);
+        }
+
+        const rows = await query(
+            `SELECT 
+                b.book_id,
+                b.isbn,
+                b.title,
+                b.author,
+                b.publisher,
+                b.category,
+                b.price,
+                b.description,
+                b.publication_year,
+                b.is_collectible
+             FROM books b
+             WHERE b.title LIKE ?
+                OR b.author LIKE ?`,
+            [`%${q}%`, `%${q}%`]
+        );
+
+        res.json(rows);
+    } catch (err) {
+        console.error("BOOK SEARCH ERROR:", err);
+        res.status(500).json({ error: "Failed to search books" });
     }
 };
 

@@ -24,6 +24,25 @@ db.exec("PRAGMA journal_mode = WAL;", (err) => {
 // Load schema file
 const schema = fs.readFileSync(schemaPath, "utf8");
 
+// Repair older databases where a Customer-role user is missing the
+// customer profile required for carts and orders.
+function ensureCustomerProfiles() {
+    db.run(
+        `INSERT OR IGNORE INTO customers (user_id)
+         SELECT DISTINCT ur.user_id
+         FROM user_roles AS ur
+         JOIN roles AS r ON r.role_id = ur.role_id
+         WHERE r.role_name = 'Customer'`,
+        (err) => {
+            if (err) {
+                console.error("Failed to ensure customer profiles:", err.message);
+            } else {
+                console.log("Customer profiles ensured");
+            }
+        }
+    );
+}
+
 // Check if user-defined tables exist (ignore SQLite internal tables)
 db.get(
     `SELECT COUNT(*) AS count
@@ -37,17 +56,27 @@ db.get(
         }
 
         if (row.count === 0) {
-            console.log("Database is empty — initializing schema...");
-            db.exec(schema, (err) => {
+            console.log("Database is empty â€” initializing schema...");
+            db.exec(schema, async (err) => {
                 if (err) {
                     console.error("Failed to initialize database schema:");
                     console.error(err.message);
                 } else {
                     console.log("Database schema initialized");
+
+                    // Run RBAC bootstrap
+                    const bootstrapRBAC = require("./bootstrapRBAC");
+                    await bootstrapRBAC(db);
+
+                    ensureCustomerProfiles();
+
+                    console.log("RBAC bootstrap complete.");
                 }
             });
-        } else {
+        }
+ else {
             console.log("Database schema already present");
+            ensureCustomerProfiles();
         }
     }
 );

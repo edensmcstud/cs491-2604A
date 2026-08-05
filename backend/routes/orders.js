@@ -18,6 +18,13 @@ router.post(
     controller.createOrder
 );
 
+// List pending orders (Employee/Admin only)
+router.get(
+    "/pending",
+    auth,
+    requirePermission("customer_orders", "read"),
+    controller.listPendingOrders
+);
 // Get order status (Customer: own orders only, Employee/Admin: any)
 router.get(
     "/:id",
@@ -33,5 +40,14 @@ router.post(
     requirePermission("customer_orders", "cancel"),
     controller.cancelOrder
 );
+
+// Fulfill order (Employee/Admin only)
+router.post(
+    "/:id/fulfill",
+    auth,
+    requirePermission("customer_orders", "fulfill"),
+    controller.fulfillOrder
+);
+
 
 module.exports = router;

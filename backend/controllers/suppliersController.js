@@ -1,5 +1,4 @@
 const { query, run } = require("../utils/db");
-const handleError = require("../middleware/errorHandler");
 const { logAction } = require("../utils/audit");
 
 /**
@@ -28,7 +27,7 @@ exports.createSupplier = async (req, res) => {
             supplier_id: supplierId
         });
     } catch (err) {
-        handleError(res, err);
+        res.status(500).json({ error: err.message || "Internal server error" });
     }
 };
 
@@ -45,7 +44,7 @@ exports.getSuppliers = async (req, res) => {
 
         res.json(suppliers);
     } catch (err) {
-        handleError(res, err);
+        res.status(500).json({ error: err.message || "Internal server error" });
     }
 };
 
@@ -69,7 +68,7 @@ exports.getSupplier = async (req, res) => {
 
         res.json(rows[0]);
     } catch (err) {
-        handleError(res, err);
+        res.status(500).json({ error: err.message || "Internal server error" });
     }
 };
 
@@ -102,7 +101,7 @@ exports.updateSupplier = async (req, res) => {
 
         res.json({ message: "Supplier updated" });
     } catch (err) {
-        handleError(res, err);
+        res.status(500).json({ error: err.message || "Internal server error" });
     }
 };
 
@@ -132,6 +131,6 @@ exports.deleteSupplier = async (req, res) => {
 
         res.json({ message: "Supplier deleted" });
     } catch (err) {
-        handleError(res, err);
+        res.status(500).json({ error: err.message || "Internal server error" });
     }
 };

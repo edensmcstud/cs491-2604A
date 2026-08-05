@@ -1,14 +1,18 @@
-﻿import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useCart } from "../../context/CartContext";
 import SortHeader from "./SortHeader";
 
 export default function BooksTable({
     books,
     visibleColumns,
+    canUseCart,
     canUpdate,
     canAddInventory,
     onEditBook,
-    onEditInventory
+    onEditInventory,
+    onSelectBook
 }) {
+    const { addToCart } = useCart();
     const [sortColumn, setSortColumn] = useState("title");
     const [sortDirection, setSortDirection] = useState("asc");
 
@@ -18,184 +22,94 @@ export default function BooksTable({
         return sorted;
     }, [books, sortColumn, sortDirection]);
 
-    const handleSort = (columnKey) => {
-        setSortColumn(prev => {
-            if (prev === columnKey) {
-                setSortDirection(d => (d === "asc" ? "desc" : "asc"));
-                return prev;
-            }
+    function handleSort(columnKey) {
+        if (sortColumn === columnKey) {
+            setSortDirection((direction) => direction === "asc" ? "desc" : "asc");
+        } else {
+            setSortColumn(columnKey);
             setSortDirection("asc");
-            return columnKey;
-        });
-    };
+        }
+    }
+
+    function sortableHeading(label, columnKey) {
+        return (
+            <SortHeader
+                label={label}
+                columnKey={columnKey}
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+            />
+        );
+    }
+
+    const visibleCount = Object.values(visibleColumns).filter(Boolean).length;
 
     return (
-        <div className="books-grid">
-            <div className="books-grid-header">
-                {visibleColumns.bookId && (
-                    <SortHeader
-                        label="Book ID"
-                        columnKey="book_id"
-                        sortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                    />
-                )}
-                {visibleColumns.title && (
-                    <SortHeader
-                        label="Title"
-                        columnKey="title"
-                        sortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                    />
-                )}
-                {visibleColumns.author && (
-                    <SortHeader
-                        label="Author"
-                        columnKey="author"
-                        sortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                    />
-                )}
-                {visibleColumns.isbn && (
-                    <SortHeader
-                        label="ISBN"
-                        columnKey="isbn"
-                        sortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                    />
-                )}
-                {visibleColumns.publisher && (
-                    <SortHeader
-                        label="Publisher"
-                        columnKey="publisher"
-                        sortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                    />
-                )}
-                {visibleColumns.category && (
-                    <SortHeader
-                        label="Category"
-                        columnKey="category"
-                        sortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                    />
-                )}
-                {visibleColumns.price && (
-                    <SortHeader
-                        label="Price"
-                        columnKey="price"
-                        sortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                    />
-                )}
-                {visibleColumns.collectible && <div className="books-grid-header-cell">Collectible</div>}
-                {visibleColumns.available && (
-                    <SortHeader
-                        label="Available"
-                        columnKey="available_quantity"
-                        sortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                    />
-                )}
-                {visibleColumns.actions && <div className="books-grid-header-cell">Actions</div>}
-            </div>
-
-            <div className="books-grid-body">
-                {sortedBooks.map((b) => (
-                    <div className="books-grid-row" key={b.book_id}>
-                        {visibleColumns.bookId && (
-                            <div className="books-grid-cell">{b.book_id}</div>
-                        )}
-                        {visibleColumns.title && (
-                            <div className="books-grid-cell">{b.title}</div>
-                        )}
-                        {visibleColumns.author && (
-                            <div className="books-grid-cell">{b.author}</div>
-                        )}
-                        {visibleColumns.isbn && (
-                            <div className="books-grid-cell">{b.isbn}</div>
-                        )}
-                        {visibleColumns.publisher && (
-                            <div className="books-grid-cell">{b.publisher}</div>
-                        )}
-                        {visibleColumns.category && (
-                            <div className="books-grid-cell">{b.category}</div>
-                        )}
-                        {visibleColumns.price && (
-                            <div className="books-grid-cell">
-                                ${Number(b.price).toFixed(2)}
-                            </div>
-                        )}
-                        {visibleColumns.collectible && (
-                            <div className="books-grid-cell">
-                                {b.is_collectible ? "Yes" : "No"}
-                            </div>
-                        )}
-                        {visibleColumns.available && (
-                            <div className="books-grid-cell">
-                                {canAddInventory
-                                    ? b.quantity_on_hand
-                                    : b.available_quantity}
-                            </div>
-                        )}
-                        {visibleColumns.actions && (
-                            <div className="books-grid-cell">
-                                {canUpdate && (
-                                    <button onClick={() => onEditBook(b.book_id)}>
-                                        Edit
-                                    </button>
+        <div className="books-table-shell">
+            <table className="books-table">
+                <thead>
+                    <tr>
+                        {visibleColumns.bookId && <th>{sortableHeading("ID", "book_id")}</th>}
+                        {visibleColumns.title && <th>{sortableHeading("Title", "title")}</th>}
+                        {visibleColumns.author && <th>{sortableHeading("Author", "author")}</th>}
+                        {visibleColumns.isbn && <th>{sortableHeading("ISBN", "isbn")}</th>}
+                        {visibleColumns.publisher && <th>{sortableHeading("Publisher", "publisher")}</th>}
+                        {visibleColumns.category && <th>{sortableHeading("Category", "category")}</th>}
+                        {visibleColumns.price && <th>{sortableHeading("Price", "price")}</th>}
+                        {visibleColumns.collectible && <th>Type</th>}
+                        {visibleColumns.available && <th>{sortableHeading("Available", "available_quantity")}</th>}
+                        {visibleColumns.actions && <th>Actions</th>}
+                    </tr>
+                </thead>
+                <tbody>
+                    {sortedBooks.length === 0 ? (
+                        <tr><td className="books-empty" colSpan={visibleCount}>No books match the current filters.</td></tr>
+                    ) : sortedBooks.map((book) => {
+                        const available = canAddInventory ? book.quantity_on_hand : book.available_quantity;
+                        return (
+                            <tr key={book.book_id}>
+                                {visibleColumns.bookId && <td className="book-id">#{book.book_id}</td>}
+                                {visibleColumns.title && <td className="book-title">{book.title || "Untitled"}</td>}
+                                {visibleColumns.author && <td>{book.author || "Unknown"}</td>}
+                                {visibleColumns.isbn && <td className="book-isbn">{book.isbn || "—"}</td>}
+                                {visibleColumns.publisher && <td>{book.publisher || "—"}</td>}
+                                {visibleColumns.category && <td><span className="book-category">{book.category || "Uncategorized"}</span></td>}
+                                {visibleColumns.price && <td className="book-price">${Number(book.price).toFixed(2)}</td>}
+                                {visibleColumns.collectible && (
+                                    <td><span className={`book-badge ${book.is_collectible ? "collectible" : "standard"}`}>{book.is_collectible ? "Collectible" : "Standard"}</span></td>
                                 )}
-
-                                {canAddInventory && b.inventory_id && (
-                                    <button
-                                        onClick={() =>
-                                            onEditInventory(b.inventory_id)
-                                        }
-                                        style={{ marginLeft: "10px" }}
-                                    >
-                                        Edit Inventory
-                                    </button>
+                                {visibleColumns.available && (
+                                    <td><span className={`stock-badge ${Number(available) > 0 ? "in-stock" : "out-of-stock"}`}>{Number(available) > 0 ? `${available} in stock` : "Out of stock"}</span></td>
                                 )}
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
+                                {visibleColumns.actions && (
+                                    <td>
+                                        <div className="book-actions">
+                                            {canUpdate && <button onClick={() => onEditBook(book.book_id)}>Edit</button>}
+                                            {canAddInventory && book.inventory_id && <button onClick={() => onEditInventory(book.inventory_id)}>Inventory</button>}
+                                            {canUseCart && <button onClick={async () => { await addToCart(book.book_id); alert("Added to cart"); }}>Add to Cart</button>}
+                                            {onSelectBook && <button onClick={() => onSelectBook(book)}>Add to Sale</button>}
+                                        </div>
+                                    </td>
+                                )}
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
         </div>
     );
 }
 
 function compare(a, b, column, direction) {
-    const dir = direction === "asc" ? 1 : -1;
-
-    const getVal = (obj) => {
-        switch (column) {
-            case "book_id": return obj.book_id;
-            case "title": return obj.title || "";
-            case "author": return obj.author || "";
-            case "isbn": return obj.isbn || "";
-            case "publisher": return obj.publisher || "";
-            case "category": return obj.category || "";
-            case "price": return Number(obj.price) || 0;
-            case "available_quantity": return Number(obj.available_quantity ?? obj.quantity_on_hand) || 0;
-            default: return "";
-        }
+    const multiplier = direction === "asc" ? 1 : -1;
+    const value = (book) => {
+        if (column === "price") return Number(book.price) || 0;
+        if (column === "available_quantity") return Number(book.available_quantity ?? book.quantity_on_hand) || 0;
+        if (column === "book_id") return Number(book.book_id) || 0;
+        return String(book[column] || "").toLowerCase();
     };
-
-    const va = getVal(a);
-    const vb = getVal(b);
-
-    if (typeof va === "number" && typeof vb === "number") {
-        return (va - vb) * dir;
-    }
-
-    return String(va).localeCompare(String(vb)) * dir;
+    const left = value(a);
+    const right = value(b);
+    return (typeof left === "number" ? left - right : left.localeCompare(right)) * multiplier;
 }

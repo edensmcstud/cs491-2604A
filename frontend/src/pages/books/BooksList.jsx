@@ -1,15 +1,13 @@
-﻿import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
-
 import FiltersPanel from "../../components/BooksList/FiltersPanel";
 import BooksTable from "../../components/BooksTable/BooksTable";
 
 export default function BooksList() {
     const navigate = useNavigate();
     const { user } = useAuth();
-
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -22,12 +20,9 @@ export default function BooksList() {
     const [searchTerm, setSearchTerm] = useState("");
     const [inStock, setInStock] = useState(false);
     const [rareOnly, setRareOnly] = useState(false);
-
     const [minPrice, setMinPrice] = useState(0);
     const [maxPrice, setMaxPrice] = useState(500);
     const [priceLimit, setPriceLimit] = useState(500);
-
-    // COLUMN VISIBILITY STATE
     const [visibleColumns, setVisibleColumns] = useState({
         bookId: true,
         title: true,
@@ -41,26 +36,27 @@ export default function BooksList() {
         actions: true
     });
 
-    // LOAD BOOKS
+    const canCreate = user?.modules?.books?.create === true;
+    const canUpdate = user?.modules?.books?.update === true;
+    const canAddInventory = user?.modules?.inventory?.adjust === true;
+    const canUseCart = user?.modules?.cart?.use === true;
+
     useEffect(() => {
-        api.get("/books")
-            .then((res) => {
-                setBooks(res);
-
-                const highest = Math.max(...res.map(b => b.price));
-                setPriceLimit(highest || 500);
-                setMaxPrice(highest || 500);
-
-                setLoading(false);
+        api.get("/books/withInventory")
+            .then((result) => {
+                setBooks(result);
+                const highest = Math.max(0, ...result.map((book) => Number(book.price) || 0));
+                const limit = Math.ceil(highest) || 500;
+                setPriceLimit(limit);
+                setMaxPrice(limit);
             })
             .catch((err) => {
-                console.log("BooksList load error:", err);
+                console.error("BooksList load error:", err);
                 setError("Failed to load books.");
-                setLoading(false);
-            });
+            })
+            .finally(() => setLoading(false));
     }, []);
 
-    // APPLY FILTERS
     const filteredBooks = useMemo(() => {
         const search = searchTerm.trim().toLowerCase();
 
@@ -86,12 +82,7 @@ export default function BooksList() {
     }, [books, searchTerm, inStock, rareOnly, minPrice, maxPrice]);
 
     if (loading) {
-        return (
-            <div className="page">
-                <h1>Books</h1>
-                <p>Loading books...</p>
-            </div>
-        );
+        return <div className="page books-loading"><h1>Books</h1><p>Loading catalog...</p></div>;
     }
 
     return (
@@ -120,25 +111,50 @@ export default function BooksList() {
                 {error && <p style={{ color: "red" }}>{error}</p>}
 
                 {canCreate && (
-                    <button
-                        onClick={() => navigate("/books/add")}
-                        style={{ marginBottom: "20px" }}
-                    >
-                        Add New Book
-                    </button>
+                    <button className="primary-button" onClick={() => navigate("/books/add")}>Add New Book</button>
                 )}
+            </div>
 
-                <BooksTable
-                    books={filteredBooks}
-                    visibleColumns={visibleColumns}
-                    canUpdate={canUpdate}
-                    canAddInventory={canAddInventory}
-                    onEditBook={(id) => navigate(`/books/edit/${id}`)}
-                    onEditInventory={(inventoryId) =>
-                        navigate(`/inventory/edit/${inventoryId}`)
-                    }
+            <div className="books-search-row">
+                <label htmlFor="book-search">Search catalog</label>
+                <input
+                    id="book-search"
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Search title, author, ISBN, publisher, or category"
                 />
-            </main>
+            </div>
+
+            {error && <p className="error">{error}</p>}
+
+            <div className="books-layout">
+                <FiltersPanel
+                    inStock={inStock}
+                    rareOnly={rareOnly}
+                    setInStock={setInStock}
+                    setRareOnly={setRareOnly}
+                    minPrice={minPrice}
+                    maxPrice={maxPrice}
+                    priceLimit={priceLimit}
+                    setMinPrice={setMinPrice}
+                    setMaxPrice={setMaxPrice}
+                    visibleColumns={visibleColumns}
+                    setVisibleColumns={setVisibleColumns}
+                />
+
+                <main className="books-main">
+                    <BooksTable
+                        books={filteredBooks}
+                        visibleColumns={visibleColumns}
+                        canUpdate={canUpdate}
+                        canAddInventory={canAddInventory}
+                        canUseCart={canUseCart}
+                        onEditBook={(id) => navigate(`/books/edit/${id}`)}
+                        onEditInventory={(inventoryId) => navigate(`/inventory/edit/${inventoryId}`)}
+                    />
+                </main>
+            </div>
         </div>
     );
 }

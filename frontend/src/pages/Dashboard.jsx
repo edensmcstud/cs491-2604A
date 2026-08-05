@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function Dashboard() {
     const { user, logout } = useAuth();
+    console.log(user.modules);
 
     const canAny = (module) => {
         const perms = user?.modules?.[module];
@@ -17,7 +18,6 @@ export default function Dashboard() {
 
             <div style={{ marginBottom: "20px" }}>
                 <p>Welcome, {user?.username}</p>
-                <button onClick={logout}>Logout</button>
             </div>
 
             <h2>Available Sections</h2>
@@ -32,12 +32,17 @@ export default function Dashboard() {
                 )}
 
                 {canAny("sales") && (
-                    <li><Link to="/sales">Sales</Link></li>
+                    <li><Link to="/sales">Sales History</Link></li>
                 )}
 
                 {canAny("customer_orders") && (
                     <li><Link to="/orders/customers">Customer Orders</Link></li>
                 )}
+
+                {canAny("customer_orders") && (
+                    <li><Link to="/orders/fulfillment">Order Fulfillment</Link></li>
+                )}
+
 
                 {canAny("supplier_orders") && (
                     <li><Link to="/orders/suppliers">Supplier Orders</Link></li>

@@ -39,8 +39,8 @@ CREATE TABLE sessions (
 CREATE TABLE customers (
     customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL UNIQUE,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
+    first_name TEXT,
+    last_name TEXT,
     phone TEXT,
     address TEXT,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
@@ -86,6 +86,8 @@ CREATE TABLE customer_orders (
     order_date TEXT DEFAULT (datetime('now')),
     status TEXT NOT NULL DEFAULT 'Pending'
         CHECK (status IN ('Pending','Paid','Shipped','Cancelled')),
+    fulfillment_type TEXT DEFAULT 'Shipped'
+    CHECK (fulfillment_type IN ('Shipped', 'InStore')),
     subtotal REAL NOT NULL,
     tax REAL NOT NULL,
     total REAL NOT NULL,
@@ -107,11 +109,21 @@ CREATE TABLE customer_order_items (
 -- SALES
 CREATE TABLE sales (
     sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    employee_id INTEGER NOT NULL,
+    customer_id INTEGER NULL,
+    employee_id INTEGER NULL,
     sale_date TEXT DEFAULT (datetime('now')),
     subtotal REAL NOT NULL,
     tax REAL NOT NULL,
     total REAL NOT NULL,
+    sale_source TEXT NOT NULL DEFAULT 'POS'
+        CHECK (sale_source IN ('POS','Fulfillment')),
+    fulfillment_type TEXT
+        CHECK (fulfillment_type IN ('Shipped','InStore')),
+    payment_method TEXT NOT NULL
+        CHECK (payment_method IN ('Cash','Card','GiftCard','StoreCredit')),
+    notes TEXT,
+    status TEXT NOT NULL DEFAULT 'Completed'
+    CHECK (status IN ('Completed','Voided','Refunded')),
     FOREIGN KEY (employee_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
@@ -126,6 +138,19 @@ CREATE TABLE sale_items (
     FOREIGN KEY (sale_id) REFERENCES sales(sale_id) ON DELETE CASCADE,
     FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
 );
+
+-- CART ITEMS
+CREATE TABLE cart_items (
+    cart_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    book_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    added_at TEXT DEFAULT (datetime('now')),
+
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
+);
+
 
 -- SUPPLIERS
 CREATE TABLE suppliers (

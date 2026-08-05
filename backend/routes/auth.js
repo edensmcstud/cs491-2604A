@@ -19,6 +19,15 @@ router.post(
     controller.logout
 );
 
+// Register (public)
+router.post(
+    "/register",
+    requireFields(["username", "email", "password", "confirmPassword"]),
+    controller.register
+);
+
+
+
 // Test route (public)
 router.get("/test", controller.test);
 
