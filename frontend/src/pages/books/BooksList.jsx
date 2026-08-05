@@ -11,7 +11,13 @@ export default function BooksList() {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [search, setSearch] = useState("");
+
+    const canCreate = user?.modules?.books?.create === true;
+    const canUpdate = user?.modules?.books?.update === true;
+    const canAddInventory = user?.modules?.inventory?.adjust === true;
+
+    // FILTER STATE
+    const [searchTerm, setSearchTerm] = useState("");
     const [inStock, setInStock] = useState(false);
     const [rareOnly, setRareOnly] = useState(false);
     const [minPrice, setMinPrice] = useState(0);
@@ -52,27 +58,58 @@ export default function BooksList() {
     }, []);
 
     const filteredBooks = useMemo(() => {
-        const term = search.trim().toLowerCase();
+        const search = searchTerm.trim().toLowerCase();
 
         return books
-            .filter((book) => !inStock || Number(book.quantity_on_hand) > 0)
-            .filter((book) => !rareOnly || Number(book.is_collectible) === 1)
-            .filter((book) => Number(book.price) >= minPrice && Number(book.price) <= maxPrice)
-            .filter((book) => !term || [book.title, book.author, book.isbn, book.publisher, book.category]
-                .some((value) => String(value || "").toLowerCase().includes(term)));
-    }, [books, search, inStock, rareOnly, minPrice, maxPrice]);
+            .filter((book) => {
+                if (!search) {
+                    return true;
+                }
+
+                const title = book.title?.toLowerCase() || "";
+                const author = book.author?.toLowerCase() || "";
+                const isbn = String(book.isbn || "").toLowerCase();
+
+                return (
+                    title.includes(search) ||
+                    author.includes(search) ||
+                    isbn.includes(search)
+                );
+            })
+            .filter(b => !inStock || b.quantity_on_hand > 0)
+            .filter(b => !rareOnly || b.is_collectible === 1)
+            .filter(b => b.price >= minPrice && b.price <= maxPrice);
+    }, [books, searchTerm, inStock, rareOnly, minPrice, maxPrice]);
 
     if (loading) {
         return <div className="page books-loading"><h1>Books</h1><p>Loading catalog...</p></div>;
     }
 
     return (
-        <div className="page books-page">
-            <div className="books-page-heading">
-                <div>
-                    <h1>Books</h1>
-                    <p>{filteredBooks.length} of {books.length} books shown</p>
-                </div>
+        <div className="page books-layout">
+            {/* SIDEBAR FILTERS */}
+            <FiltersPanel
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                inStock={inStock}
+                rareOnly={rareOnly}
+                setInStock={setInStock}
+                setRareOnly={setRareOnly}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                priceLimit={priceLimit}
+                setMinPrice={setMinPrice}
+                setMaxPrice={setMaxPrice}
+                visibleColumns={visibleColumns}
+                setVisibleColumns={setVisibleColumns}
+            />
+
+            {/* MAIN CONTENT */}
+            <main className="books-main">
+                <h1>Books</h1>
+
+                {error && <p style={{ color: "red" }}>{error}</p>}
+
                 {canCreate && (
                     <button className="primary-button" onClick={() => navigate("/books/add")}>Add New Book</button>
                 )}
