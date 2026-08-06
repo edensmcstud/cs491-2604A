@@ -2,8 +2,10 @@ import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 
 export default function Dashboard() {
-    const { user, logout } = useAuth();
-    console.log(user.modules);
+    const { user } = useAuth();
+
+    //console.log("Modules:", user?.modules);
+    //console.log("Roles:", user?.roles);
 
     const canAny = (module) => {
         const perms = user?.modules?.[module];
@@ -31,23 +33,21 @@ export default function Dashboard() {
                     <li><Link to="/inventory">Inventory</Link></li>
                 )}
 
-                {canAny("sales") && (
-                    <li><Link to="/sales">Sales History</Link></li>
-                )}
-
                 {canAny("customer_orders") && (
-                    <li><Link to="/orders/customers">Customer Orders</Link></li>
+                    <li><Link to="/pos">Point of Sale</Link></li>
                 )}
 
                 {canAny("customer_orders") && (
                     <li><Link to="/orders/fulfillment">Order Fulfillment</Link></li>
                 )}
 
+                {canAny("sales") && (
+                    <li><Link to="/sales">Sales History</Link></li>
+                )}
 
                 {canAny("supplier_orders") && (
                     <li><Link to="/orders/suppliers">Supplier Orders</Link></li>
                 )}
-
 
                 {canAny("reports") && (
                     <li><Link to="/reports">Reports</Link></li>
