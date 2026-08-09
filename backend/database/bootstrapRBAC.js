@@ -86,8 +86,9 @@ module.exports = async function bootstrapRBAC() {
         );
     }
 
-    // ADMIN: full access
+    // ADMIN: full access (cart is customer-only; Admin has no use for it)
     for (const perm of permissions) {
+        if (perm.module === "cart") continue;
         await assign("Admin", perm.module, perm.action);
     }
 
