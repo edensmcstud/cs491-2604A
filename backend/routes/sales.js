@@ -3,10 +3,13 @@ const router = express.Router();
 
 const salesController = require("../controllers/salesController");
 const requirePermission = require("../middleware/requirePermission");
+const auth = require("../middleware/auth");
 
 // =====================================================
 // SALES ROUTES — RBAC OVERHAUL VERSION (Correct)
 // =====================================================
+// Require authentication for ALL sales routes
+router.use(auth);
 
 // -----------------------------------------------------
 // CREATE SALE (Employee + Admin)

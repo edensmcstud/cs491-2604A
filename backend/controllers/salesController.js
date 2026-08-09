@@ -32,8 +32,10 @@ exports.createSale = async (req, res) => {
         for (const item of items) {
             const { book_id, quantity } = item;
 
-            if (!book_id || !quantity || quantity <= 0) {
-                return res.status(400).json({ error: "Each item requires book_id and quantity > 0" });
+            if (!book_id || !quantity || quantity <= 0 || !Number.isInteger(quantity)) {
+                return res.status(400).json({
+                    error: "Each item requires book_id and a whole number quantity greater than 0"
+                });
             }
 
             // Fetch price
