@@ -15,14 +15,12 @@ export default function AuditLog() {
         try {
             setLoading(true);
 
-            // FUTURE BACKEND ENDPOINT:
-            // GET /admin/audit-log
             const data = await api.get("/admin/audit-log");
 
             setLogs(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error("Failed to load audit log:", err);
-            setError("Audit log backend not implemented yet");
+            setError("Failed to load audit log.");
             setLogs([]);
         } finally {
             setLoading(false);
@@ -45,8 +43,8 @@ export default function AuditLog() {
                 columns={["User", "Action", "Timestamp"]}
                 data={logs.map((entry) => ({
                     User: entry.username,
-                    Action: entry.action,
-                    Timestamp: entry.timestamp
+                    Action: entry.action_type,
+                    Timestamp: entry.created_at
                 }))}
             />
         </div>

@@ -15,14 +15,12 @@ export default function PermissionMatrix() {
         try {
             setLoading(true);
 
-            // FUTURE BACKEND ENDPOINT:
-            // GET /admin/permissions
             const data = await api.get("/admin/permissions");
 
             setMatrix(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error("Failed to load permission matrix:", err);
-            setError("Permission matrix backend not implemented yet");
+            setError("Failed to load permission matrix.");
             setMatrix([]);
         } finally {
             setLoading(false);
