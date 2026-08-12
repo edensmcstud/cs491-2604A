@@ -23,17 +23,9 @@ export default function ReceiptPage() {
         fetchReceipt();
     }, [id]);
 
-    if (loading) {
-        return <div>Loading receipt…</div>;
-    }
-
-    if (error) {
-        return <div>{error}</div>;
-    }
-
-    if (!receipt) {
-        return <div>No receipt found.</div>;
-    }
+    if (loading) return <div>Loading receipt…</div>;
+    if (error) return <div>{error}</div>;
+    if (!receipt) return <div>No receipt found.</div>;
 
     const {
         sale_id,
@@ -50,7 +42,7 @@ export default function ReceiptPage() {
     } = receipt;
 
     return (
-        <div style={{ maxWidth: "700px", margin: "0 auto", padding: "20px" }}>
+        <div className="receipt-page">
             <h2>Receipt #{sale_id}</h2>
             <hr />
 
@@ -88,11 +80,11 @@ export default function ReceiptPage() {
 
             <section>
                 <h3>Items</h3>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <table className="receipt-table">
                     <thead>
                         <tr>
-                            <th style={{ textAlign: "left" }}>Title</th>
-                            <th style={{ textAlign: "left" }}>ISBN</th>
+                            <th>Title</th>
+                            <th>ISBN</th>
                             <th>Qty</th>
                             <th>Price</th>
                             <th>Total</th>
@@ -103,9 +95,9 @@ export default function ReceiptPage() {
                             <tr key={item.sale_item_id}>
                                 <td>{item.title}</td>
                                 <td>{item.isbn || "—"}</td>
-                                <td style={{ textAlign: "center" }}>{item.quantity}</td>
-                                <td style={{ textAlign: "right" }}>${item.unit_price.toFixed(2)}</td>
-                                <td style={{ textAlign: "right" }}>${item.line_total.toFixed(2)}</td>
+                                <td className="numeric-cell">{item.quantity}</td>
+                                <td className="numeric-cell">${item.unit_price.toFixed(2)}</td>
+                                <td className="numeric-cell">${item.line_total.toFixed(2)}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -124,12 +116,8 @@ export default function ReceiptPage() {
             <hr />
 
             <button
+                className="primary-button"
                 onClick={() => window.print()}
-                style={{
-                    padding: "10px 20px",
-                    fontSize: "16px",
-                    cursor: "pointer"
-                }}
             >
                 Print Receipt
             </button>

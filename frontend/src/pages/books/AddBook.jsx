@@ -102,61 +102,86 @@ export default function AddBook() {
         <div className="page">
             <h1>Add Inventory Item</h1>
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            {error && (
+                <div className="form-error">
+                    {error}
+                </div>
+            )}
 
-            <form onSubmit={handleSubmit}>
-                <label>Book</label>
-                <select
-                    name="book_id"
-                    value={form.book_id}
-                    onChange={handleBookSelect}
+            {/* Centered modern form */}
+            <form className="form-modern form-centered" onSubmit={handleSubmit}>
+
+                <div className="form-group">
+                    <label>Book</label>
+                    <select
+                        name="book_id"
+                        value={form.book_id}
+                        onChange={handleBookSelect}
+                        className="input-modern"
+                    >
+                        <option value="">-- Select a Book --</option>
+                        {books.map((b) => (
+                            <option key={b.book_id} value={b.book_id}>
+                                {b.title} (ID: {b.book_id})
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="form-group">
+                    <label>Quantity On Hand</label>
+                    <input
+                        type="number"
+                        name="quantity_on_hand"
+                        value={form.quantity_on_hand}
+                        onChange={updateField}
+                        disabled={selectedBook?.is_collectible === 1}
+                        className="input-modern"
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Quantity Reserved</label>
+                    <input
+                        type="number"
+                        name="quantity_reserved"
+                        value={form.quantity_reserved}
+                        onChange={updateField}
+                        disabled={selectedBook?.is_collectible === 1}
+                        className="input-modern"
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Reorder Level</label>
+                    <input
+                        type="number"
+                        name="reorder_level"
+                        value={form.reorder_level}
+                        onChange={updateField}
+                        disabled={selectedBook?.is_collectible === 1}
+                        className="input-modern"
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Reorder Quantity</label>
+                    <input
+                        type="number"
+                        name="reorder_quantity"
+                        value={form.reorder_quantity}
+                        onChange={updateField}
+                        disabled={selectedBook?.is_collectible === 1}
+                        className="input-modern"
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    className="primary-button"
+                    disabled={saving}
                 >
-                    <option value="">-- Select a Book --</option>
-                    {books.map((b) => (
-                        <option key={b.book_id} value={b.book_id}>
-                            {b.title} (ID: {b.book_id})
-                        </option>
-                    ))}
-                </select>
-
-                <label>Quantity On Hand</label>
-                <input
-                    type="number"
-                    name="quantity_on_hand"
-                    value={form.quantity_on_hand}
-                    onChange={updateField}
-                    disabled={selectedBook?.is_collectible === 1}
-                />
-
-                <label>Quantity Reserved</label>
-                <input
-                    type="number"
-                    name="quantity_reserved"
-                    value={form.quantity_reserved}
-                    onChange={updateField}
-                    disabled={selectedBook?.is_collectible === 1}
-                />
-
-                <label>Reorder Level</label>
-                <input
-                    type="number"
-                    name="reorder_level"
-                    value={form.reorder_level}
-                    onChange={updateField}
-                    disabled={selectedBook?.is_collectible === 1}
-                />
-
-                <label>Reorder Quantity</label>
-                <input
-                    type="number"
-                    name="reorder_quantity"
-                    value={form.reorder_quantity}
-                    onChange={updateField}
-                    disabled={selectedBook?.is_collectible === 1}
-                />
-
-                <button type="submit" disabled={saving}>
-                    {saving ? "Saving..." : "Add Inventory Item"}
+                    {saving ? "Saving…" : "Add Inventory Item"}
                 </button>
             </form>
         </div>
