@@ -41,11 +41,15 @@ export default function POS() {
         );
     }
 
+    function removeItem(book_id) {
+        setItems(prev => prev.filter(i => i.book_id !== book_id));
+    }
+
     async function completeSale() {
         try {
             const response = await api.post("/sales/pos", {
                 items,
-                payment_method: paymentMethod   // FIXED
+                payment_method: paymentMethod
             });
 
             const { sale_id } = response;
@@ -60,7 +64,8 @@ export default function POS() {
             alert(message);
         }
     }
- return (
+
+    return (
         <div className="page">
             <h1>Point of Sale</h1>
 
@@ -76,7 +81,7 @@ export default function POS() {
             <ul>
                 {results.map(book => (
                     <li key={book.book_id}>
-                        {book.title} — ${book.price}
+                        {book.title} — ${book.price.toFixed(2)}
                         <button onClick={() => addItem(book)}>Add</button>
                     </li>
                 ))}
@@ -87,13 +92,21 @@ export default function POS() {
             <ul>
                 {items.map(item => (
                     <li key={item.book_id}>
-                        {item.title} — ${item.price}
+                        {item.title} — ${item.price.toFixed(2)}
+
                         <input
                             type="number"
                             min="1"
                             value={item.quantity}
                             onChange={e => updateQuantity(item.book_id, Number(e.target.value))}
                         />
+
+                        <button
+                            style={{ marginLeft: "10px" }}
+                            onClick={() => removeItem(item.book_id)}
+                        >
+                            Remove
+                        </button>
                     </li>
                 ))}
             </ul>
