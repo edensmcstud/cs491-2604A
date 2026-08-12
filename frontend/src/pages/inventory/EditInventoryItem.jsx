@@ -99,47 +99,69 @@ export default function EditInventoryItem() {
                 </p>
             )}
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            {error && (
+                <div className="form-error">
+                    {error}
+                </div>
+            )}
 
-            <form onSubmit={handleSubmit}>
-                <label>Quantity On Hand</label>
-                <input
-                    type="number"
-                    name="quantity_on_hand"
-                    value={form.quantity_on_hand}
-                    onChange={updateField}
-                    disabled={book?.is_collectible === 1}
-                />
+            {/* Centered modern form */}
+            <form className="form-modern form-centered" onSubmit={handleSubmit}>
 
-                <label>Quantity Reserved</label>
-                <input
-                    type="number"
-                    name="quantity_reserved"
-                    value={form.quantity_reserved}
-                    onChange={updateField}
-                    disabled={book?.is_collectible === 1}
-                />
+                <div className="form-group">
+                    <label>Quantity On Hand</label>
+                    <input
+                        type="number"
+                        name="quantity_on_hand"
+                        value={form.quantity_on_hand}
+                        onChange={updateField}
+                        disabled={book?.is_collectible === 1}
+                        className="input-modern"
+                    />
+                </div>
 
-                <label>Reorder Level</label>
-                <input
-                    type="number"
-                    name="reorder_level"
-                    value={form.reorder_level}
-                    onChange={updateField}
-                    disabled={book?.is_collectible === 1}
-                />
+                <div className="form-group">
+                    <label>Quantity Reserved</label>
+                    <input
+                        type="number"
+                        name="quantity_reserved"
+                        value={form.quantity_reserved}
+                        onChange={updateField}
+                        disabled={book?.is_collectible === 1}
+                        className="input-modern"
+                    />
+                </div>
 
-                <label>Reorder Quantity</label>
-                <input
-                    type="number"
-                    name="reorder_quantity"
-                    value={form.reorder_quantity}
-                    onChange={updateField}
-                    disabled={book?.is_collectible === 1}
-                />
+                <div className="form-group">
+                    <label>Reorder Level</label>
+                    <input
+                        type="number"
+                        name="reorder_level"
+                        value={form.reorder_level}
+                        onChange={updateField}
+                        disabled={book?.is_collectible === 1}
+                        className="input-modern"
+                    />
+                </div>
 
-                <button type="submit" disabled={saving}>
-                    {saving ? "Saving..." : "Save Changes"}
+                <div className="form-group">
+                    <label>Reorder Quantity</label>
+                    <input
+                        type="number"
+                        name="reorder_quantity"
+                        value={form.reorder_quantity}
+                        onChange={updateField}
+                        disabled={book?.is_collectible === 1}
+                        className="input-modern"
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    className="primary-button"
+                    disabled={saving}
+                >
+                    {saving ? "Saving…" : "Save Changes"}
                 </button>
             </form>
         </div>
