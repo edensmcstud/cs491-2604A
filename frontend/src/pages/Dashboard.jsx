@@ -4,9 +4,6 @@ import { Link } from "react-router-dom";
 export default function Dashboard() {
     const { user } = useAuth();
 
-    //console.log("Modules:", user?.modules);
-    //console.log("Roles:", user?.roles);
-
     const canAny = (module) => {
         const perms = user?.modules?.[module];
         return perms && Object.values(perms).some(v => v === true);
@@ -15,12 +12,11 @@ export default function Dashboard() {
     const isAdmin = user?.roles?.includes("Admin");
 
     return (
-        <div className="page">
+        <div className="dashboard-page">
+
             <h1>Dashboard</h1>
 
-            <div style={{ marginBottom: "20px" }}>
-                <p>Welcome, {user?.username}</p>
-            </div>
+            <p>Welcome, {user?.username}</p>
 
             <h2>Available Sections</h2>
 
@@ -57,6 +53,7 @@ export default function Dashboard() {
                     <li><Link to="/admin">Administration</Link></li>
                 )}
             </ul>
+
         </div>
     );
 }

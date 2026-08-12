@@ -12,15 +12,28 @@ export default function Layout() {
     return (
         <div className="layout" style={{ position: "relative" }}>
 
+            
             {/* Global Header Container */}
-            <div style={{ width: "100%", textAlign: "center", padding: "30px 0 10px 0" }}>
-                <div style={{ display: "inline-block", margin: "0 auto" }}>
+            <div style={{ width: "100%", textAlign: "center", padding: "20px 0 10px 0" }}>
+                <div
+                    style={{
+                        display: "inline-flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: "0px"
+                    }}
+                >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 100 100"
-                        width="80"
-                        height="80"
-                        style={{ display: "block", margin: "0 auto" }}
+                        width="100"
+                        height="100"
+                        style={{
+                            display: "block",
+                            margin: "0",
+                            padding: "0",
+                            transform: "translateY(20px)"   // <— THIS FIXES THE SPACING
+                        }}
                     >
                         <path
                             fill="currentColor"
@@ -45,7 +58,7 @@ export default function Layout() {
                             borderTop: "2px solid #f3a4b1",
                             borderBottom: "2px solid #f3a4b1",
                             padding: "4px 12px",
-                            marginTop: "10px",
+                            margin: "0",
                             display: "inline-block"
                         }}
                     >
@@ -53,6 +66,7 @@ export default function Layout() {
                     </div>
                 </div>
             </div>
+
 
             {/* Remote Header Component */}
             <Header />
