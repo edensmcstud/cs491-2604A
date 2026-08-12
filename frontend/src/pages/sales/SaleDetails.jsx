@@ -26,8 +26,10 @@ export default function SaleDetails() {
         return (
             <div className="page">
                 <h1>Sale Details</h1>
-                <p style={{ color: "red" }}>{error}</p>
-                <button onClick={() => navigate("/sales")}>Back</button>
+                <div className="form-error">{error}</div>
+                <button className="primary-button" onClick={() => navigate("/sales")}>
+                    Back
+                </button>
             </div>
         );
     }
@@ -46,31 +48,18 @@ export default function SaleDetails() {
             <h1>Sale #{sale.sale_id}</h1>
 
             <button
+                className="secondary-button"
+                style={{ marginBottom: "16px" }}
                 onClick={() => navigate("/sales")}
-                style={{
-                    marginBottom: "20px",
-                    padding: "8px 14px",
-                    background: "#eee",
-                    border: "1px solid #ccc",
-                    cursor: "pointer"
-                }}
             >
                 Back to Sales
             </button>
 
-            <div
-                style={{
-                    padding: "20px",
-                    border: "1px solid #ccc",
-                    background: "#fff",
-                    borderRadius: "6px",
-                    maxWidth: "800px"
-                }}
-            >
+            <div className="card-soft">
                 {/* Summary */}
-                <section style={{ marginBottom: "25px" }}>
-                    <h2 style={{ marginBottom: "10px" }}>Summary</h2>
-                    <div style={{ lineHeight: "1.6" }}>
+                <section className="section-block">
+                    <h2>Summary</h2>
+                    <div className="section-lines">
                         <p><strong>Date:</strong> {sale.sale_date}</p>
                         <p><strong>Employee:</strong> {sale.employee_id}</p>
                         <p><strong>Payment Method:</strong> {sale.payment_method}</p>
@@ -78,34 +67,37 @@ export default function SaleDetails() {
                 </section>
 
                 {/* Items */}
-                <section style={{ marginBottom: "25px" }}>
-                    <h2 style={{ marginBottom: "10px" }}>Items</h2>
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                        <thead>
-                            <tr style={{ background: "#f5f5f5" }}>
-                                <th style={thStyle}>Title</th>
-                                <th style={thStyle}>Qty</th>
-                                <th style={thStyle}>Unit Price</th>
-                                <th style={thStyle}>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {sale.items.map(i => (
-                                <tr key={i.sale_item_id}>
-                                    <td style={tdStyle}>{i.title}</td>
-                                    <td style={tdStyle}>{i.quantity}</td>
-                                    <td style={tdStyle}>${i.unit_price.toFixed(2)}</td>
-                                    <td style={tdStyle}>${i.line_total.toFixed(2)}</td>
+                <section className="section-block">
+                    <h2>Items</h2>
+
+                    <div className="table-card">
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Qty</th>
+                                    <th>Unit Price</th>
+                                    <th>Total</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {sale.items.map(i => (
+                                    <tr key={i.sale_item_id}>
+                                        <td>{i.title}</td>
+                                        <td className="numeric-cell">{i.quantity}</td>
+                                        <td className="numeric-cell">${i.unit_price.toFixed(2)}</td>
+                                        <td className="numeric-cell">${i.line_total.toFixed(2)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </section>
 
                 {/* Totals */}
-                <section>
-                    <h2 style={{ marginBottom: "10px" }}>Totals</h2>
-                    <div style={{ lineHeight: "1.6" }}>
+                <section className="section-block">
+                    <h2>Totals</h2>
+                    <div className="section-lines">
                         <p><strong>Subtotal:</strong> ${sale.subtotal.toFixed(2)}</p>
                         <p><strong>Tax:</strong> ${sale.tax.toFixed(2)}</p>
                         <p><strong>Total:</strong> ${sale.total.toFixed(2)}</p>
@@ -115,14 +107,3 @@ export default function SaleDetails() {
         </div>
     );
 }
-
-const thStyle = {
-    padding: "8px",
-    borderBottom: "1px solid #ddd",
-    textAlign: "left"
-};
-
-const tdStyle = {
-    padding: "8px",
-    borderBottom: "1px solid #eee"
-};

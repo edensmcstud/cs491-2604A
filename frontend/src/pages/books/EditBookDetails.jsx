@@ -121,114 +121,172 @@ export default function EditBookDetails() {
         <div className="page">
             <h1>Edit Book</h1>
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            {error && (
+                <div className="form-error">
+                    {error}
+                </div>
+            )}
 
-            <form onSubmit={handleSubmit}>
-                <label>ISBN</label>
-                <input
-                    name="isbn"
-                    value={form.isbn}
-                    onChange={updateField}
-                    placeholder="ISBN (optional)"
-                />
+            {/* Centered modern form */}
+            <form className="form-modern form-centered" onSubmit={handleSubmit}>
 
-                <label>Title</label>
-                <input
-                    name="title"
-                    value={form.title}
-                    onChange={updateField}
-                />
-
-                <label>Author</label>
-                <input
-                    name="author"
-                    value={form.author}
-                    onChange={updateField}
-                />
-
-                <label>Publisher</label>
-                <input
-                    name="publisher"
-                    value={form.publisher}
-                    onChange={updateField}
-                />
-
-                <label>Category</label>
-                <input
-                    name="category"
-                    value={form.category}
-                    onChange={updateField}
-                />
-
-                <label>Price</label>
-                <input
-                    type="number"
-                    name="price"
-                    step="0.01"
-                    min="0"
-                    value={form.price}
-                    onChange={updateField}
-                />
-
-                <label>Description</label>
-                <textarea
-                    name="description"
-                    value={form.description}
-                    onChange={updateField}
-                />
-
-                <label>
+                {/* ISBN */}
+                <div className="form-group">
+                    <label>ISBN</label>
                     <input
-                        type="checkbox"
-                        name="is_collectible"
-                        checked={form.is_collectible}
+                        name="isbn"
+                        value={form.isbn}
                         onChange={updateField}
+                        placeholder="ISBN (optional)"
+                        className="input-modern"
                     />
-                    Rare / Collectible Book
-                </label>
+                </div>
 
-                {form.is_collectible && (
-                    <>
-                        <label>Condition</label>
-                        <input
-                            name="condition"
-                            value={form.condition}
-                            onChange={updateField}
-                        />
+                {/* Title */}
+                <div className="form-group">
+                    <label>Title</label>
+                    <input
+                        name="title"
+                        value={form.title}
+                        onChange={updateField}
+                        className="input-modern"
+                    />
+                </div>
 
-                        <label>Edition</label>
-                        <input
-                            name="edition"
-                            value={form.edition}
-                            onChange={updateField}
-                        />
+                {/* Author */}
+                <div className="form-group">
+                    <label>Author</label>
+                    <input
+                        name="author"
+                        value={form.author}
+                        onChange={updateField}
+                        className="input-modern"
+                    />
+                </div>
 
-                        <label>Binding</label>
-                        <input
-                            name="binding"
-                            value={form.binding}
-                            onChange={updateField}
-                        />
+                {/* Publisher */}
+                <div className="form-group">
+                    <label>Publisher</label>
+                    <input
+                        name="publisher"
+                        value={form.publisher}
+                        onChange={updateField}
+                        className="input-modern"
+                    />
+                </div>
 
-                        <label>Signed</label>
+                {/* Category */}
+                <div className="form-group">
+                    <label>Category</label>
+                    <input
+                        name="category"
+                        value={form.category}
+                        onChange={updateField}
+                        className="input-modern"
+                    />
+                </div>
+
+                {/* Price */}
+                <div className="form-group">
+                    <label>Price</label>
+                    <input
+                        type="number"
+                        name="price"
+                        step="0.01"
+                        min="0"
+                        value={form.price}
+                        onChange={updateField}
+                        className="input-modern"
+                    />
+                </div>
+
+                {/* Description */}
+                <div className="form-group">
+                    <label>Description</label>
+                    <textarea
+                        name="description"
+                        value={form.description}
+                        onChange={updateField}
+                        className="input-modern"
+                    />
+                </div>
+
+                {/* Collectible toggle */}
+                <div className="form-group checkbox-group">
+                    <label className="checkbox-label">
                         <input
                             type="checkbox"
-                            name="signed"
-                            checked={form.signed}
+                            name="is_collectible"
+                            checked={form.is_collectible}
                             onChange={updateField}
                         />
+                        Rare / Collectible Book
+                    </label>
+                </div>
 
-                        <label>Provenance</label>
-                        <textarea
-                            name="provenance"
-                            value={form.provenance}
-                            onChange={updateField}
-                        />
+                {/* Collectible fields */}
+                {form.is_collectible && (
+                    <>
+                        <div className="form-group">
+                            <label>Condition</label>
+                            <input
+                                name="condition"
+                                value={form.condition}
+                                onChange={updateField}
+                                className="input-modern"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Edition</label>
+                            <input
+                                name="edition"
+                                value={form.edition}
+                                onChange={updateField}
+                                className="input-modern"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Binding</label>
+                            <input
+                                name="binding"
+                                value={form.binding}
+                                onChange={updateField}
+                                className="input-modern"
+                            />
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    name="signed"
+                                    checked={form.signed}
+                                    onChange={updateField}
+                                />
+                                Signed
+                            </label>
+                        </div>
+
+                        <div className="form-group">
+                            <label>Provenance</label>
+                            <textarea
+                                name="provenance"
+                                value={form.provenance}
+                                onChange={updateField}
+                                className="input-modern"
+                            />
+                        </div>
                     </>
                 )}
 
-                <button type="submit" disabled={saving}>
-                    {saving ? "Saving..." : "Save Changes"}
+                <button
+                    type="submit"
+                    className="primary-button"
+                    disabled={saving}
+                >
+                    {saving ? "Saving…" : "Save Changes"}
                 </button>
             </form>
         </div>
