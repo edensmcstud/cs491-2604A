@@ -103,10 +103,24 @@ exports.createPosSale = async (req, res) => {
     const { items, payment_method } = req.body;
     const employee_id = req.user.user_id;
 
+    if (!Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ error: "items[] required" });
+    }
+
+    for (const item of items) {
+        if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
+            return res.status(400).json({
+                error: `Invalid quantity for book_id ${item.book_id}`
+            });
+        }
+    }
+
     try {
         await db.run("BEGIN TRANSACTION");
 
-        // 1. Validate inventory
+        // 1. Validate inventory + look up authoritative price server-side
+        const priceByBookId = {};
+
         for (const item of items) {
             const stock = await db.get(
                 "SELECT quantity_on_hand FROM inventory WHERE book_id = ?",
@@ -126,11 +140,25 @@ exports.createPosSale = async (req, res) => {
                     error: `Not enough stock for book_id ${item.book_id}. In stock: ${stock.quantity_on_hand}, requested: ${item.quantity}`
                 });
             }
+
+            const book = await db.get(
+                "SELECT price FROM books WHERE book_id = ?",
+                [item.book_id]
+            );
+
+            if (!book) {
+                await db.run("ROLLBACK");
+                return res.status(400).json({
+                    error: `Book not found for book_id ${item.book_id}`
+                });
+            }
+
+            priceByBookId[item.book_id] = book.price;
         }
 
-        // 2. Compute totals
+        // 2. Compute totals using authoritative prices, not client input
         const subtotal = items.reduce(
-            (sum, item) => sum + item.price * item.quantity,
+            (sum, item) => sum + priceByBookId[item.book_id] * item.quantity,
             0
         );
 
@@ -155,7 +183,8 @@ exports.createPosSale = async (req, res) => {
 
         // 4. Insert items + deduct inventory
         for (const item of items) {
-            const line_total = item.price * item.quantity;
+            const unitPrice = priceByBookId[item.book_id];
+            const line_total = unitPrice * item.quantity;
 
             await db.run(
                 `INSERT INTO sale_items (
@@ -165,7 +194,7 @@ exports.createPosSale = async (req, res) => {
                     unit_price,
                     line_total
                 ) VALUES (?, ?, ?, ?, ?)`,
-                [sale_id, item.book_id, item.quantity, item.price, line_total]
+                [sale_id, item.book_id, item.quantity, unitPrice, line_total]
             );
 
             await db.run(
