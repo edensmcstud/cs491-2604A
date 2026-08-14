@@ -34,6 +34,8 @@ export default function POS() {
     }
 
     function updateQuantity(book_id, qty) {
+        if (!Number.isInteger(qty) || qty <= 0) return;
+
         setItems(prev =>
             prev.map(i =>
                 i.book_id === book_id ? { ...i, quantity: qty } : i
@@ -46,6 +48,11 @@ export default function POS() {
     }
 
     async function completeSale() {
+        if (items.length === 0) {
+            alert("Add at least one item before completing the sale.");
+            return;
+        }
+
         try {
             const response = await api.post("/sales/pos", {
                 items,
