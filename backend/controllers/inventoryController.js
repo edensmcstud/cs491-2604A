@@ -64,6 +64,14 @@ exports.updateInventoryItem = async (req, res) => {
             reorder_quantity
         } = req.body;
 
+        const fields = { quantity_on_hand, quantity_reserved, reorder_level, reorder_quantity };
+
+        for (const [name, value] of Object.entries(fields)) {
+            if (typeof value !== "number" || Number.isNaN(value) || value < 0) {
+                return res.status(400).json({ error: `${name} must be a number >= 0` });
+            }
+        }
+
         const now = new Date().toISOString();
 
         // Validate inventory exists
