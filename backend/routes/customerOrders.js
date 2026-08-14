@@ -3,7 +3,7 @@ const router = express.Router();
 
 const customerOrdersController = require("../controllers/customerOrdersController");
 const requirePermission = require("../middleware/requirePermission");
-const requireAuth = require("../middleware/requireAuth");
+const auth = require("../middleware/auth");
 
 // =====================================================
 // CUSTOMER ORDER ROUTES � RBAC OVERHAUL VERSION
@@ -17,7 +17,7 @@ const requireAuth = require("../middleware/requireAuth");
 // -----------------------------------------------------
 router.post(
     "/",
-    requireAuth,
+    auth,
     requirePermission("customer_orders", "create"),
     customerOrdersController.createCustomerOrder
 );
@@ -28,7 +28,7 @@ router.post(
 // -----------------------------------------------------
 router.get(
     "/",
-    requireAuth,
+    auth,
     requirePermission("customer_orders", "read"),
     customerOrdersController.getCustomerOrders
 );
@@ -40,7 +40,7 @@ router.get(
 // -----------------------------------------------------
 router.get(
     "/:id",
-    requireAuth,
+    auth,
     requirePermission("customer_orders", "read"),
     customerOrdersController.getCustomerOrderById
 );
