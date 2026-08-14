@@ -41,31 +41,56 @@ export function CartProvider({ children }) {
     }
 
     async function addToCart(book_id) {
-        await api.post("/cart/add", { book_id, quantity: 1 });
-        await loadCart();
+        try {
+            await api.post("/cart/add", { book_id, quantity: 1 });
+            await loadCart();
+        } catch (err) {
+            console.error("CartContext addToCart ERROR:", err);
+            alert(err?.response?.data?.error || "Failed to add item to cart.");
+        }
     }
 
     async function removeFromCart(book_id) {
-        await api.delete(`/cart/remove/${book_id}`);
-        await loadCart();
+        try {
+            await api.delete(`/cart/remove/${book_id}`);
+            await loadCart();
+        } catch (err) {
+            console.error("CartContext removeFromCart ERROR:", err);
+            alert(err?.response?.data?.error || "Failed to remove item from cart.");
+        }
     }
 
     async function decrement(book_id) {
-        await api.delete(`/cart/decrement/${book_id}`);
-        await loadCart();
+        try {
+            await api.delete(`/cart/decrement/${book_id}`);
+            await loadCart();
+        } catch (err) {
+            console.error("CartContext decrement ERROR:", err);
+            alert(err?.response?.data?.error || "Failed to update item quantity.");
+        }
     }
 
     async function clearCart() {
-        await api.delete("/cart");
-        await loadCart();
+        try {
+            await api.delete("/cart");
+            await loadCart();
+        } catch (err) {
+            console.error("CartContext clearCart ERROR:", err);
+            alert(err?.response?.data?.error || "Failed to clear cart.");
+        }
     }
 
     async function checkout() {
-        await api.post("/cart/checkout", {
-            payment_method: "N/A",
-            shipping_address: "N/A"
-        });
-        await loadCart();
+        try {
+            await api.post("/cart/checkout", {
+                payment_method: "N/A",
+                shipping_address: "N/A"
+            });
+            await loadCart();
+        } catch (err) {
+            console.error("CartContext checkout ERROR:", err);
+            alert(err?.response?.data?.error || "Checkout failed.");
+        }
     }
 
     return (

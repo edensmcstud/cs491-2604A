@@ -56,7 +56,7 @@ export default function CartPage() {
                         >
                             <strong>{item.title}</strong>
                             <div>Quantity: {item.quantity}</div>
-                            <div>Subtotal: ${item.subtotal.toFixed(2)}</div>
+                            <div>Subtotal: ${Number(item.subtotal || 0).toFixed(2)}</div>
 
                             <div style={{ marginTop: "10px" }}>
                                 <button
