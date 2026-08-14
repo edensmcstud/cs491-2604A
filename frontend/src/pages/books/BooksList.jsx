@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
@@ -44,7 +44,7 @@ export default function BooksList() {
     const canAddInventory = user?.modules?.inventory?.adjust === true;
     const canUseCart = user?.modules?.cart?.use === true;
 
-    // INITIAL LOAD � FULL CATALOG
+    // INITIAL LOAD — FULL CATALOG
     useEffect(() => {
         api.get("/books/withInventory")
             .then((result) => {
@@ -63,16 +63,26 @@ export default function BooksList() {
             .finally(() => setLoading(false));
     }, []);
 
-    // BACKEND SEARCH � POS STYLE
+    // BACKEND SEARCH — POS STYLE
     async function handleSearch() {
         try {
+            // If search box is empty → reload full catalog
+            if (!search.trim()) {
+                const full = await api.get("/books/withInventory");
+                setBooks(full);
+                return;
+            }
+
+            // Otherwise perform backend search
             const data = await api.get(`/books/search?q=${search}`);
             setBooks(data);
+
         } catch (err) {
             console.error("Search error:", err);
             setError("Search failed.");
         }
     }
+
 
     // CLIENT FILTERS APPLIED TO BACKEND RESULTS
     const filteredBooks = useMemo(() => {
