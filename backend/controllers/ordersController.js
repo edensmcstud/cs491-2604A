@@ -123,7 +123,7 @@ exports.createOrder = async (req, res) => {
             total
         });
     } catch (err) {
-        handleError(err, req, res);
+        handleError(res, err);
     }
 };
 
@@ -174,7 +174,7 @@ exports.getOrderStatus = async (req, res) => {
 
         res.json(order);
     } catch (err) {
-        handleError(err, req, res);
+        handleError(res, err);
     }
 };
 
@@ -210,7 +210,7 @@ exports.listPendingOrders = async (req, res) => {
 
         res.json({ orders });
     } catch (err) {
-        handleError(err, req, res);
+        handleError(res, err);
     }
 };
 
@@ -281,7 +281,7 @@ exports.cancelOrder = async (req, res) => {
 
         res.json({ message: "Order cancelled" });
     } catch (err) {
-        handleError(err, req, res);
+        handleError(res, err);
     }
 };
 
@@ -450,7 +450,7 @@ exports.fulfillOrder = async (req, res) => {
         if (transactionStarted) {
             await run("ROLLBACK");
         }
-        handleError(err, req, res);
+        handleError(res, err);
     }
 };
 

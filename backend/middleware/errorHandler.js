@@ -1,4 +1,4 @@
-module.exports = (err, req, res, next) => {
+module.exports = (res, err) => {
     console.error("ERROR:", err);
 
     const status =

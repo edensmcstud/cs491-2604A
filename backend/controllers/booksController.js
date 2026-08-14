@@ -2,6 +2,7 @@
 
 const { query, run } = require("../utils/db");
 const { logAction } = require("../utils/audit");
+const handleError = require("../middleware/errorHandler");
 
 /**
  * Normalize numeric flags (signed, is_collectible)
