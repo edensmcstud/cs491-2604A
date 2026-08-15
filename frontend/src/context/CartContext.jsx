@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useState } from "react";
+﻿import { createContext, useContext, useState, useEffect } from "react";
 import api from "../api/api";
 
 const CartContext = createContext();
@@ -39,6 +39,11 @@ export function CartProvider({ children }) {
             setCount(0);
         }
     }
+
+    // GLOBAL CART LOAD — this is the missing piece
+    useEffect(() => {
+        loadCart();
+    }, []);
 
     async function addToCart(book_id) {
         try {
@@ -102,9 +107,9 @@ export function CartProvider({ children }) {
                 loadCart,
                 addToCart,
                 removeFromCart,
-                decrement,   // <-- REQUIRED
+                decrement,
                 clearCart,
-                checkout     // <-- REQUIRED
+                checkout
             }}
         >
             {children}
