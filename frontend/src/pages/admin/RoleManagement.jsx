@@ -56,7 +56,7 @@ export default function RoleManagement() {
 
                     return {
                         ID: r.role_id,
-                        Name: r.role_name,
+                        "Role Name": r.role_name,
                         Users: usersInRole.map((u) => u.username).join(", ") || "None",
                         Actions: (
                             <button
