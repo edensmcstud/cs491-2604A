@@ -25,6 +25,15 @@ router.get(
     requirePermission("customer_orders", "read"),
     controller.listPendingOrders
 );
+
+// List the logged-in customer's own orders
+router.get(
+    "/mine",
+    auth,
+    requirePermission("customer_orders", "read"),
+    controller.listMyOrders
+);
+
 // Get order status (Customer: own orders only, Employee/Admin: any)
 router.get(
     "/:id",
