@@ -39,6 +39,7 @@ import SupplierOrders from "./pages/orders/SupplierOrders";
 import AddCustomerOrder from "./pages/orders/AddCustomerOrder";
 import AddSupplierOrder from "./pages/orders/AddSupplierOrder";
 import OrderFulfillment from "./pages/orders/OrderFulfillment";
+import MyOrders from "./pages/orders/MyOrders";
 
 // REPORTS
 import Reports from "./pages/reports/Reports";
@@ -101,6 +102,7 @@ export default function App() {
                     <Route path="orders/suppliers" element={<SupplierOrders />} />
                     <Route path="orders/suppliers/add" element={<AddSupplierOrder />} />
                     <Route path="orders/fulfillment" element={<OrderFulfillment />} />
+                    <Route path="orders/mine" element={<MyOrders />} />
 
                     {/* Reports */}
                     <Route path="reports" element={<Reports />} />

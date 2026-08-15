@@ -179,6 +179,53 @@ exports.getOrderStatus = async (req, res) => {
 };
 
 /**
+ * List the logged-in customer's own orders
+ */
+exports.listMyOrders = async (req, res) => {
+    try {
+        const customerRows = await query(
+            `SELECT customer_id FROM customers WHERE user_id = ?`,
+            [req.user.user_id]
+        );
+
+        if (customerRows.length === 0) {
+            return res.status(403).json({ error: "No customer profile linked to this account" });
+        }
+
+        const customerId = customerRows[0].customer_id;
+
+        const orders = await query(
+            `SELECT order_id, customer_id, order_date, status, subtotal, tax, total
+             FROM customer_orders
+             WHERE customer_id = ?
+             ORDER BY order_date DESC`,
+            [customerId]
+        );
+
+        for (const order of orders) {
+            const items = await query(
+                `SELECT coi.order_item_id,
+                        coi.book_id,
+                        b.title,
+                        coi.quantity,
+                        coi.unit_price,
+                        coi.line_total
+                 FROM customer_order_items coi
+                 JOIN books b ON b.book_id = coi.book_id
+                 WHERE coi.order_id = ?`,
+                [order.order_id]
+            );
+
+            order.items = items;
+        }
+
+        res.json({ orders });
+    } catch (err) {
+        handleError(res, err);
+    }
+};
+
+/**
  * List all pending orders (Employee/Admin only)
  */
 exports.listPendingOrders = async (req, res) => {
@@ -251,6 +298,12 @@ exports.cancelOrder = async (req, res) => {
             if (customerRows.length === 0 || customerRows[0].customer_id !== order.customer_id) {
                 return res.status(403).json({ error: "Access denied" });
             }
+        }
+
+        if (order.status !== "Pending") {
+            return res.status(400).json({
+                error: `Order cannot be cancelled — current status is ${order.status}`
+            });
         }
 
         // Reverse reserved inventory

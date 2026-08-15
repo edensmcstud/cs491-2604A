@@ -10,6 +10,8 @@ export default function Dashboard() {
     };
 
     const isAdmin = user?.roles?.includes("Admin");
+    const isEmployee = user?.roles?.includes("Employee");
+    const isCustomer = user?.roles?.includes("Customer");
 
     return (
         <div className="dashboard-page">
@@ -29,12 +31,16 @@ export default function Dashboard() {
                     <li><Link to="/inventory">Inventory</Link></li>
                 )}
 
-                {canAny("customer_orders") && (
+                {(isEmployee || isAdmin) && canAny("customer_orders") && (
                     <li><Link to="/pos">Point of Sale</Link></li>
                 )}
 
-                {canAny("customer_orders") && (
+                {(isEmployee || isAdmin) && canAny("customer_orders") && (
                     <li><Link to="/orders/fulfillment">Order Fulfillment</Link></li>
+                )}
+
+                {isCustomer && canAny("customer_orders") && (
+                    <li><Link to="/orders/mine">My Orders</Link></li>
                 )}
 
                 {canAny("sales") && (

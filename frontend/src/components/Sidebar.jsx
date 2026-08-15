@@ -27,7 +27,9 @@ export default function Sidebar() {
                             {canAny("books") && (
                                 <li><Link to="/books">Browse Books</Link></li>
                             )}
-                            <li><Link to="/orders">My Orders</Link></li>
+                            {canAny("customer_orders") && (
+                                <li><Link to="/orders/mine">My Orders</Link></li>
+                            )}
                         </>
                     )}
 

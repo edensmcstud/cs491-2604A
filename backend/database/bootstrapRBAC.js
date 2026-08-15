@@ -43,6 +43,7 @@ module.exports = async function bootstrapRBAC() {
         { module: "customer_orders", action: "read" },
         { module: "customer_orders", action: "create" },
         { module: "customer_orders", action: "fulfill" },   // NEW
+        { module: "customer_orders", action: "cancel" },
 
         // SUPPLIER ORDERS
         { module: "supplier_orders", action: "read" },
@@ -121,8 +122,9 @@ module.exports = async function bootstrapRBAC() {
     // CUSTOMER: minimal access
     const customerPerms = [
         ["books", "read"],
-        ["cart", "use"]
-        // Removed customer_orders entirely
+        ["cart", "use"],
+        ["customer_orders", "read"],
+        ["customer_orders", "cancel"]
     ];
 
     for (const [module, action] of customerPerms) {
