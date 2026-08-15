@@ -87,7 +87,19 @@ export default function BooksTable({
                                         <div className="book-actions">
                                             {canUpdate && <button onClick={() => onEditBook(book.book_id)}>Edit</button>}
                                             {canAddInventory && book.inventory_id && <button onClick={() => onEditInventory(book.inventory_id)}>Inventory</button>}
-                                            {canUseCart && <button onClick={async () => { await addToCart(book.book_id); alert("Added to cart"); }}>Add to Cart</button>}
+                                            {canUseCart && <button
+                                                onClick={async () => {
+                                                    const result = await addToCart(book.book_id);
+                                                    if (result.success) {
+                                                        alert("Added to cart");
+                                                    } else {
+                                                        alert(result.error);
+                                                    }
+                                                }}
+                                            >
+                                                Add to Cart
+                                            </button>
+}
                                             {onSelectBook && <button onClick={() => onSelectBook(book)}>Add to Sale</button>}
                                         </div>
                                     </td>

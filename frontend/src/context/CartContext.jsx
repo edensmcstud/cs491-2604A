@@ -40,7 +40,6 @@ export function CartProvider({ children }) {
         }
     }
 
-    // GLOBAL CART LOAD — this is the missing piece
     useEffect(() => {
         loadCart();
     }, []);
@@ -49,9 +48,12 @@ export function CartProvider({ children }) {
         try {
             await api.post("/cart/add", { book_id, quantity: 1 });
             await loadCart();
+            return { success: true };
         } catch (err) {
-            console.error("CartContext addToCart ERROR:", err);
-            alert(err?.response?.data?.error || "Failed to add item to cart.");
+            return {
+                success: false,
+                error: err?.response?.data?.error || "Failed to add item to cart."
+            };
         }
     }
 
@@ -59,9 +61,12 @@ export function CartProvider({ children }) {
         try {
             await api.delete(`/cart/remove/${book_id}`);
             await loadCart();
+            return { success: true };
         } catch (err) {
-            console.error("CartContext removeFromCart ERROR:", err);
-            alert(err?.response?.data?.error || "Failed to remove item from cart.");
+            return {
+                success: false,
+                error: err?.response?.data?.error || "Failed to remove item from cart."
+            };
         }
     }
 
@@ -69,9 +74,12 @@ export function CartProvider({ children }) {
         try {
             await api.delete(`/cart/decrement/${book_id}`);
             await loadCart();
+            return { success: true };
         } catch (err) {
-            console.error("CartContext decrement ERROR:", err);
-            alert(err?.response?.data?.error || "Failed to update item quantity.");
+            return {
+                success: false,
+                error: err?.response?.data?.error || "Failed to update item quantity."
+            };
         }
     }
 
@@ -79,9 +87,12 @@ export function CartProvider({ children }) {
         try {
             await api.delete("/cart");
             await loadCart();
+            return { success: true };
         } catch (err) {
-            console.error("CartContext clearCart ERROR:", err);
-            alert(err?.response?.data?.error || "Failed to clear cart.");
+            return {
+                success: false,
+                error: err?.response?.data?.error || "Failed to clear cart."
+            };
         }
     }
 
@@ -92,9 +103,12 @@ export function CartProvider({ children }) {
                 shipping_address: "N/A"
             });
             await loadCart();
+            return { success: true };
         } catch (err) {
-            console.error("CartContext checkout ERROR:", err);
-            alert(err?.response?.data?.error || "Checkout failed.");
+            return {
+                success: false,
+                error: err?.response?.data?.error || "Checkout failed."
+            };
         }
     }
 
